@@ -1,5 +1,6 @@
 import { AlertTriangle, PlugZap, RotateCw, WifiOff, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
+import { Petal } from "@/components/decor";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ApiError } from "@/lib/api";
@@ -11,28 +12,30 @@ type EmptyStateProps = {
   description: ReactNode;
   action?: ReactNode;
   className?: string;
-  tone?: "violet" | "plum" | "berry";
+  tone?: "lavender" | "orchid" | "rose";
 };
 
 const TONES = {
-  violet: "from-amethyst/30 to-iris/10 text-lavender ring-amethyst/30",
-  plum: "from-orchid/30 to-plum/10 text-magenta ring-orchid/30",
-  berry: "from-berry/25 to-plum/10 text-berry ring-berry/30",
+  lavender: "from-lavender to-wisteria text-white",
+  orchid: "from-blush via-mauve to-orchid text-white",
+  rose: "from-blush to-rose/80 text-white",
 };
 
-export function EmptyState({ icon: Icon, title, description, action, className, tone = "violet" }: EmptyStateProps) {
+export function EmptyState({ icon: Icon, title, description, action, className, tone = "lavender" }: EmptyStateProps) {
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-2xl border border-dashed border-heather bg-aubergine/50 px-6 py-14 text-center",
+        "powder relative flex flex-col items-center justify-center overflow-hidden rounded-3xl border border-lilac/40 bg-white/60 px-6 py-14 text-center shadow-whip",
         className,
       )}
     >
-      <div className={cn("mb-4 grid size-14 place-items-center rounded-2xl bg-gradient-to-br ring-1", TONES[tone])}>
-        <Icon className="size-6" aria-hidden />
+      <Petal className="absolute top-6 left-[12%] size-6 rotate-[-25deg] opacity-60" />
+      <Petal className="absolute right-[10%] bottom-8 size-8 rotate-[140deg] opacity-50" />
+      <div className={cn("gloss mb-5 grid size-16 place-items-center rounded-full bg-gradient-to-br shadow-polish", TONES[tone])}>
+        <Icon className="size-7" aria-hidden />
       </div>
-      <h3 className="text-lg font-semibold text-lilac">{title}</h3>
-      <div className="mt-1.5 max-w-md text-sm text-muted-foreground">{description}</div>
+      <h3 className="font-display text-2xl font-semibold text-heading">{title}</h3>
+      <div className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">{description}</div>
       {action && <div className="mt-6 flex flex-wrap justify-center gap-2">{action}</div>}
     </div>
   );
@@ -43,7 +46,7 @@ export function ErrorState({ error, onRetry, className }: { error: unknown; onRe
   const message = error instanceof Error ? error.message : "Something unexpected happened.";
   return (
     <EmptyState
-      tone="berry"
+      tone="rose"
       icon={offline ? WifiOff : AlertTriangle}
       title={offline ? "You're offline" : "That didn't load"}
       description={message}
@@ -62,25 +65,25 @@ export function ErrorState({ error, onRetry, className }: { error: unknown; onRe
 export function ProviderNotConfigured({ message, className }: { message: string; className?: string }) {
   return (
     <EmptyState
-      tone="plum"
+      tone="orchid"
       icon={PlugZap}
       title="Music search isn't switched on yet"
       className={className}
       description={
         <>
           <p>{message}</p>
-          <p className="mt-3 text-xs text-dusk">
+          <p className="mt-3 text-xs text-subtle">
             Get a free client ID at{" "}
             <a
-              className="text-lavender underline-offset-4 hover:underline"
+              className="font-semibold text-purple underline-offset-4 hover:underline"
               href="https://developer.jamendo.com"
               target="_blank"
               rel="noreferrer"
             >
               developer.jamendo.com
             </a>
-            , add <code className="rounded bg-eggplant px-1.5 py-0.5 text-lilac">JAMENDO_CLIENT_ID</code> to{" "}
-            <code className="rounded bg-eggplant px-1.5 py-0.5 text-lilac">.env</code>, and restart the API. Your
+            , add <code className="rounded-md bg-haze px-1.5 py-0.5 text-amethyst">JAMENDO_CLIENT_ID</code> to{" "}
+            <code className="rounded-md bg-haze px-1.5 py-0.5 text-amethyst">.env</code>, and restart the API. Your
             collection keeps working in the meantime.
           </p>
         </>
@@ -91,16 +94,16 @@ export function ProviderNotConfigured({ message, className }: { message: string;
 
 export function SongListSkeleton({ rows = 6 }: { rows?: number }) {
   return (
-    <div className="divide-y divide-border/60 overflow-hidden rounded-2xl border bg-card/60" aria-busy aria-label="Loading">
+    <div className="divide-y divide-border overflow-hidden rounded-3xl border bg-card shadow-whip" aria-busy aria-label="Loading">
       {Array.from({ length: rows }, (_, i) => (
         <div key={i} className="flex items-center gap-3 px-3 py-3 sm:px-4">
-          <Skeleton className="size-11 rounded-lg bg-eggplant" />
+          <Skeleton className="size-11 rounded-xl bg-haze" />
           <div className="flex-1 space-y-2">
-            <Skeleton className="h-3.5 w-2/5 bg-eggplant" />
-            <Skeleton className="h-3 w-1/4 bg-eggplant/70" />
+            <Skeleton className="h-3.5 w-2/5 bg-haze" />
+            <Skeleton className="h-3 w-1/4 bg-powder" />
           </div>
-          <Skeleton className="hidden h-3 w-24 bg-eggplant/70 md:block" />
-          <Skeleton className="size-8 rounded-full bg-eggplant" />
+          <Skeleton className="hidden h-3 w-24 bg-powder md:block" />
+          <Skeleton className="size-8 rounded-full bg-haze" />
         </div>
       ))}
     </div>

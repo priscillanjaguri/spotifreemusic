@@ -15,13 +15,14 @@ import { QUICK_SEARCHES } from "./dashboard-page";
 
 const MIN_QUERY = 2;
 
+// Each mood tile is a different scoop of the palette.
 const MOODS = [
-  { q: "lofi", label: "Late-night lofi", tone: "from-amethyst/40 to-iris/10" },
-  { q: "ambient", label: "Ambient drift", tone: "from-wisteria/40 to-eggplant/10" },
-  { q: "jazz", label: "Smoky jazz", tone: "from-plum/50 to-grape/10" },
-  { q: "synthwave", label: "Neon synthwave", tone: "from-orchid/40 to-plum/10" },
-  { q: "piano", label: "Solo piano", tone: "from-lavender/30 to-iris/10" },
-  { q: "folk", label: "Campfire folk", tone: "from-magenta/30 to-plum/10" },
+  { q: "lofi", label: "Late-night lofi", tone: "from-lavender to-lilac" },
+  { q: "ambient", label: "Ambient drift", tone: "from-haze to-wisteria" },
+  { q: "jazz", label: "Smoky jazz", tone: "from-wisteria to-plum" },
+  { q: "synthwave", label: "Neon synthwave", tone: "from-heliotrope to-violet" },
+  { q: "piano", label: "Solo piano", tone: "from-blush to-mauve" },
+  { q: "folk", label: "Campfire folk", tone: "from-lilac to-royal-purple" },
 ];
 
 function useDebounced<T>(value: T, ms: number) {
@@ -76,14 +77,14 @@ export function DiscoverPage() {
       />
 
       <form onSubmit={onSubmit} role="search" className="relative mb-6">
-        <Search className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-lavender" />
+        <Search className="pointer-events-none absolute top-1/2 left-5 size-5 -translate-y-1/2 text-heliotrope" />
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Search songs, artists or genres"
           aria-label="Search songs"
           maxLength={100}
-          className="h-14 rounded-2xl border-iris/50 bg-grape pr-28 pl-12 text-base shadow-glow placeholder:text-dusk md:text-base"
+          className="h-14 rounded-full border-white bg-white/85 pr-32 pl-13 text-base shadow-whip-lg placeholder:text-subtle focus-visible:shadow-glow md:text-base"
         />
         <div className="absolute top-1/2 right-2 flex -translate-y-1/2 items-center gap-1">
           {input && (
@@ -91,7 +92,7 @@ export function DiscoverPage() {
               type="button"
               size="icon-sm"
               variant="ghost"
-              className="text-dusk hover:text-lilac"
+              className="text-subtle hover:text-purple"
               onClick={() => {
                 setInput("");
                 setParams({}, { replace: true });
@@ -101,28 +102,28 @@ export function DiscoverPage() {
               <X />
             </Button>
           )}
-          <Button type="submit" variant="cta" className="h-10 rounded-xl px-4" disabled={input.trim().length < MIN_QUERY}>
+          <Button type="submit" variant="cta" className="h-10 px-5" disabled={input.trim().length < MIN_QUERY}>
             {search.isFetching ? <Loader2 className="animate-spin" /> : "Search"}
           </Button>
         </div>
       </form>
 
-      {input.trim().length === 1 && <p className="-mt-3 mb-6 text-sm text-dusk">Keep typing: searches need at least two characters.</p>}
+      {input.trim().length === 1 && <p className="-mt-3 mb-6 text-sm text-subtle">Keep typing: searches need at least two characters.</p>}
 
       {query.length < MIN_QUERY ? (
         <section>
-          <h2 className="mb-3 text-sm font-semibold tracking-widest text-dusk uppercase">Start with a mood</h2>
+          <h2 className="mb-4 font-display text-3xl font-semibold text-heading">Start with a mood</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {MOODS.map((m) => (
               <button
                 key={m.q}
                 type="button"
                 onClick={() => setParams({ q: m.q })}
-                className={`group relative overflow-hidden rounded-2xl border bg-gradient-to-br ${m.tone} p-4 text-left transition-all hover:-translate-y-0.5 hover:border-orchid/60 hover:shadow-cta sm:p-5`}
+                className={`powder gloss group relative min-h-28 overflow-hidden rounded-3xl bg-gradient-to-br ${m.tone} p-4 text-left shadow-whip transition-all hover:-translate-y-1 hover:shadow-whip-lg sm:min-h-32 sm:p-5`}
               >
-                <p className="font-semibold text-lilac">{m.label}</p>
-                <p className="mt-1 text-xs text-mauve">Search “{m.q}”</p>
-                <Play className="absolute right-4 bottom-4 size-8 rounded-full bg-night/50 p-2 text-magenta opacity-0 transition-opacity group-hover:opacity-100" />
+                <p className="relative font-display text-2xl leading-tight font-semibold text-white drop-shadow-sm">{m.label}</p>
+                <p className="relative mt-1 text-xs font-semibold text-white/85">Search “{m.q}”</p>
+                <Play className="absolute right-4 bottom-4 size-9 translate-y-1 rounded-full bg-white p-2.5 text-purple opacity-0 shadow-whip transition-all group-hover:translate-y-0 group-hover:opacity-100" />
               </button>
             ))}
           </div>
@@ -132,7 +133,7 @@ export function DiscoverPage() {
                 key={q}
                 type="button"
                 onClick={() => setParams({ q })}
-                className="rounded-full border border-heather bg-grape px-3 py-1 text-sm text-mauve hover:border-iris hover:text-lilac"
+                className="rounded-full border border-lilac/50 bg-white/80 px-3.5 py-1.5 text-sm font-bold text-smoke hover:border-wisteria hover:text-purple"
               >
                 {q}
               </button>
@@ -155,7 +156,7 @@ export function DiscoverPage() {
         <section>
           <div className="mb-3 flex items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">
-              {plural(results.length, "result")} for <span className="text-lilac">“{query}”</span>
+              {plural(results.length, "result")} for <span className="font-bold text-heading">“{query}”</span>
             </p>
             {firstPlayable && (
               <Button variant="secondary" size="sm" onClick={() => player.play(firstPlayable, results)}>
@@ -163,7 +164,7 @@ export function DiscoverPage() {
               </Button>
             )}
           </div>
-          <div className="divide-y divide-border/60 overflow-hidden rounded-2xl border bg-card/80">
+          <div className="divide-y divide-border overflow-hidden rounded-3xl border border-white/80 bg-card shadow-whip">
             {results.map((song, index) => (
               <SongRow
                 key={song.id}

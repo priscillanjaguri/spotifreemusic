@@ -7,7 +7,7 @@ export function Equalizer({ active = true, className }: { active?: boolean; clas
       {[0, 1, 2, 3].map((i) => (
         <span
           key={i}
-          className={cn("w-[3px] rounded-full bg-magenta", active ? "animate-eq" : "h-1")}
+          className={cn("w-[3px] rounded-full bg-heliotrope", active ? "animate-eq" : "h-1")}
           style={active ? { animationDelay: `${i * 0.15}s` } : undefined}
         />
       ))}

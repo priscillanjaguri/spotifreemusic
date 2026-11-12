@@ -41,8 +41,8 @@ export function UserMenu({ variant = "full" }: { variant?: "full" | "avatar" }) 
   };
 
   const avatar = (
-    <Avatar className="size-8 ring-2 ring-orchid/40">
-      <AvatarFallback className="bg-gradient-to-br from-plum to-iris text-xs font-semibold text-white">
+    <Avatar className="size-9 ring-2 ring-white shadow-whip">
+      <AvatarFallback className="bg-gradient-to-br from-wisteria to-heliotrope text-xs font-bold text-white">
         {initials(user.display_name)}
       </AvatarFallback>
     </Avatar>
@@ -53,7 +53,7 @@ export function UserMenu({ variant = "full" }: { variant?: "full" | "avatar" }) 
       <DropdownMenuTrigger
         className={cn(
           "flex items-center gap-3 rounded-xl text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
-          variant === "full" ? "w-full p-2 hover:bg-sidebar-accent" : "rounded-full",
+          variant === "full" ? "w-full rounded-2xl p-2 hover:bg-sidebar-accent hover:shadow-whip" : "rounded-full",
         )}
         aria-label="Account menu"
       >
@@ -61,22 +61,22 @@ export function UserMenu({ variant = "full" }: { variant?: "full" | "avatar" }) 
         {variant === "full" && (
           <>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-medium text-lilac">{user.display_name}</span>
-              <span className="block truncate text-xs text-dusk">{user.email}</span>
+              <span className="block truncate text-sm font-bold text-heading">{user.display_name}</span>
+              <span className="block truncate text-xs text-subtle">{user.email}</span>
             </span>
-            <ChevronsUpDown className="size-4 text-dusk" />
+            <ChevronsUpDown className="size-4 text-subtle" />
           </>
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuGroup>
           <DropdownMenuLabel>
-            <span className="block truncate text-lilac">{user.display_name}</span>
-            <span className="block truncate text-xs font-normal text-dusk">{user.email}</span>
+            <span className="block truncate font-bold text-heading">{user.display_name}</span>
+            <span className="block truncate text-xs font-normal text-subtle">{user.email}</span>
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onLogout} className="text-berry focus:text-berry">
+        <DropdownMenuItem onClick={onLogout} className="text-rose focus:text-rose">
           <LogOut /> Log out
         </DropdownMenuItem>
       </DropdownMenuContent>

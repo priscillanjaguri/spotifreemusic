@@ -58,7 +58,7 @@ function FacetChips({
   onSelect: (value: string | null) => void;
 }) {
   if (facets.length === 0) {
-    return <p className="py-2 text-sm text-dusk">Nothing to filter by yet.</p>;
+    return <p className="py-2 text-sm text-subtle">Nothing to filter by yet.</p>;
   }
   return (
     <div className="scrollbar-none -mx-1 flex gap-2 overflow-x-auto px-1 py-1 sm:flex-wrap sm:overflow-visible">
@@ -72,15 +72,15 @@ function FacetChips({
             onClick={() => onSelect(isOn ? null : value)}
             aria-pressed={isOn}
             className={cn(
-              "inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-all",
+              "inline-flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-bold transition-all",
               isOn
-                ? "border-orchid bg-gradient-to-r from-plum/60 to-orchid/40 text-white shadow-cta"
-                : "border-heather bg-grape text-mauve hover:border-iris hover:text-lilac",
+                ? "gloss border-transparent bg-cta text-white shadow-polish"
+                : "border-lilac/50 bg-white/80 text-smoke hover:border-wisteria hover:text-purple",
               kind === "genre" && "capitalize",
             )}
           >
             {f.name}
-            <span className={cn("rounded-full px-1.5 text-xs tabular-nums", isOn ? "bg-white/20" : "bg-eggplant text-dusk")}>
+            <span className={cn("rounded-full px-1.5 text-xs tabular-nums", isOn ? "bg-white/25" : "bg-haze text-subtle")}>
               {f.count}
             </span>
           </button>
@@ -153,20 +153,20 @@ export function CollectionPage() {
         />
       ) : (
         <>
-          <section className="mb-6 rounded-2xl border bg-card/70 p-4 sm:p-5">
+          <section className="powder mb-6 rounded-3xl border border-white/80 bg-white/60 p-4 shadow-whip sm:p-5">
             <Tabs value={tab} onValueChange={(v) => setTab(v as FacetKind)}>
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <TabsList className="bg-eggplant/80">
+                <TabsList className="h-10 w-full rounded-full bg-haze/80 p-1 sm:w-auto">
                   {FACET_TABS.map(({ kind, label, icon: Icon, key }) => (
-                    <TabsTrigger key={kind} value={kind} className="gap-1.5 px-3 data-active:text-lilac">
+                    <TabsTrigger key={kind} value={kind} className="flex-1 gap-1.5 rounded-full px-2.5 sm:flex-none sm:px-3.5 font-bold text-smoke data-active:bg-white data-active:text-purple data-active:shadow-whip">
                       <Icon className="size-4" />
                       {label}
-                      {facets.data && <span className="text-xs text-dusk">{facets.data[key].length}</span>}
+                      {facets.data && <span className="hidden text-xs text-subtle sm:inline">{facets.data[key].length}</span>}
                     </TabsTrigger>
                   ))}
                 </TabsList>
                 {active && (
-                  <Button variant="ghost" size="sm" onClick={clear} className="text-mauve hover:text-magenta">
+                  <Button variant="ghost" size="sm" onClick={clear} className="text-smoke hover:text-purple">
                     <FilterX data-icon="inline-start" /> Clear filters
                   </Button>
                 )}
@@ -176,11 +176,11 @@ export function CollectionPage() {
               {facets.isPending ? (
                 <div className="flex gap-2">
                   {[80, 110, 64, 96].map((w) => (
-                    <Skeleton key={w} className="h-8 rounded-full bg-eggplant" style={{ width: w }} />
+                    <Skeleton key={w} className="h-9 rounded-full bg-haze" style={{ width: w }} />
                   ))}
                 </div>
               ) : facets.isError ? (
-                <p className="text-sm text-berry">
+                <p className="text-sm text-rose">
                   Filters didn't load.{" "}
                   <button className="underline" onClick={() => void facets.refetch()}>
                     Retry
@@ -196,18 +196,18 @@ export function CollectionPage() {
               )}
             </div>
             {activePills.length > 0 && (
-              <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border/60 pt-4">
-                <span className="text-xs tracking-wide text-dusk uppercase">Showing</span>
+              <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+                <span className="font-script text-xl text-orchid">showing</span>
                 {activePills.map((p) => (
                   <span
                     key={p.kind}
-                    className="inline-flex items-center gap-1 rounded-full bg-amethyst/20 py-1 pr-1 pl-3 text-sm text-lavender ring-1 ring-amethyst/40"
+                    className="inline-flex items-center gap-1 rounded-full bg-haze py-1 pr-1 pl-3 text-sm font-semibold text-amethyst ring-1 ring-lilac/60"
                   >
-                    <span className="text-dusk">{p.kind}:</span> <span className={p.kind === "genre" ? "capitalize" : ""}>{p.label}</span>
+                    <span className="text-subtle">{p.kind}:</span> <span className={p.kind === "genre" ? "capitalize" : ""}>{p.label}</span>
                     <button
                       type="button"
                       onClick={() => set(p.kind, null)}
-                      className="grid size-5 place-items-center rounded-full hover:bg-amethyst/30"
+                      className="grid size-5 place-items-center rounded-full hover:bg-white"
                       aria-label={`Remove ${p.kind} filter`}
                     >
                       <X className="size-3.5" />
@@ -236,7 +236,7 @@ export function CollectionPage() {
           ) : (
             <>
               <div className="@container">
-                <div className="hidden px-4 pb-2 text-xs tracking-wide text-dusk uppercase @md:flex @md:gap-3">
+                <div className="hidden px-4 pb-2 text-xs tracking-wide text-subtle uppercase @md:flex @md:gap-3">
                   <span className="w-6 text-right">#</span>
                   <span className="w-12" />
                   <span className="flex-1">Title</span>
@@ -247,7 +247,7 @@ export function CollectionPage() {
                   <span className="w-7" />
                 </div>
               </div>
-              <div className="divide-y divide-border/60 overflow-hidden rounded-2xl border bg-card/80">
+              <div className="divide-y divide-border overflow-hidden rounded-3xl border border-white/80 bg-card shadow-whip">
                 {items.map((item, index) => (
                   <SongRow
                     key={item.song.id}

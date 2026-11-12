@@ -110,16 +110,38 @@ and replaced without touching the web layer or UI.
   exercised without a Jamendo key; it is never selected when a real provider is configured or outside
   development. Tests still use their own fake provider.
 
-### Design system: purple palette
-Raw shades are Tailwind theme colours (`bg-grape`, `text-lavender`, ...). Components use the semantic
-tokens (`bg-card`, `text-primary`, `ring-ring`, ...) which map onto them, so a re-theme is one file.
+### Design system: "girly Spotify", clean-girl purple
+A light, airy theme in a Spotify layout (floating sidebar, card grids, a persistent player bar). All
+tokens live in `frontend/src/index.css`. Raw shades are Tailwind colours (`bg-lavender`, `text-grape`, ...).
+Components use the semantic tokens (`bg-card`, `text-heading`, `text-muted-foreground`, `ring-ring`,
+`bg-player`, ...), so a re-theme only touches that one file.
 
-| Role | Shades |
+| Group | Shades |
 |---|---|
-| Backgrounds, darkest first | `night` #0c0716 (app), `aubergine` #130b22 (sidebar, nav), `grape` #1b1030 (cards), `eggplant` #251640 (raised, player), `heather` #36245a (borders), `iris` #5b3fa3 (strong borders) |
-| Primary / focus | `amethyst` #8b5cf6 (primary buttons), `violet-glow` #a78bfa (focus ring), `wisteria` #7c6cf0 (info, charts) |
-| Text and accents | `mist` #f5f1ff (body), `lilac` #e4dcff (headings), `lavender` #c4b5fd (links, accents), `mauve` #a596c4 (muted), `dusk` #7a6a9c (subtle) |
-| Calls to action, highlights | `plum` #9d2b8a to `orchid` #d24bc4 (CTA gradient, `bg-cta`), `magenta` #f062c0 (now playing, active icons), `berry` #f0507a (destructive) |
+| Eyeshadow palette (sampled from the reference) | `lavender` #d9c4ef, `lilac` #d4a5e2, `mauve` #c77dbd, `wisteria` #c98ad3, `heliotrope` #a954e2, `purple` #8511c4, `orchid` #a03aa9, `amethyst` #6d1a9c, `violet` #6108be, `plum` #77236f, `grape` #4e0759, `eggplant` #2a052f |
+| Shade-chart extras | `royal-purple` #7851a9, `purple-heart` #69359c, `deep-purple` #4b2c6b |
+| Airy tints | `whip` #fcf8fe (page), `powder` #f5ecfa (sidebar, muted), `haze` #efe3f8 (accent), `petal` #fbeefa, `blush` #f3d9ef, `smoke` #7a6185 (muted text), `dust` #a891b3 (subtle text), `rose` #c8336f (destructive) |
 
-Utilities: `bg-cta`, `text-gradient`, `shadow-glow`, `shadow-cta`. Button gains a `cta` variant;
-Badge gains `genre`, `highlight` and `mock`.
+The main roles:
+- **Text:** body text is `eggplant` and headings are `grape`.
+- **Primary actions:** `purple`, with a `heliotrope` focus ring.
+- **Calls to action:** a glossy `mauve → heliotrope → purple` gradient (`bg-cta`).
+- **Player bar:** the one deep surface, a glossy `purple-heart → grape → eggplant` gradient (`bg-polish`), like a bottle of nail polish.
+- **Distinct shades per element:** the stat cards, mood tiles and fallback covers each use a different pair of palette shades.
+
+**Textures and motifs** (see `components/decor.tsx` and the utilities in `index.css`):
+- **Pressed powder:** `powder`, a faint SVG grain behind the sidebar, the filter panel and the empty states.
+- **Nail-polish sheen:** `gloss`, a top-half highlight on CTAs, covers, icon chips and the player.
+- **Whipped softness:** `shadow-whip` / `shadow-whip-lg`, large radii and pill-shaped buttons.
+- **Lilac hair:** `<HairWaves>`, flowing gradient strands on the login panel and the Discover callout.
+- **Roses and petals:** `<Rose>`, `<Petal>` and `<PetalScatter>`, used sparingly on the login screen, sidebar, empty states and callouts.
+
+**Fonts** (placeholders, from Google Fonts via `@fontsource`), behind tokens:
+- `--font-display`: Cormorant Garamond, for headings.
+- `--font-script`: Great Vibes, for the logo, eyebrows and small accents.
+- `--font-sans`: Nunito, a rounded sans for the UI.
+
+To swap a font, change its `@import` and its token; nothing else names a font family.
+
+Component variants: Button `cta` (glossy pill), Badge `genre`, `highlight` and `mock`. `SongCard` adds
+Spotify-style tiles for the dashboard.

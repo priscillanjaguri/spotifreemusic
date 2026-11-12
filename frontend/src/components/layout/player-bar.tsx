@@ -29,8 +29,8 @@ function Range({
       step={0.01}
       value={value}
       onChange={(e) => onChange(Number(e.target.value))}
-      className={cn("tw-range h-1.5 w-full cursor-pointer appearance-none rounded-full bg-heather", className)}
-      style={{ background: `linear-gradient(90deg, var(--color-lavender), var(--color-magenta) ${pct}%, var(--color-heather) ${pct}%)` }}
+      className={cn("tw-range h-1.5 w-full cursor-pointer appearance-none rounded-full", className)}
+      style={{ background: `linear-gradient(90deg, var(--color-lilac), var(--color-wisteria) ${pct}%, rgb(255 255 255 / 0.18) ${pct}%)` }}
     />
   );
 }
@@ -48,11 +48,11 @@ export function PlayerBar() {
     <div
       role="region"
       aria-label="Now playing"
-      className="fixed inset-x-2 bottom-[4.5rem] z-40 rounded-2xl border border-iris/40 bg-eggplant/90 shadow-glow backdrop-blur-xl lg:inset-x-auto lg:bottom-4 lg:left-[17rem] lg:right-4"
+      className="gloss fixed inset-x-2 bottom-[4.75rem] z-40 rounded-[1.75rem] border border-white/15 bg-polish text-player-foreground shadow-whip-lg lg:inset-x-auto lg:bottom-4 lg:left-[17.5rem] lg:right-4"
     >
       <div className="absolute inset-x-3 top-0 lg:hidden">
         <div
-          className="h-0.5 rounded-full bg-gradient-to-r from-lavender to-magenta"
+          className="h-0.5 rounded-full bg-gradient-to-r from-lilac to-wisteria"
           style={{ width: `${p.duration ? (p.position / p.duration) * 100 : 0}%` }}
         />
       </div>
@@ -61,10 +61,10 @@ export function PlayerBar() {
           <CoverArt src={song.cover_url} seed={song.id} title={song.title} className="size-11" />
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <p className="truncate text-sm font-semibold text-lilac">{song.title}</p>
+              <p className="truncate text-sm font-bold text-white">{song.title}</p>
               {song.data_source === "mock_dev" && <MockBadge />}
             </div>
-            <p className="truncate text-xs text-muted-foreground">
+            <p className="truncate text-xs text-lavender/80">
               {artistNames(song.artists)}
               {license && (
                 <>
@@ -73,7 +73,7 @@ export function PlayerBar() {
                     href={license}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-lavender/80 hover:text-lavender hover:underline"
+                    className="inline-flex items-center gap-1 text-lilac hover:text-white hover:underline"
                   >
                     <Scale className="size-3" /> Licence
                   </a>
@@ -85,23 +85,22 @@ export function PlayerBar() {
 
         <div className="flex items-center gap-1 lg:flex-col lg:gap-1.5">
           <div className="flex items-center gap-1 lg:gap-2">
-            <Button size="icon-sm" variant="ghost" className="hidden text-mauve hover:text-lilac sm:inline-flex" onClick={p.previous} aria-label="Previous">
+            <Button size="icon-sm" variant="ghost" className="hidden text-lavender hover:bg-white/10 hover:text-white sm:inline-flex" onClick={p.previous} aria-label="Previous">
               <SkipBack className="fill-current" />
             </Button>
             <Button
               size="icon"
-              variant="cta"
-              className="rounded-full"
+              className="gloss size-10 rounded-full bg-white text-grape hover:scale-105 hover:bg-white"
               onClick={p.toggle}
               aria-label={p.isPlaying ? "Pause" : "Play"}
             >
               <PlayIcon className={cn("fill-current", p.isLoading && "animate-spin fill-none")} />
             </Button>
-            <Button size="icon-sm" variant="ghost" className="text-mauve hover:text-lilac" onClick={p.next} aria-label="Next">
+            <Button size="icon-sm" variant="ghost" className="text-lavender hover:bg-white/10 hover:text-white" onClick={p.next} aria-label="Next">
               <SkipForward className="fill-current" />
             </Button>
           </div>
-          <div className="hidden w-full items-center gap-2 text-[11px] tabular-nums text-dusk lg:flex">
+          <div className="hidden w-full items-center gap-2 text-[11px] tabular-nums text-lavender/70 lg:flex">
             <span className="w-9 text-right">{formatDuration(p.position * 1000)}</span>
             <Range value={p.position} max={p.duration} onChange={p.seek} label="Seek" />
             <span className="w-9">{formatDuration(p.duration * 1000)}</span>
@@ -112,14 +111,14 @@ export function PlayerBar() {
           <Button
             size="icon-sm"
             variant="ghost"
-            className="text-mauve hover:text-lilac"
+            className="text-lavender hover:bg-white/10 hover:text-white"
             onClick={() => p.setVolume(p.volume === 0 ? 0.8 : 0)}
             aria-label={p.volume === 0 ? "Unmute" : "Mute"}
           >
             <VolumeIcon />
           </Button>
           <Range value={p.volume} max={1} onChange={p.setVolume} label="Volume" className="max-w-28" />
-          <Button size="icon-sm" variant="ghost" className="text-dusk hover:text-lilac" onClick={p.stop} aria-label="Close player">
+          <Button size="icon-sm" variant="ghost" className="text-lavender/70 hover:bg-white/10 hover:text-white" onClick={p.stop} aria-label="Close player">
             <X />
           </Button>
         </div>

@@ -18,9 +18,9 @@ const badgeVariants = cva(
         ghost:
           "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
         link: "text-primary underline-offset-4 hover:underline",
-        genre: "border-iris/40 bg-eggplant/70 text-lavender",
-        highlight: "border-orchid/40 bg-plum/25 text-magenta",
-        mock: "border-dashed border-magenta/50 bg-plum/15 text-magenta",
+        genre: "border-lilac/50 bg-haze/80 text-amethyst",
+        highlight: "border-mauve/40 bg-petal text-orchid",
+        mock: "border-dashed border-mauve/60 bg-petal text-orchid",
       },
     },
     defaultVariants: {
