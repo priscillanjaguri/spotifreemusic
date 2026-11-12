@@ -29,7 +29,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatBytes, plural } from "@/lib/format";
 import { type QueueItem, useDeleteUpload, useLibrary, useUploadQueue } from "@/lib/library";
@@ -39,6 +39,7 @@ import { cn } from "@/lib/utils";
 
 const FORMATS = "MP3, M4A/AAC, FLAC, OGG or WAV";
 
+/** Android Chrome-friendly picker: label + input (not a nested role=button click proxy). */
 function Dropzone({
   onFiles,
   accept,
@@ -50,18 +51,12 @@ function Dropzone({
   limits?: LibraryLimits;
   compact: boolean;
 }) {
-  const input = useRef<HTMLInputElement>(null);
+  const inputId = "tunewise-library-file";
   const [dragging, setDragging] = useState(false);
   const depth = useRef(0);
-  const open = () => input.current?.click();
 
   return (
     <section
-      role="button"
-      tabIndex={0}
-      aria-label="Add music files: drop them here or press to choose"
-      onClick={open}
-      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), open())}
       onDragEnter={(e) => {
         e.preventDefault();
         depth.current += 1;
@@ -79,8 +74,8 @@ function Dropzone({
         if (e.dataTransfer.files.length) onFiles(e.dataTransfer.files);
       }}
       className={cn(
-        "powder glass group relative cursor-pointer overflow-hidden rounded-[2rem] border-2 border-dashed border-white/20 text-center transition-all outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-        compact ? "px-6 py-7" : "px-6 py-12 sm:py-16",
+        "powder glass group relative overflow-hidden rounded-[2rem] border-2 border-dashed border-white/20 text-center transition-all",
+        compact ? "px-5 py-6" : "px-6 py-12 sm:py-16",
         dragging
           ? "scale-[1.01] border-orchid-glow bg-satin-amethyst shadow-glow"
           : "border-lavender/25 bg-satin-royal hover:border-lavender/45",
@@ -90,35 +85,43 @@ function Dropzone({
       <Petal className="pointer-events-none absolute top-6 left-[8%] size-6 rotate-[-20deg] opacity-60" />
       <Petal className="pointer-events-none absolute top-[40%] left-[22%] hidden size-4 rotate-[60deg] opacity-40 sm:block" />
       <input
-        ref={input}
+        id={inputId}
         type="file"
         multiple
-        accept={`audio/*,${accept}`}
+        accept={accept}
         className="sr-only"
-        tabIndex={-1}
-        onClick={(e) => e.stopPropagation()}
+        // capture omitted on purpose — we want the file picker, not the camera/mic.
         onChange={(e) => {
           if (e.target.files?.length) onFiles(e.target.files);
           e.target.value = "";
         }}
       />
       <div className={cn("relative flex items-center gap-5", compact ? "flex-row justify-center text-left" : "flex-col")}>
-        <span className="gloss grid size-16 shrink-0 place-items-center rounded-full bg-cta text-white shadow-polish transition-transform group-hover:scale-105">
+        <span className="gloss grid size-16 shrink-0 place-items-center rounded-full bg-cta text-white shadow-polish">
           <Upload className="size-7" />
         </span>
-        <div>
+        <div className="min-w-0">
           <h2 className={cn("font-display font-semibold text-heading", compact ? "text-2xl" : "text-3xl sm:text-4xl")}>
             {dragging ? "Let go to add them" : (
               <>
                 <span className="hidden sm:inline">Drop your music here</span>
-                <span className="sm:hidden">Add music from your device</span>
+                <span className="sm:hidden">Add music from your phone</span>
               </>
             )}
           </h2>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            <span className="hidden sm:inline">or <span className="font-bold text-lavender underline-offset-4 group-hover:underline">choose files</span> · </span>
             {FORMATS} · up to {limits?.max_file_mb ?? 200} MB each
           </p>
+          <label
+            htmlFor={inputId}
+            className={cn(
+              buttonVariants({ variant: "cta", size: "lg" }),
+              "mt-4 inline-flex min-h-12 cursor-pointer touch-manipulation px-6",
+            )}
+          >
+            <FolderHeart data-icon="inline-start" />
+            Choose audio files
+          </label>
         </div>
       </div>
     </section>

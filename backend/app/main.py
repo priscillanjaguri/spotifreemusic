@@ -16,6 +16,7 @@ from app.api import (
     songs,
 )
 from app.core.config import get_settings
+from app.static_spa import mount_spa
 
 
 def create_app() -> FastAPI:
@@ -47,6 +48,8 @@ def create_app() -> FastAPI:
         app.include_router(router, prefix="/api/v1")
     if settings.mock_provider_enabled:
         app.include_router(dev.router, prefix="/api/v1")
+    # After API routes: optional Vite build at frontend/dist (single-origin PWA).
+    mount_spa(app)
     return app
 
 

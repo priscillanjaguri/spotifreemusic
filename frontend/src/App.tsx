@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Compass, Loader2 } from "lucide-react";
 import type { ReactNode } from "react";
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { InstallBanner } from "@/components/install-banner";
 import { AppShell } from "@/components/layout/app-shell";
 import { Logo } from "@/components/layout/logo";
 import { EmptyState, ErrorState } from "@/components/states";
@@ -115,6 +116,7 @@ export default function App() {
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
+              <InstallBanner />
               <Toaster position="top-center" richColors={false} />
             </PlayerProvider>
           </AuthProvider>

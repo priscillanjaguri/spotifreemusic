@@ -113,7 +113,13 @@ export function useUploadQueue(limits?: { accepted_extensions: string[]; max_fil
     (files: FileList | File[]) => {
       const fresh: QueueItem[] = Array.from(files).map((file) => {
         const key = `${++counter.current}-${file.name}`;
-        if (!accepted.includes(extensionOf(file.name))) {
+        const ext = extensionOf(file.name);
+        const mimeOk = typeof file.type === "string" && file.type.startsWith("audio/");
+        // Android Chrome sometimes omits the extension; accept by MIME too.
+        if (ext && !accepted.includes(ext) && !mimeOk) {
+          return { key, file, status: "rejected", progress: 0, message: "Not a supported audio file. Skipped." };
+        }
+        if (!ext && !mimeOk) {
           return { key, file, status: "rejected", progress: 0, message: "Not a supported audio file. Skipped." };
         }
         if (file.size > maxBytes) {
@@ -133,5 +139,19 @@ export function useUploadQueue(limits?: { accepted_extensions: string[]; max_fil
     [],
   );
 
-  return { items, add, retry, clearFinished, accept: accepted.join(",") };
+  // Broad accept list helps Android Chrome's file picker surface audio files.
+  const acceptAttr = [
+    "audio/*",
+    "audio/mpeg",
+    "audio/mp4",
+    "audio/x-m4a",
+    "audio/aac",
+    "audio/flac",
+    "audio/ogg",
+    "audio/wav",
+    "audio/x-wav",
+    ...accepted,
+  ].join(",");
+
+  return { items, add, retry, clearFinished, accept: acceptAttr };
 }

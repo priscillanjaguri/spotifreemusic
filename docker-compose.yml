@@ -1,0 +1,44 @@
+# Production-shaped stack: Postgres + Tunewise (API serving the built SPA).
+# Copy .env.example → .env and fill SECRET_KEY (+ optional Jamendo / R2). Never commit .env.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: tunewise
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tunewise}
+      POSTGRES_DB: tunewise
+    volumes:
+      - tunewise_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tunewise -d tunewise"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    ports:
+      - "${TUNEWISE_PORT:-8000}:8000"
+    environment:
+      ENVIRONMENT: production
+      DATABASE_URL: postgresql+psycopg://tunewise:${POSTGRES_PASSWORD:-tunewise}@db:5432/tunewise
+      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in .env}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:8000"]}
+      JAMENDO_CLIENT_ID: ${JAMENDO_CLIENT_ID:-}
+      DEV_MOCK_PROVIDER: "false"
+      LIBRARY_ANALYSIS_ENABLED: ${LIBRARY_ANALYSIS_ENABLED:-false}
+      R2_ACCOUNT_ID: ${R2_ACCOUNT_ID:-}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:-}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:-}
+      R2_BUCKET: ${R2_BUCKET:-}
+      FRONTEND_DIST: /app/frontend/dist
+    volumes:
+      - tunewise_library:/app/var/library
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  tunewise_pg:
+  tunewise_library:

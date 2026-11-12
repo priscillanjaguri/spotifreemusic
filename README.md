@@ -5,10 +5,9 @@
 A personal music discovery and intelligence app: collection management, content-based
 recommendations, listening analytics, taste timeline and a daily companion.
 
-**Status: Stage 7 of 7 complete** — auth, catalogue, Jamendo, My Library (local/R2), deep-satin-purple UI,
-content-based recommendations, listening history + weekly/monthly analytics (Taste Timeline, Memory Lane),
-daily companion, and end-to-end test coverage. See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) and
-[`docs/TESTING.md`](docs/TESTING.md).
+**Status: Stage 7 of 7 complete** — auth, catalogue, Jamendo, My Library (local/R2), deep satin / glass UI,
+content-based recommendations, listening analytics, daily companion, e2e tests, and an **installable PWA**
+for Android Chrome. See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) and [`docs/TESTING.md`](docs/TESTING.md).
 
 ## Stack
 React + TypeScript + Vite + Tailwind v4 + shadcn/ui (Base UI) + TanStack Query (frontend) · FastAPI + Pydantic (backend) ·
@@ -60,13 +59,47 @@ npm run typecheck     # tsc, no emit
 npm run build         # typecheck + production bundle in dist/
 ```
 Screens: **Sign in / Create account**, **Home**, **Companion**, **For You**, **Discover**,
-**Collection**, **My Library**, **Analytics** (weekly/monthly charts, Taste Timeline, Memory Lane, privacy).
-The player bar streams audio and posts listening segments so taste profiles and analytics can learn
-from plays, completes and replays.
+**Collection**, **My Library**, **Analytics**. The player bar streams audio and posts listening
+segments. Installable as a PWA (manifest + service worker caches the app shell only — never private
+audio or `/api`).
 
-Design system: a "girly Spotify" look in deep satin purples. `src/index.css` holds the palette,
-font tokens (Cormorant Garamond, Great Vibes, Nunito) and texture utilities
-(`bg-satin-*`, `satin`, `powder`, `gloss`, `bg-cta`). See `docs/ARCHITECTURE.md`.
+Design system: deep satin / glass purple. Tokens in `src/index.css`. See `docs/ARCHITECTURE.md`.
+
+## Install on Android (Chrome)
+Tunewise is a Progressive Web App. On a phone:
+
+1. Open the site in **Chrome** (HTTPS in production, or your LAN/dev URL).
+2. Tap the **⋮** menu → **Install app** / **Add to Home screen** (wording varies by Chrome version).
+3. Confirm. Tunewise opens full-screen (`display: standalone`) from the home-screen icon.
+4. Sign in, open **My Library**, tap **Choose audio files**, upload, then play from Library / Collection.
+
+If Chrome shows no Install option yet, use the in-app **Install Tunewise** chip when it appears, or
+**Add to Home screen**. The service worker must control the page (reload once after first visit).
+
+## Deploy (one product: SPA + API)
+Tunewise needs **Postgres** (and optionally Cloudflare R2 + a Jamendo client ID). Cursor’s simple
+`publish-app` host is aimed at Node/static apps with optional platform Postgres — this stack is
+**FastAPI + Alembic + optional R2**, so the supported path is Docker Compose (or any host that runs
+the same pieces).
+
+```bash
+cp .env.example .env   # set SECRET_KEY; never commit .env
+# Optional: JAMENDO_CLIENT_ID, R2_*, COOKIE_SECURE=true, CORS_ORIGINS for your public URL
+docker compose up --build
+# → http://localhost:8000  (API + built frontend, same origin — ideal for the PWA)
+```
+
+Without Docker:
+
+```bash
+cd frontend && npm ci && npm run build && cd ..
+cd backend && source .venv/bin/activate
+alembic upgrade head
+FRONTEND_DIST=../frontend/dist ENVIRONMENT=production \
+  uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+`COOKIE_SECURE=true` when serving over HTTPS. Keep `JAMENDO_*` and `R2_*` in the environment only.
 
 ## API documentation
 FastAPI generates it automatically: **http://localhost:8000/docs** (Swagger UI) and
