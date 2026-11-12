@@ -1,0 +1,25 @@
+# Web framework
+fastapi>=0.115,<1.0
+uvicorn[standard]>=0.30,<1.0
+
+# Validation & settings
+pydantic>=2.8,<3.0
+pydantic-settings>=2.4,<3.0
+email-validator>=2.2,<3.0
+
+# Database
+sqlalchemy>=2.0,<2.1
+alembic>=1.13,<2.0
+psycopg[binary]>=3.2,<4.0
+
+# Auth (added in Stage 2, pinned now so the environment is stable)
+argon2-cffi>=23.1,<26.0
+pyjwt>=2.9,<3.0
+
+# HTTP client for music providers (and tests)
+httpx>=0.27,<1.0
+
+# Machine learning (Stage 4)
+numpy>=1.26,<3.0
+pandas>=2.2,<3.0
+scikit-learn>=1.5,<2.0
