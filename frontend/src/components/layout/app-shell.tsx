@@ -73,7 +73,7 @@ function MobileTabBar() {
   return (
     <nav
       aria-label="Main"
-      className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t border-lavender/10 bg-deep-purple/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_32px_-12px_rgb(8_2_12/0.8)] backdrop-blur-xl lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-lavender/10 bg-deep-purple/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_32px_-12px_rgb(8_2_12/0.8)] backdrop-blur-xl lg:hidden"
     >
       {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
         <NavLink

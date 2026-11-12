@@ -15,6 +15,7 @@ import { AuthPage } from "@/pages/auth-page";
 import { CollectionPage } from "@/pages/collection-page";
 import { DashboardPage } from "@/pages/dashboard-page";
 import { DiscoverPage } from "@/pages/discover-page";
+import { LibraryPage } from "@/pages/library-page";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -104,6 +105,7 @@ export default function App() {
                   <Route index element={<DashboardPage />} />
                   <Route path="collection" element={<CollectionPage />} />
                   <Route path="discover" element={<DiscoverPage />} />
+                  <Route path="library" element={<LibraryPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>

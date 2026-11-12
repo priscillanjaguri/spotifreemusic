@@ -1,5 +1,6 @@
 """Turns provider tracks into rows in our provider-independent catalogue."""
 from sqlalchemy import func, select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from app.models import Album, Artist, Genre, MusicProvider, Song, SongArtist, SongProviderLink
@@ -9,8 +10,13 @@ from app.providers.base import MusicProviderAdapter, ProviderTrack
 def ensure_provider_row(db: Session, adapter: MusicProviderAdapter) -> MusicProvider:
     row = db.scalar(select(MusicProvider).where(MusicProvider.key == adapter.key))
     if row is None:
-        row = MusicProvider(key=adapter.key, display_name=adapter.display_name)
-        db.add(row)
+        # Two first-ever requests can race here (e.g. parallel uploads); ON CONFLICT makes creation idempotent.
+        db.execute(
+            insert(MusicProvider)
+            .values(key=adapter.key, display_name=adapter.display_name)
+            .on_conflict_do_nothing(index_elements=["key"])
+        )
+        row = db.scalar(select(MusicProvider).where(MusicProvider.key == adapter.key))
     # An adapter only exists in the registry when it is configured.
     row.is_configured = True
     row.supports_playback = adapter.supports_playback

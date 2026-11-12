@@ -4,7 +4,10 @@ import type {
   CollectionItem,
   CollectionPage,
   CollectionSource,
+  LibraryPage,
+  LibraryUpload,
   SongSearchResponse,
+  UploadResult,
   User,
 } from "./types";
 
@@ -53,6 +56,13 @@ function messageFromDetail(detail: unknown, fallback: string): { message: string
   return { message: fallback, code: null };
 }
 
+function apiErrorFrom(status: number, body: { detail?: unknown } | null): ApiError {
+  const fallback =
+    status >= 500 ? "Something went wrong on our side. Please try again in a moment." : `Request failed (${status})`;
+  const { message, code } = messageFromDetail(body?.detail, fallback);
+  return new ApiError(status, message, code);
+}
+
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   let response: Response;
   try {
@@ -68,15 +78,45 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (response.status === 204) return undefined as T;
 
   const body = await response.json().catch(() => null);
-  if (!response.ok) {
-    const fallback =
-      response.status >= 500
-        ? "Something went wrong on our side. Please try again in a moment."
-        : `Request failed (${response.status})`;
-    const { message, code } = messageFromDetail(body?.detail, fallback);
-    throw new ApiError(response.status, message, code);
-  }
+  if (!response.ok) throw apiErrorFrom(response.status, body);
   return body as T;
+}
+
+/**
+ * Upload one file with progress events (fetch can't report upload progress, XMLHttpRequest can).
+ * The endpoint accepts many files per request; the UI sends one per request so each gets its own bar.
+ */
+export function uploadToLibrary(
+  file: File,
+  onProgress: (fraction: number) => void,
+  signal?: AbortSignal,
+): Promise<UploadResult> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${BASE}/library/uploads`);
+    xhr.withCredentials = true;
+    xhr.responseType = "json";
+    xhr.upload.onprogress = (e) => e.lengthComputable && onProgress(e.loaded / e.total);
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        const result = (xhr.response as { results?: UploadResult[] } | null)?.results?.[0];
+        if (result) resolve(result);
+        else reject(new ApiError(xhr.status, "The server sent an unexpected response."));
+      } else {
+        reject(
+          xhr.status === 413
+            ? new ApiError(413, "This file is too large for the server to accept.")
+            : apiErrorFrom(xhr.status, xhr.response),
+        );
+      }
+    };
+    xhr.onerror = () => reject(new ApiError(0, "Upload interrupted. Check your connection and try again."));
+    xhr.onabort = () => reject(new ApiError(0, "Upload cancelled."));
+    signal?.addEventListener("abort", () => xhr.abort());
+    const form = new FormData();
+    form.append("files", file, file.name);
+    xhr.send(form);
+  });
 }
 
 const json = (data: unknown) => JSON.stringify(data);
@@ -103,4 +143,8 @@ export const api = {
   addToCollection: (song_id: number, source: CollectionSource = "search") =>
     request<CollectionItem>("/collection", { method: "POST", body: json({ song_id, source }) }),
   removeFromCollection: (song_id: number) => request<void>(`/collection/${song_id}`, { method: "DELETE" }),
+
+  library: () => request<LibraryPage>("/library"),
+  libraryItem: (id: number) => request<LibraryUpload>(`/library/${id}`),
+  deleteUpload: (id: number) => request<void>(`/library/${id}`, { method: "DELETE" }),
 };

@@ -56,3 +56,45 @@ export type CollectionFilter = {
   albumId?: number;
   genre?: string;
 };
+
+export type AnalysisStatus = "pending" | "running" | "done" | "failed" | "unavailable";
+
+export type AudioFeatures = {
+  tempo: number | null;
+  energy: number | null;
+  loudness_db: number | null;
+  spectral_centroid_hz: number | null;
+  key: number | null;
+  mode: number | null;
+  key_name: string | null;
+  analyzer: string | null;
+};
+
+export type LibraryUpload = {
+  id: number;
+  original_filename: string;
+  audio_format: string;
+  size_bytes: number;
+  created_at: string;
+  analysis_status: AnalysisStatus;
+  analysis_error: string | null;
+  song: Song | null;
+  features: AudioFeatures | null;
+};
+
+export type LibraryLimits = {
+  accepted_extensions: string[];
+  max_file_mb: number;
+  max_files_per_request: number;
+  storage_backend: "local" | "r2" | string;
+  analysis_available: boolean;
+};
+
+export type LibraryPage = { total: number; items: LibraryUpload[]; limits: LibraryLimits };
+
+export type UploadResult = {
+  filename: string;
+  status: "added" | "duplicate" | "rejected";
+  message: string;
+  upload: LibraryUpload | null;
+};

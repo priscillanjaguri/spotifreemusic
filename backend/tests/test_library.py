@@ -341,3 +341,10 @@ def test_stream_redirects_to_presigned_url_on_r2(lib, db, storage):
     res = lib.get(item["song"]["playback"]["stream_url"], follow_redirects=False)
     assert res.status_code == 307 and res.headers["location"].startswith("https://r2.example/users/")
     assert res.headers["cache-control"] == "no-store"
+
+
+@pytest.mark.skipif(not audio_features.librosa_available(), reason="librosa not installed")
+@pytest.mark.parametrize("name, key_name", [("amethyst.m4a", "C"), ("lilac-hour.mp3", "A"), ("violet-sheen.flac", "G")])
+def test_analysis_decodes_every_format_and_finds_the_tone(name, key_name):
+    f = audio_features.analyze_file(AUDIO / name)
+    assert audio_features.PITCH_CLASSES[f.key] == key_name and f.tempo is None  # a pure tone has no beat

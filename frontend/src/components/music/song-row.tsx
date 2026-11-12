@@ -1,4 +1,5 @@
-import { Check, Loader2, Pause, Play, Plus, Trash2 } from "lucide-react";
+import { Check, HardDriveUpload, Loader2, Pause, Play, Plus, Trash2 } from "lucide-react";
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,20 @@ export function MockBadge() {
   );
 }
 
+export function OwnFileBadge() {
+  return (
+    <Tooltip>
+      <TooltipTrigger render={<span className="shrink-0" />}>
+        <Badge variant="genre" className="gap-1">
+          <HardDriveUpload className="size-3" />
+          Your file
+        </Badge>
+      </TooltipTrigger>
+      <TooltipContent>Uploaded to My Library. Only you can see and play it.</TooltipContent>
+    </Tooltip>
+  );
+}
+
 type SongRowProps = {
   song: Song;
   queue: Song[];
@@ -28,8 +43,9 @@ type SongRowProps = {
   meta?: string;
   action?:
     | { kind: "add"; saved: boolean; pending: boolean; onAdd: () => void }
-    | { kind: "remove"; pending: boolean; onRemove: () => void };
+    | { kind: "remove"; pending: boolean; onRemove: () => void; label?: string };
   linkFacets?: boolean;
+  badges?: ReactNode;
 };
 
 /** Lets a whole row or tile start playback, while its own buttons and links keep their behaviour. */
@@ -39,7 +55,7 @@ export function onSurfaceClick(event: React.MouseEvent, play: () => void) {
   play();
 }
 
-export function SongRow({ song, queue, index, meta, action, linkFacets }: SongRowProps) {
+export function SongRow({ song, queue, index, meta, action, linkFacets, badges }: SongRowProps) {
   const player = usePlayer();
   const isCurrent = player.current?.id === song.id;
   const isPlaying = isCurrent && player.isPlaying;
@@ -91,6 +107,8 @@ export function SongRow({ song, queue, index, meta, action, linkFacets }: SongRo
           <div className="flex items-center gap-2">
             <p className={cn("min-w-0 truncate font-bold", isCurrent ? "text-accent-foreground" : "text-heading")}>{song.title}</p>
             {song.data_source === "mock_dev" && <MockBadge />}
+            {song.data_source === "user_provided" && !badges && <OwnFileBadge />}
+            {badges}
           </div>
           <p className="truncate text-sm text-muted-foreground">
             {linkFacets
@@ -162,7 +180,7 @@ export function SongRow({ song, queue, index, meta, action, linkFacets }: SongRo
             className="shrink-0 rounded-full text-subtle hover:bg-rose/10 hover:text-rose lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100"
             onClick={action.onRemove}
             disabled={action.pending}
-            aria-label={`Remove ${song.title} from collection`}
+            aria-label={action.label ?? `Remove ${song.title} from collection`}
           >
             {action.pending ? <Loader2 className="animate-spin" /> : <Trash2 />}
           </Button>

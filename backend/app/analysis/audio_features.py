@@ -3,6 +3,9 @@
 Only values Librosa can actually measure are produced. Spotify-style danceability, valence,
 acousticness and instrumentalness need a trained model and are deliberately left out.
 """
+import shutil
+import subprocess
+import tempfile
 from dataclasses import asdict, dataclass
 from importlib.util import find_spec
 from pathlib import Path
@@ -74,6 +77,24 @@ def energy_from_rms(rms: float) -> float:
     return min(1.0, max(0.0, (20 * math.log10(rms) + 60) / 60))
 
 
+def _load_via_ffmpeg(path: Path, max_seconds: float, cause: Exception):
+    import librosa
+
+    ffmpeg = shutil.which("ffmpeg")
+    if ffmpeg is None:
+        raise ValueError(f"Could not decode audio ({cause.__class__.__name__}); install ffmpeg for this format") from cause
+    with tempfile.TemporaryDirectory(prefix="tunewise-decode-") as tmp:
+        wav = Path(tmp) / "decoded.wav"
+        result = subprocess.run(
+            [ffmpeg, "-loglevel", "error", "-y", "-i", str(path), "-t", str(max_seconds), "-ac", "1",
+             "-ar", str(SAMPLE_RATE), str(wav)],
+            capture_output=True, timeout=120,
+        )
+        if result.returncode != 0 or not wav.exists():
+            raise ValueError("Could not decode audio") from cause
+        return librosa.load(str(wav), sr=SAMPLE_RATE, mono=True)
+
+
 def analyze_file(path: Path, max_seconds: float = MAX_SECONDS) -> AudioFeatures:
     """Decode up to `max_seconds` of `path` and measure it. Raises AnalysisUnavailable or ValueError."""
     if not librosa_available():
@@ -83,8 +104,8 @@ def analyze_file(path: Path, max_seconds: float = MAX_SECONDS) -> AudioFeatures:
 
     try:
         y, sr = librosa.load(str(path), sr=SAMPLE_RATE, mono=True, duration=max_seconds)
-    except Exception as exc:  # decoder errors vary by backend (soundfile, audioread/ffmpeg)
-        raise ValueError(f"Could not decode audio: {exc.__class__.__name__}") from exc
+    except Exception as exc:  # libsndfile can't read every container (notably M4A/AAC)
+        y, sr = _load_via_ffmpeg(path, max_seconds, exc)
     if y.size < sr // 2:
         raise ValueError("Audio is shorter than half a second")
 
