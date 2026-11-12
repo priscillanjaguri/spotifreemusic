@@ -36,7 +36,8 @@ def test_parses_tracks_and_skips_unusable_rows():
     assert [t.title for t in tracks] == ["Press Record", "Single"]
     t = tracks[0]
     assert t.duration_ms == 192_000 and t.genres == ["pop", "rock"] and t.album_title == "Season One"
-    assert t.stream_url == "https://stream/887202.mp3" and "by-nc-sa" in t.license_url
+    assert t.stream_url == "https://stream/887202.mp3"
+    assert t.license_url == "https://creativecommons.org/licenses/by-nc-sa/3.0/"
     assert tracks[1].release_date is None and tracks[1].album_title is None  # bad date tolerated
 
 
@@ -58,3 +59,27 @@ def test_network_failure_raises_provider_error():
 
     with pytest.raises(ProviderError):
         adapter(boom).search_tracks("x")
+
+
+def test_retries_spurious_empty_results():
+    calls = []
+    empty = {"headers": {"status": "success", "code": 0, "results_count": 0}, "results": []}
+
+    def handler(request):
+        calls.append(1)
+        return httpx.Response(200, json=empty if len(calls) == 1 else SAMPLE)
+
+    assert len(adapter(handler).search_tracks("press")) == 2
+    assert len(calls) == 2
+
+
+def test_gives_up_after_repeated_empty_results():
+    calls = []
+    empty = {"headers": {"status": "success", "code": 0, "results_count": 0}, "results": []}
+
+    def handler(request):
+        calls.append(1)
+        return httpx.Response(200, json=empty)
+
+    assert adapter(handler).search_tracks("zzzz") == []
+    assert len(calls) == 3

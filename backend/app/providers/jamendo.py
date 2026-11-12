@@ -3,9 +3,9 @@
 We only use documented read endpoints and the stream URLs Jamendo returns for
 playback. We never use the download URLs.
 
-NOTE: written from Jamendo's public API docs and tested against sample payloads.
-Run `python -m scripts.check_jamendo` on a machine with internet access to verify
-it against the live API.
+Verified against the live API (run `python -m scripts.check_jamendo` to re-check).
+Cover art comes back as https://usercontent.jamendo.com/... (300px by default) and
+stream URLs as https://prod-1.storage.jamendo.com/... MP3s that support range requests.
 """
 from datetime import date
 
@@ -14,6 +14,7 @@ import httpx
 from app.providers.base import MusicProviderAdapter, ProviderArtist, ProviderError, ProviderTrack
 
 BASE_URL = "https://api.jamendo.com/v3.0"
+EMPTY_RESULT_ATTEMPTS = 3
 
 
 class JamendoAdapter(MusicProviderAdapter):
@@ -33,8 +34,18 @@ class JamendoAdapter(MusicProviderAdapter):
             "search": query,
             "include": "musicinfo",  # gives genre tags
             "audioformat": "mp31",
-            "imagesize": 300,
         }
+        # Jamendo intermittently answers a valid search with status "success" and zero results
+        # (about half of identical requests in live testing), so retry empty answers a couple of times.
+        rows: list[dict] = []
+        for _ in range(EMPTY_RESULT_ATTEMPTS):
+            rows = self._fetch(params)
+            if rows:
+                break
+        tracks = (self._parse(row) for row in rows)
+        return [t for t in tracks if t is not None]
+
+    def _fetch(self, params: dict) -> list[dict]:
         try:
             response = self._http.get(f"{BASE_URL}/tracks/", params=params)
             response.raise_for_status()
@@ -45,9 +56,7 @@ class JamendoAdapter(MusicProviderAdapter):
         headers = payload.get("headers", {})
         if headers.get("status") != "success":
             raise ProviderError(f"Jamendo error: {headers.get('error_message') or 'unknown'}")
-
-        tracks = (self._parse(row) for row in payload.get("results", []))
-        return [t for t in tracks if t is not None]
+        return payload.get("results") or []
 
     @staticmethod
     def _parse(row: dict) -> ProviderTrack | None:
@@ -79,5 +88,12 @@ class JamendoAdapter(MusicProviderAdapter):
             cover_url=row.get("image") or row.get("album_image") or None,
             genres=[g for g in genres if isinstance(g, str)],
             stream_url=row.get("audio") or None,
-            license_url=row.get("license_ccurl") or None,
+            license_url=_https(row.get("license_ccurl")),
         )
+
+
+def _https(url: str | None) -> str | None:
+    """Jamendo returns creativecommons.org licence links as http://; the https form is equivalent."""
+    if not url:
+        return None
+    return "https://" + url[len("http://"):] if url.startswith("http://") else url
