@@ -6,8 +6,9 @@ A personal music discovery and intelligence app: collection management, content-
 recommendations, listening analytics, taste timeline and a daily companion.
 
 **Status: Stage 7 of 7 complete** — auth, catalogue, Jamendo, My Library (local/R2), deep satin / glass UI,
-content-based recommendations, listening analytics, daily companion, e2e tests, and an **installable PWA**
-for Android Chrome. See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) and [`docs/TESTING.md`](docs/TESTING.md).
+content-based recommendations, listening analytics, daily companion, e2e tests, an **installable PWA**,
+and a **sideloadable Android APK** (Capacitor). See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md),
+[`docs/TESTING.md`](docs/TESTING.md), and [`docs/ANDROID.md`](docs/ANDROID.md).
 
 ## Stack
 React + TypeScript + Vite + Tailwind v4 + shadcn/ui (Base UI) + TanStack Query (frontend) · FastAPI + Pydantic (backend) ·
@@ -65,8 +66,30 @@ audio or `/api`).
 
 Design system: deep satin / glass purple. Tokens in `src/index.css`. See `docs/ARCHITECTURE.md`.
 
-## Install on Android (Chrome)
-Tunewise is a Progressive Web App. On a phone:
+## Install on Android (APK — recommended)
+A Capacitor debug APK wraps the Vite UI and talks to your Tunewise backend over a configurable
+**Server URL**. The phone must reach that host (same Wi‑Fi LAN IP or a deployed HTTPS URL). The
+backend needs **Postgres** (and **R2** if you store library files there); Jamendo is optional.
+
+1. Copy `tunewise-debug.apk` to the phone (USB, Drive, chat, etc.).
+2. Open the file. If Android blocks it, allow **Install unknown apps** / **Unknown sources** for
+   that app (Files, Chrome, Drive, …), then confirm the install.
+3. Open **Tunewise**. On first launch, enter your **Server URL**, e.g.
+   `http://192.168.1.20:8741` (PC LAN IP + API port) or `https://your.deployed.host`.
+4. Tap **Save & connect**, then sign in. Account menu → **Server URL** changes the host later.
+
+Rebuild locally (needs Android SDK + JDK 17+):
+
+```bash
+cd frontend
+npm ci
+npm run android:apk   # → android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+See [`docs/ANDROID.md`](docs/ANDROID.md) for cleartext LAN notes, Bearer auth, and CORS.
+
+## Install on Android (Chrome PWA)
+Tunewise is also a Progressive Web App. On a phone:
 
 1. Open the site in **Chrome** (HTTPS in production, or your LAN/dev URL).
 2. Tap the **⋮** menu → **Install app** / **Add to Home screen** (wording varies by Chrome version).

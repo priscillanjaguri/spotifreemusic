@@ -30,6 +30,9 @@ class UserOut(BaseModel):
     email: EmailStr
     display_name: str
     created_at: datetime
+    # Returned on login/register so native clients (Capacitor) can use Bearer auth
+    # when cross-origin cookies are unavailable. Optional on /me and profile responses.
+    access_token: str | None = None
 
 
 class ProfileUpdate(BaseModel):

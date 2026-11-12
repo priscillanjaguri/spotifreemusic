@@ -41,6 +41,18 @@ def test_login_logout_flow(client):
     assert client.get("/api/v1/auth/me").status_code == 200
 
 
+def test_bearer_and_query_token_auth_for_native_clients(client):
+    """Capacitor WebViews can't rely on cross-origin cookies; use Bearer / ?access_token=."""
+    body = register(client).json()
+    token = body["access_token"]
+    assert token
+    client.post("/api/v1/auth/logout")
+    client.cookies.clear()
+    assert client.get("/api/v1/auth/me").status_code == 401
+    assert client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"}).status_code == 200
+    assert client.get(f"/api/v1/auth/me?access_token={token}").status_code == 200
+
+
 def test_tampered_cookie_is_rejected(client):
     register(client)
     client.cookies.set("tunewise_session", "garbage.token.value")

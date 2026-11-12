@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { api } from "./api";
+import { resolveMediaUrl } from "./config";
 import type { Song } from "./types";
 
 type PlayerState = {
@@ -107,7 +108,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       const audio = audioRef.current;
       if (!audio || !song.playback) return;
       void flushSegment(false);
-      audio.src = song.playback.stream_url;
+      audio.src = resolveMediaUrl(song.playback.stream_url) ?? song.playback.stream_url;
       setState((s) => ({ ...s, current: song, queue, position: 0, duration: song.duration_ms / 1000, isLoading: true }));
       beginSegment(song);
       audio.play().catch(() => {

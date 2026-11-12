@@ -24,7 +24,14 @@ class Settings(BaseSettings):
     )
     secret_key: str = Field(min_length=32, description="Signs auth tokens")
     access_token_expire_minutes: int = 60 * 24
-    cors_origins: list[str] = ["http://localhost:5173"]
+    # Capacitor Android/iOS WebViews use https://localhost (and capacitor:// on some builds).
+    cors_origins: list[str] = [
+        "http://localhost:5173",
+        "http://localhost:5791",
+        "https://localhost",
+        "capacitor://localhost",
+        "http://localhost",
+    ]
     # Set true behind HTTPS (production) so the session cookie is never sent over plain HTTP.
     cookie_secure: bool = False
     # Optional: without it the app runs, but search/playback report "provider not configured".

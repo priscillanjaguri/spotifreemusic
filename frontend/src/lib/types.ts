@@ -3,6 +3,8 @@ export type User = {
   email: string;
   display_name: string;
   created_at: string;
+  /** Present on login/register for Capacitor Bearer auth; stripped before React state. */
+  access_token?: string | null;
 };
 
 export type Artist = { id: number; name: string };

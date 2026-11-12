@@ -1,4 +1,4 @@
-import { ChevronsUpDown, LogOut } from "lucide-react";
+import { ChevronsUpDown, LogOut, Server } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -76,6 +76,9 @@ export function UserMenu({ variant = "full" }: { variant?: "full" | "avatar" }) 
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => navigate("/settings")}>
+          <Server /> Server URL
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={onLogout} className="text-rose focus:text-rose">
           <LogOut /> Log out
         </DropdownMenuItem>

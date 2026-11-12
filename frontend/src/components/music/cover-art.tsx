@@ -1,5 +1,6 @@
 import { Music2 } from "lucide-react";
 import { useState } from "react";
+import { resolveMediaUrl } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
 // Fallback covers: each is a different blend from the palette, picked deterministically per song.
@@ -16,7 +17,8 @@ type Props = { src: string | null; seed: number; title: string; className?: stri
 
 export function CoverArt({ src, seed, title, className, iconClassName }: Props) {
   const [failed, setFailed] = useState(false);
-  const showImage = src && !failed;
+  const resolved = resolveMediaUrl(src);
+  const showImage = resolved && !failed;
   return (
     <div
       className={cn(
@@ -27,7 +29,7 @@ export function CoverArt({ src, seed, title, className, iconClassName }: Props) 
     >
       {showImage ? (
         <img
-          src={src}
+          src={resolved}
           alt={`Cover art for ${title}`}
           loading="lazy"
           onError={() => setFailed(true)}

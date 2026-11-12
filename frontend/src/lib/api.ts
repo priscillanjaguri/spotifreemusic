@@ -20,8 +20,7 @@ import type {
   UploadResult,
   User,
 } from "./types";
-
-const BASE = "/api/v1";
+import { apiV1Base, getAccessToken, setAccessToken } from "./config";
 
 /** A failed API call. `code` is set when the backend sends a structured `{code, message}` detail. */
 export class ApiError extends Error {
@@ -73,16 +72,32 @@ function apiErrorFrom(status: number, body: { detail?: unknown } | null): ApiErr
   return new ApiError(status, message, code);
 }
 
+function authHeaders(): Record<string, string> {
+  const token = getAccessToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+function rememberSession(user: User): User {
+  if (user.access_token) setAccessToken(user.access_token);
+  const { access_token: _drop, ...rest } = user;
+  return rest as User;
+}
+
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   let response: Response;
+  const headers: Record<string, string> = {
+    ...(init.body ? { "Content-Type": "application/json" } : {}),
+    ...authHeaders(),
+    ...(init.headers as Record<string, string> | undefined),
+  };
   try {
-    response = await fetch(`${BASE}${path}`, {
+    response = await fetch(`${apiV1Base()}${path}`, {
       credentials: "include",
       ...init,
-      headers: { ...(init.body ? { "Content-Type": "application/json" } : {}), ...init.headers },
+      headers,
     });
   } catch {
-    throw new ApiError(0, "Can't reach Tunewise right now. Check your connection and try again.");
+    throw new ApiError(0, "Can't reach Tunewise right now. Check your Server URL and try again.");
   }
 
   if (response.status === 204) return undefined as T;
@@ -103,8 +118,10 @@ export function uploadToLibrary(
 ): Promise<UploadResult> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", `${BASE}/library/uploads`);
+    xhr.open("POST", `${apiV1Base()}/library/uploads`);
     xhr.withCredentials = true;
+    const token = getAccessToken();
+    if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
     xhr.responseType = "json";
     xhr.upload.onprogress = (e) => e.lengthComputable && onProgress(e.loaded / e.total);
     xhr.onload = () => {
@@ -133,11 +150,19 @@ const json = (data: unknown) => JSON.stringify(data);
 
 export const api = {
   me: () => request<User>("/auth/me"),
-  login: (email: string, password: string) =>
-    request<User>("/auth/login", { method: "POST", body: json({ email, password }) }),
-  register: (email: string, password: string, display_name: string) =>
-    request<User>("/auth/register", { method: "POST", body: json({ email, password, display_name }) }),
-  logout: () => request<void>("/auth/logout", { method: "POST" }),
+  login: async (email: string, password: string) =>
+    rememberSession(await request<User>("/auth/login", { method: "POST", body: json({ email, password }) })),
+  register: async (email: string, password: string, display_name: string) =>
+    rememberSession(
+      await request<User>("/auth/register", { method: "POST", body: json({ email, password, display_name }) }),
+    ),
+  logout: async () => {
+    try {
+      await request<void>("/auth/logout", { method: "POST" });
+    } finally {
+      setAccessToken(null);
+    }
+  },
 
   searchSongs: (q: string, limit = 24) =>
     request<SongSearchResponse>(`/songs/search?${new URLSearchParams({ q, limit: String(limit) })}`),

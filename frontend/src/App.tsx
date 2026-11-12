@@ -1,3 +1,4 @@
+import { Capacitor } from "@capacitor/core";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Compass, Loader2 } from "lucide-react";
 import type { ReactNode } from "react";
@@ -11,6 +12,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ApiError } from "@/lib/api";
 import { AuthProvider, useAuth } from "@/lib/auth";
+import { getApiBase } from "@/lib/config";
 import { PlayerProvider } from "@/lib/player";
 import { AnalyticsPage } from "@/pages/analytics-page";
 import { AuthPage } from "@/pages/auth-page";
@@ -20,6 +22,7 @@ import { DashboardPage } from "@/pages/dashboard-page";
 import { DiscoverPage } from "@/pages/discover-page";
 import { LibraryPage } from "@/pages/library-page";
 import { RecommendationsPage } from "@/pages/recommendations-page";
+import { SettingsPage } from "@/pages/settings-page";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,15 +51,24 @@ function SessionGate({ children, requireAuth }: { children: ReactNode; requireAu
   if (status === "error") {
     return (
       <div className="grid min-h-dvh place-items-center px-4">
-        <div className="w-full max-w-md">
-          <Logo className="mb-6 justify-center" />
+        <div className="w-full max-w-md space-y-4">
+          <Logo className="mb-2 justify-center" />
           <ErrorState error={error} onRetry={retry} />
+          <Link to="/settings" className={buttonVariants({ variant: "outline", className: "w-full" })}>
+            Open Server URL settings
+          </Link>
         </div>
       </div>
     );
   }
   if (requireAuth && !user) return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
   if (!requireAuth && user) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
+
+function NativeServerGate({ children }: { children: ReactNode }) {
+  const needsServer = Capacitor.isNativePlatform() && !getApiBase();
+  if (needsServer) return <SettingsPage required />;
   return <>{children}</>;
 }
 
@@ -80,46 +92,49 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <BrowserRouter>
-          <AuthProvider>
-            <PlayerProvider>
-              <Routes>
-                <Route
-                  path="/login"
-                  element={
-                    <SessionGate requireAuth={false}>
-                      <AuthPage mode="login" />
-                    </SessionGate>
-                  }
-                />
-                <Route
-                  path="/register"
-                  element={
-                    <SessionGate requireAuth={false}>
-                      <AuthPage mode="register" />
-                    </SessionGate>
-                  }
-                />
-                <Route
-                  element={
-                    <SessionGate requireAuth>
-                      <AppShell />
-                    </SessionGate>
-                  }
-                >
-                  <Route index element={<DashboardPage />} />
-                  <Route path="companion" element={<CompanionPage />} />
-                  <Route path="recommendations" element={<RecommendationsPage />} />
-                  <Route path="collection" element={<CollectionPage />} />
-                  <Route path="discover" element={<DiscoverPage />} />
-                  <Route path="library" element={<LibraryPage />} />
-                  <Route path="analytics" element={<AnalyticsPage />} />
-                  <Route path="*" element={<NotFound />} />
-                </Route>
-              </Routes>
-              <InstallBanner />
-              <Toaster position="top-center" richColors={false} />
-            </PlayerProvider>
-          </AuthProvider>
+          <NativeServerGate>
+            <AuthProvider>
+              <PlayerProvider>
+                <Routes>
+                  <Route path="/settings" element={<SettingsPage />} />
+                  <Route
+                    path="/login"
+                    element={
+                      <SessionGate requireAuth={false}>
+                        <AuthPage mode="login" />
+                      </SessionGate>
+                    }
+                  />
+                  <Route
+                    path="/register"
+                    element={
+                      <SessionGate requireAuth={false}>
+                        <AuthPage mode="register" />
+                      </SessionGate>
+                    }
+                  />
+                  <Route
+                    element={
+                      <SessionGate requireAuth>
+                        <AppShell />
+                      </SessionGate>
+                    }
+                  >
+                    <Route index element={<DashboardPage />} />
+                    <Route path="companion" element={<CompanionPage />} />
+                    <Route path="recommendations" element={<RecommendationsPage />} />
+                    <Route path="collection" element={<CollectionPage />} />
+                    <Route path="discover" element={<DiscoverPage />} />
+                    <Route path="library" element={<LibraryPage />} />
+                    <Route path="analytics" element={<AnalyticsPage />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Route>
+                </Routes>
+                {!Capacitor.isNativePlatform() && <InstallBanner />}
+                <Toaster position="top-center" richColors={false} />
+              </PlayerProvider>
+            </AuthProvider>
+          </NativeServerGate>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
