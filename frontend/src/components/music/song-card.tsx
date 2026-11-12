@@ -4,7 +4,7 @@ import { usePlayer } from "@/lib/player";
 import type { Song } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CoverArt } from "./cover-art";
-import { MockBadge } from "./song-row";
+import { MockBadge, onSurfaceClick } from "./song-row";
 
 /** Spotify-style tile: big cover, floating play button on hover. */
 export function SongCard({ song, queue, meta }: { song: Song; queue: Song[]; meta?: string }) {
@@ -12,10 +12,13 @@ export function SongCard({ song, queue, meta }: { song: Song; queue: Song[]; met
   const isCurrent = player.current?.id === song.id;
   const isPlaying = isCurrent && player.isPlaying;
   const playable = Boolean(song.playback);
+  const onPlay = () => (isCurrent ? player.toggle() : player.play(song, queue));
 
   return (
     <div
+      onClick={playable ? (e) => onSurfaceClick(e, onPlay) : undefined}
       className={cn(
+        playable && "cursor-pointer",
         "group satin relative rounded-3xl border border-border bg-card p-3 shadow-whip transition-all hover:-translate-y-1 hover:bg-surface-raised hover:shadow-whip-lg",
         isCurrent && "ring-2 ring-wisteria/60",
       )}
@@ -24,7 +27,7 @@ export function SongCard({ song, queue, meta }: { song: Song; queue: Song[]; met
         <CoverArt src={song.cover_url} seed={song.id} title={song.title} className="aspect-square w-full rounded-2xl" iconClassName="size-1/4" />
         <button
           type="button"
-          onClick={() => (isCurrent ? player.toggle() : player.play(song, queue))}
+          onClick={onPlay}
           disabled={!playable}
           aria-label={isPlaying ? `Pause ${song.title}` : `Play ${song.title}`}
           className={cn(

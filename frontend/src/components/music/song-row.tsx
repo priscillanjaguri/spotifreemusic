@@ -32,6 +32,13 @@ type SongRowProps = {
   linkFacets?: boolean;
 };
 
+/** Lets a whole row or tile start playback, while its own buttons and links keep their behaviour. */
+export function onSurfaceClick(event: React.MouseEvent, play: () => void) {
+  if ((event.target as HTMLElement).closest("button, a, input, [role=menuitem]")) return;
+  if (window.getSelection()?.toString()) return;
+  play();
+}
+
 export function SongRow({ song, queue, index, meta, action, linkFacets }: SongRowProps) {
   const player = usePlayer();
   const isCurrent = player.current?.id === song.id;
@@ -43,8 +50,10 @@ export function SongRow({ song, queue, index, meta, action, linkFacets }: SongRo
   return (
     <div className="@container">
       <div
+        onClick={playable ? (e) => onSurfaceClick(e, onPlay) : undefined}
         className={cn(
           "group flex items-center gap-3 px-3 py-2.5 transition-colors @md:px-4",
+          playable && "cursor-pointer",
           isCurrent ? "bg-accent/80" : "hover:bg-surface-raised",
         )}
       >
