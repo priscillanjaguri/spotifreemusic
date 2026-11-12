@@ -2,7 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, collection, health, profile, songs
+from app.api import auth, collection, dev, health, profile, songs
 from app.core.config import get_settings
 
 
@@ -22,6 +22,8 @@ def create_app() -> FastAPI:
     )
     for router in (health.router, auth.router, profile.router, songs.router, collection.router):
         app.include_router(router, prefix="/api/v1")
+    if settings.mock_provider_enabled:
+        app.include_router(dev.router, prefix="/api/v1")
     return app
 
 

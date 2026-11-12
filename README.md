@@ -5,11 +5,12 @@
 A personal music discovery and intelligence app: collection management, content-based
 recommendations, listening analytics, taste timeline and a daily companion.
 
-**Status: Stage 2 of 7 complete** (auth, profile, catalogue, collection, Jamendo adapter).
+**Status: Stage 3 of 7 complete** (auth, profile, catalogue, collection, Jamendo adapter, and the web UI:
+sign-in, dashboard, collection with filters, discover with search and playback).
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for design decisions and the stage checklist.
 
 ## Stack
-React + TypeScript + Vite + Tailwind (frontend) · FastAPI + Pydantic (backend) ·
+React + TypeScript + Vite + Tailwind v4 + shadcn/ui (Base UI) + TanStack Query (frontend) · FastAPI + Pydantic (backend) ·
 PostgreSQL + SQLAlchemy 2 + Alembic · NumPy / Pandas / scikit-learn (recommender).
 
 ## Prerequisites
@@ -39,6 +40,31 @@ cd frontend
 npm install
 npm run dev                             # http://localhost:5173 (proxies /api to :8000)
 ```
+
+The dev server proxies `/api` to `http://localhost:8000`; set `TUNEWISE_API_URL` to point it elsewhere,
+e.g. `TUNEWISE_API_URL=http://localhost:8741 npm run dev -- --port 5791`.
+
+### Trying the UI without a Jamendo key
+Set `DEV_MOCK_PROVIDER=true` in `.env` (only honoured when `ENVIRONMENT=development` and
+`JAMENDO_CLIENT_ID` is empty). Search then serves a small invented catalogue, stored with
+`data_source='mock_dev'` and shown with a **Sample** badge, and playback streams generated
+12-second tones from `/api/v1/dev/mock-audio/…`. Leave it off to see the real "provider not
+configured" (503) state in Discover.
+
+## Frontend
+```bash
+cd frontend
+npm run typecheck     # tsc, no emit
+npm run build         # typecheck + production bundle in dist/
+```
+Screens: **Sign in / Create account**, **Home** (stats, recently added, top genres and artists),
+**Collection** (filter by artist, album, genre via `/collection/facets`; remove with undo; play all)
+and **Discover** (search, add to collection, play). A persistent player bar handles playback via
+the provider's stream URL. Layout: sidebar on desktop, top bar and bottom tab bar on mobile.
+
+Design system: `src/index.css` holds the purple palette as Tailwind theme colours and CSS
+variables (see `docs/ARCHITECTURE.md`, "Stage 3 decisions"); primitives live in
+`src/components/ui` (shadcn/ui), shared app components in `src/components`.
 
 ## API documentation
 FastAPI generates it automatically: **http://localhost:8000/docs** (Swagger UI) and

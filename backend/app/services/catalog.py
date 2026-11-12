@@ -14,29 +14,30 @@ def ensure_provider_row(db: Session, adapter: MusicProviderAdapter) -> MusicProv
     # An adapter only exists in the registry when it is configured.
     row.is_configured = True
     row.supports_playback = adapter.supports_playback
+    row.is_mock = adapter.is_mock
     db.flush()
     return row
 
 
-def _artist(db: Session, name: str) -> Artist:
+def _artist(db: Session, name: str, source: str) -> Artist:
     # Simplification: artists are matched by case-insensitive name. Two different
     # artists with an identical name would be merged; fine until we need provider artist ids.
     artist = db.scalars(select(Artist).where(func.lower(Artist.name) == name.lower())).first()
     if artist is None:
-        artist = Artist(name=name, data_source="provider")
+        artist = Artist(name=name, data_source=source)
         db.add(artist)
         db.flush()  # autoflush is off, so flush so later lookups in this batch find it
     return artist
 
 
-def _album(db: Session, title: str, artist: Artist, track: ProviderTrack) -> Album:
+def _album(db: Session, title: str, artist: Artist, track: ProviderTrack, source: str) -> Album:
     album = db.scalars(
         select(Album).where(func.lower(Album.title) == title.lower(), Album.primary_artist_id == artist.id)
     ).first()
     if album is None:
         album = Album(
             title=title, primary_artist=artist, release_date=track.release_date,
-            cover_url=track.cover_url, data_source="provider",
+            cover_url=track.cover_url, data_source=source,
         )
         db.add(album)
         db.flush()
@@ -67,17 +68,17 @@ def import_tracks(db: Session, adapter: MusicProviderAdapter, tracks: list[Provi
             link.playback_uri, link.license_url = track.stream_url, track.license_url
             song = link.song
         else:
-            song = _create_song(db, provider, track)
+            song = _create_song(db, provider, track, adapter.data_source)
         if song not in songs:
             songs.append(song)
     db.flush()
     return songs
 
 
-def _create_song(db: Session, provider: MusicProvider, track: ProviderTrack) -> Song:
+def _create_song(db: Session, provider: MusicProvider, track: ProviderTrack, source: str) -> Song:
     artists: list[Artist] = []
     for pa in track.artists:
-        a = _artist(db, pa.name)
+        a = _artist(db, pa.name, source)
         if a not in artists:
             artists.append(a)
     genre_names = sorted({g.strip().lower() for g in track.genres if g.strip()})
@@ -86,8 +87,8 @@ def _create_song(db: Session, provider: MusicProvider, track: ProviderTrack) -> 
         title=track.title,
         duration_ms=track.duration_ms,
         cover_url=track.cover_url,
-        data_source="provider",
-        album=_album(db, track.album_title, artists[0], track) if track.album_title else None,
+        data_source=source,
+        album=_album(db, track.album_title, artists[0], track, source) if track.album_title else None,
         genres=[_genre(db, n) for n in genre_names],
     )
     for position, artist in enumerate(artists):

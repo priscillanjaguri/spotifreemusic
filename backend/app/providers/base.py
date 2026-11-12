@@ -37,6 +37,9 @@ class MusicProviderAdapter(ABC):
     key: str  # stable code, stored in music_providers.key
     display_name: str
     supports_playback: bool
+    # Labels everything this adapter imports. Only the dev mock uses 'mock_dev'.
+    data_source: str = "provider"
+    is_mock: bool = False
 
     @abstractmethod
     def search_tracks(self, query: str, limit: int = 20) -> list[ProviderTrack]:

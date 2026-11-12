@@ -20,6 +20,12 @@ tunewise/
 │   ├── alembic/versions/      # migrations (0001_initial_schema)
 │   └── tests/
 └── frontend/                  # Vite + React + TS + Tailwind
+    └── src/
+        ├── index.css          # design tokens: purple palette, semantic CSS variables, utilities
+        ├── components/ui/     # shadcn/ui primitives (Base UI), restyled through the tokens
+        ├── components/        # app components: layout (shell, nav, player bar), music, states
+        ├── lib/               # api client, auth + player contexts, collection hooks, formatting
+        └── pages/             # auth, dashboard, collection, discover
 ```
 Dependency direction: `api -> services -> models`, and `services -> ml` (never the reverse).
 The ML package receives plain arrays/DataFrames and returns scores, so it can be unit-tested
@@ -68,7 +74,7 @@ and replaced without touching the web layer or UI.
 ## Stage checklist
 - [x] 1 Scaffold, architecture, schema, migration, tests
 - [x] 2 Backend: auth, profile, catalogue import, collection, provider interface + Jamendo adapter
-- [ ] 3 Frontend: design system, navigation, auth, dashboard, collection, discover
+- [x] 3 Frontend: design system, navigation, auth, dashboard, collection, discover
 - [ ] 4 Recommendation engine
 - [ ] 5 Listening history + weekly/monthly analytics, Taste Timeline, Memory Lane
 - [ ] 6 Daily companion + full integration
@@ -85,3 +91,35 @@ and replaced without touching the web layer or UI.
   the same name would merge). Revisit when we store provider artist ids.
 - **Jamendo gives genre tags but no energy/valence/tempo.** Those will come from Librosa in Stage 4,
   only for tracks whose stored licence permits analysis.
+
+## Stage 3 decisions
+- **Server state lives in TanStack Query**; there is no global store. Auth (`/auth/me`) and the audio
+  player are React contexts. The session stays in the httpOnly cookie; the UI only learns *who* is
+  signed in from `/auth/me` and never touches the token.
+- **One `<audio>` element** for the whole app, fed with the provider's `stream_url`. Songs without a
+  `playback` object show a disabled play button. Each track's licence URL is linked from the player.
+- **Errors are shaped once** in `lib/api.ts` (`ApiError` with `status`, `code`, readable message, including
+  FastAPI 422 lists). The 503 `provider_not_configured` code gets its own screen explaining how to enable
+  Jamendo; 502 and network failures get a retry state.
+- **"Is this song saved?"** uses the newest 100 collection items (the API's page cap) plus songs added this
+  session; a 409 on add marks older ones. A dedicated membership endpoint would remove this approximation.
+- **Collection filters live in the URL** (`?artist=`, `?album=`, `?genre=`), so filtered views can be
+  linked and survive reloads; artist/album/genre names in rows link into them.
+- **Dev mock provider** (`DEV_MOCK_PROVIDER=true`, development only): an invented catalogue labelled
+  `mock_dev` (shown as a **Sample** badge, per decision 8) with generated tones. It exists so the UI can be
+  exercised without a Jamendo key; it is never selected when a real provider is configured or outside
+  development. Tests still use their own fake provider.
+
+### Design system: purple palette
+Raw shades are Tailwind theme colours (`bg-grape`, `text-lavender`, ...). Components use the semantic
+tokens (`bg-card`, `text-primary`, `ring-ring`, ...) which map onto them, so a re-theme is one file.
+
+| Role | Shades |
+|---|---|
+| Backgrounds, darkest first | `night` #0c0716 (app), `aubergine` #130b22 (sidebar, nav), `grape` #1b1030 (cards), `eggplant` #251640 (raised, player), `heather` #36245a (borders), `iris` #5b3fa3 (strong borders) |
+| Primary / focus | `amethyst` #8b5cf6 (primary buttons), `violet-glow` #a78bfa (focus ring), `wisteria` #7c6cf0 (info, charts) |
+| Text and accents | `mist` #f5f1ff (body), `lilac` #e4dcff (headings), `lavender` #c4b5fd (links, accents), `mauve` #a596c4 (muted), `dusk` #7a6a9c (subtle) |
+| Calls to action, highlights | `plum` #9d2b8a to `orchid` #d24bc4 (CTA gradient, `bg-cta`), `magenta` #f062c0 (now playing, active icons), `berry` #f0507a (destructive) |
+
+Utilities: `bg-cta`, `text-gradient`, `shadow-glow`, `shadow-cta`. Button gains a `cta` variant;
+Badge gains `genre`, `highlight` and `mock`.

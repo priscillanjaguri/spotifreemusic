@@ -1,28 +1,117 @@
-import { useEffect, useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Compass, Loader2 } from "lucide-react";
+import type { ReactNode } from "react";
+import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { AppShell } from "@/components/layout/app-shell";
+import { Logo } from "@/components/layout/logo";
+import { EmptyState, ErrorState } from "@/components/states";
+import { buttonVariants } from "@/components/ui/button";
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { ApiError } from "@/lib/api";
+import { AuthProvider, useAuth } from "@/lib/auth";
+import { PlayerProvider } from "@/lib/player";
+import { AuthPage } from "@/pages/auth-page";
+import { CollectionPage } from "@/pages/collection-page";
+import { DashboardPage } from "@/pages/dashboard-page";
+import { DiscoverPage } from "@/pages/discover-page";
 
-type Health = { status: string; database: string };
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: (count, err) => count < 1 && !(err instanceof ApiError && err.status >= 400 && err.status < 500),
+    },
+  },
+});
 
-// Stage 1 only proves the frontend can reach the backend. The real UI starts in Stage 3.
-export default function App() {
-  const [health, setHealth] = useState<Health | "error" | null>(null);
-
-  useEffect(() => {
-    fetch("/api/v1/health")
-      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
-      .then(setHealth)
-      .catch(() => setHealth("error"));
-  }, []);
-
+function Splash() {
   return (
-    <main className="min-h-screen grid place-items-center bg-neutral-950 text-neutral-100">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-semibold">Tunewise</h1>
-        <p className="text-neutral-400">Understand your music. Discover beyond it.</p>
-        <p className="text-sm text-neutral-500">
-          API:{" "}
-          {health === null ? "checking…" : health === "error" ? "unreachable" : `${health.status} (db ${health.database})`}
-        </p>
+    <div className="grid min-h-dvh place-items-center">
+      <div className="flex flex-col items-center gap-5">
+        <Logo />
+        <Loader2 className="size-5 animate-spin text-lavender" aria-label="Loading" />
       </div>
-    </main>
+    </div>
+  );
+}
+
+function SessionGate({ children, requireAuth }: { children: ReactNode; requireAuth: boolean }) {
+  const { user, status, error, retry } = useAuth();
+  const location = useLocation();
+  if (status === "loading") return <Splash />;
+  if (status === "error") {
+    return (
+      <div className="grid min-h-dvh place-items-center px-4">
+        <div className="w-full max-w-md">
+          <Logo className="mb-6 justify-center" />
+          <ErrorState error={error} onRetry={retry} />
+        </div>
+      </div>
+    );
+  }
+  if (requireAuth && !user) return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
+  if (!requireAuth && user) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
+
+function NotFound() {
+  return (
+    <EmptyState
+      icon={Compass}
+      title="This page wandered off"
+      description="The link may be old or mistyped. Head back home and keep exploring."
+      action={
+        <Link to="/" className={buttonVariants({ variant: "cta" })}>
+          Back to home
+        </Link>
+      }
+    />
+  );
+}
+
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <PlayerProvider>
+              <Routes>
+                <Route
+                  path="/login"
+                  element={
+                    <SessionGate requireAuth={false}>
+                      <AuthPage mode="login" />
+                    </SessionGate>
+                  }
+                />
+                <Route
+                  path="/register"
+                  element={
+                    <SessionGate requireAuth={false}>
+                      <AuthPage mode="register" />
+                    </SessionGate>
+                  }
+                />
+                <Route
+                  element={
+                    <SessionGate requireAuth>
+                      <AppShell />
+                    </SessionGate>
+                  }
+                >
+                  <Route index element={<DashboardPage />} />
+                  <Route path="collection" element={<CollectionPage />} />
+                  <Route path="discover" element={<DiscoverPage />} />
+                  <Route path="*" element={<NotFound />} />
+                </Route>
+              </Routes>
+              <Toaster position="top-center" richColors={false} />
+            </PlayerProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 }

@@ -1,1 +1,195 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Tunewise palette: every surface, accent and highlight is a shade of purple.
+ * Raw shades are exposed as Tailwind colours (bg-grape, text-lavender, ...);
+ * components should prefer the semantic tokens below (bg-card, text-primary, ...).
+ */
+@theme {
+  /* Depths: backgrounds and surfaces, darkest first */
+  --color-night: #0c0716;
+  --color-aubergine: #130b22;
+  --color-grape: #1b1030;
+  --color-eggplant: #251640;
+  --color-heather: #36245a;
+  --color-iris: #5b3fa3;
+
+  /* Violets: primary actions and focus */
+  --color-amethyst: #8b5cf6;
+  --color-violet-glow: #a78bfa;
+  --color-wisteria: #7c6cf0;
+
+  /* Lights: accents, text */
+  --color-lavender: #c4b5fd;
+  --color-lilac: #e4dcff;
+  --color-mist: #f5f1ff;
+  --color-mauve: #a596c4;
+  --color-dusk: #7a6a9c;
+
+  /* Plums: calls to action and highlights */
+  --color-plum: #9d2b8a;
+  --color-orchid: #d24bc4;
+  --color-magenta: #f062c0;
+  --color-berry: #f0507a;
+
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --animate-eq: eq 0.9s ease-in-out infinite alternate;
+  @keyframes eq {
+    0% { height: 20%; }
+    50% { height: 100%; }
+    100% { height: 45%; }
+  }
+
+  --shadow-glow: 0 0 0 1px rgb(139 92 246 / 0.25), 0 8px 32px -8px rgb(139 92 246 / 0.45);
+  --shadow-cta: 0 10px 30px -10px rgb(210 75 196 / 0.7);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-highlight: var(--highlight);
+  --color-surface-raised: var(--surface-raised);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* Tunewise is dark-only; <html class="dark"> enables the dark: variants in shadcn components. */
+:root {
+  --radius: 0.75rem;
+
+  --background: var(--color-night);
+  --foreground: var(--color-mist);
+  --card: var(--color-grape);
+  --card-foreground: var(--color-mist);
+  --popover: #1d1233;
+  --popover-foreground: var(--color-mist);
+  --surface-raised: var(--color-eggplant);
+
+  --primary: var(--color-amethyst);
+  --primary-foreground: #ffffff;
+  --secondary: var(--color-eggplant);
+  --secondary-foreground: var(--color-lilac);
+  --muted: #1f1436;
+  --muted-foreground: var(--color-mauve);
+  --accent: #2c1a4d;
+  --accent-foreground: var(--color-lavender);
+  --highlight: var(--color-magenta);
+  --destructive: var(--color-berry);
+
+  --border: rgb(124 92 196 / 0.22);
+  --input: rgb(150 120 220 / 0.28);
+  --ring: var(--color-violet-glow);
+
+  --cta-from: var(--color-plum);
+  --cta-to: var(--color-orchid);
+
+  --chart-1: var(--color-lavender);
+  --chart-2: var(--color-amethyst);
+  --chart-3: var(--color-orchid);
+  --chart-4: var(--color-wisteria);
+  --chart-5: var(--color-plum);
+
+  --sidebar: var(--color-aubergine);
+  --sidebar-foreground: var(--color-lilac);
+  --sidebar-primary: var(--color-amethyst);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #24153f;
+  --sidebar-accent-foreground: var(--color-lavender);
+  --sidebar-border: rgb(124 92 196 / 0.16);
+  --sidebar-ring: var(--color-violet-glow);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans antialiased;
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground min-h-dvh;
+    background-image:
+      radial-gradient(60rem 40rem at 10% -10%, rgb(139 92 246 / 0.16), transparent 60%),
+      radial-gradient(50rem 30rem at 110% 110%, rgb(210 75 196 / 0.1), transparent 60%);
+    background-attachment: fixed;
+  }
+  ::selection {
+    background: rgb(210 75 196 / 0.4);
+  }
+}
+
+@utility bg-cta {
+  background-image: linear-gradient(135deg, var(--cta-from), var(--cta-to));
+}
+
+@utility text-gradient {
+  background-image: linear-gradient(100deg, var(--color-lavender), var(--color-magenta));
+  background-clip: text;
+  color: transparent;
+}
+
+.tw-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  background: var(--color-mist);
+  box-shadow: 0 0 0 3px rgb(210 75 196 / 0.35);
+}
+.tw-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 0;
+  border-radius: 9999px;
+  background: var(--color-mist);
+  box-shadow: 0 0 0 3px rgb(210 75 196 / 0.35);
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

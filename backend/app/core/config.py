@@ -29,6 +29,13 @@ class Settings(BaseSettings):
     cookie_secure: bool = False
     # Optional: without it the app runs, but search/playback report "provider not configured".
     jamendo_client_id: str | None = None
+    # Development only: serve an invented catalogue (labelled 'mock_dev') with generated
+    # tones when no real provider is configured. Ignored outside ENVIRONMENT=development.
+    dev_mock_provider: bool = False
+
+    @property
+    def mock_provider_enabled(self) -> bool:
+        return self.dev_mock_provider and self.environment == "development" and not self.jamendo_client_id
 
 
 @lru_cache
