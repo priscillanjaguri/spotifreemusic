@@ -79,7 +79,7 @@ function Dropzone({
         if (e.dataTransfer.files.length) onFiles(e.dataTransfer.files);
       }}
       className={cn(
-        "powder group relative cursor-pointer overflow-hidden rounded-[2rem] border-2 border-dashed text-center shadow-whip-lg transition-all outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+        "powder glass group relative cursor-pointer overflow-hidden rounded-[2rem] border-2 border-dashed border-white/20 text-center transition-all outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
         compact ? "px-6 py-7" : "px-6 py-12 sm:py-16",
         dragging
           ? "scale-[1.01] border-orchid-glow bg-satin-amethyst shadow-glow"
@@ -192,7 +192,7 @@ function UploadQueue({ items, onRetry, onClear }: { items: QueueItem[]; onRetry:
     count("failed") && `${count("failed")} failed`,
   ].filter(Boolean);
   return (
-    <section className="mt-6 overflow-hidden rounded-3xl border border-border bg-card satin shadow-whip" aria-label="Uploads">
+    <section className="glass glass-inset mt-6 overflow-hidden rounded-[1.75rem]" aria-label="Uploads">
       <header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div>
           <h2 className="font-display text-xl font-semibold text-heading">Uploads</h2>
@@ -339,7 +339,7 @@ export function LibraryPage() {
         ) : (
           <>
             <h2 className="mb-3 font-display text-2xl font-semibold text-heading">In your library</h2>
-            <div className="divide-y divide-border overflow-hidden rounded-3xl border border-border bg-card satin shadow-whip">
+            <div className="glass glass-inset divide-y divide-white/10 overflow-hidden rounded-[1.75rem]">
               {uploads.map((u, i) => (
                 <SongRow
                   key={u.id}

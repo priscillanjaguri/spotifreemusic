@@ -84,7 +84,7 @@ export function DiscoverPage() {
           placeholder="Search songs, artists or genres"
           aria-label="Search songs"
           maxLength={100}
-          className="h-14 rounded-full border-border bg-card pr-32 pl-13 text-base shadow-whip-lg placeholder:text-subtle focus-visible:shadow-glow md:text-base"
+          className="h-14 rounded-full border-white/15 bg-white/8 pr-32 pl-13 text-base shadow-whip-lg backdrop-blur-xl placeholder:text-subtle focus-visible:shadow-glow md:text-base"
         />
         <div className="absolute top-1/2 right-2 flex -translate-y-1/2 items-center gap-1">
           {input && (
@@ -119,7 +119,7 @@ export function DiscoverPage() {
                 key={m.q}
                 type="button"
                 onClick={() => setParams({ q: m.q })}
-                className={`powder gloss group relative min-h-28 overflow-hidden rounded-3xl border border-lavender/15 ${m.tone} p-4 text-left shadow-whip transition-all hover:-translate-y-1 hover:shadow-whip-lg sm:min-h-32 sm:p-5`}
+                className={`powder gloss glow-soft group relative min-h-28 overflow-hidden glass-edge rounded-[1.75rem] ${m.tone} p-4 text-left transition-all hover:-translate-y-1 sm:min-h-32 sm:p-5`}
               >
                 <p className="relative font-display text-2xl leading-tight font-semibold text-cream drop-shadow-sm">{m.label}</p>
                 <p className="relative mt-1 text-xs font-semibold text-lavender">Search “{m.q}”</p>
@@ -164,7 +164,7 @@ export function DiscoverPage() {
               </Button>
             )}
           </div>
-          <div className="divide-y divide-border overflow-hidden rounded-3xl border border-border bg-card satin shadow-whip">
+          <div className="glass glass-inset divide-y divide-white/10 overflow-hidden rounded-[1.75rem]">
             {results.map((song, index) => (
               <SongRow
                 key={song.id}

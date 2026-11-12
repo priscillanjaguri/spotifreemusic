@@ -84,7 +84,7 @@ export function CompanionPage() {
         }
       />
 
-      <section className="powder relative overflow-hidden rounded-[2rem] border border-lavender/15 bg-satin-royal p-5 shadow-whip-lg sm:p-6">
+      <section className="powder glass-soft glass-edge relative overflow-hidden rounded-[2rem] p-5 sm:p-6">
         <HairWaves className="absolute inset-0 opacity-40" />
         <Rose className="absolute -right-8 top-0 size-28 opacity-70" />
         <div className="relative">
@@ -106,7 +106,7 @@ export function CompanionPage() {
                     "gloss inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm font-bold ring-1 transition-all",
                     active
                       ? "bg-cta text-white ring-lavender/40 shadow-whip"
-                      : "bg-deep-purple/50 text-lavender ring-lavender/15 hover:bg-deep-purple hover:text-cream",
+                      : "bg-white/5 text-lavender ring-white/10 hover:bg-white/10 hover:text-cream",
                   )}
                 >
                   <Icon className="size-4" />
@@ -156,7 +156,7 @@ export function CompanionPage() {
         </section>
 
         <aside className="space-y-5">
-          <section className="rounded-3xl border border-border bg-card satin p-5 shadow-whip">
+          <section className="glass glass-inset rounded-[1.75rem] p-5">
             <p className="font-script text-2xl text-highlight">today’s notes</p>
             <ul className="mt-3 space-y-3">
               {(data?.insights ?? []).map((insight) => (
@@ -177,7 +177,7 @@ export function CompanionPage() {
           </section>
 
           {data?.spotlight && (
-            <section className="overflow-hidden rounded-3xl border border-lavender/15 bg-satin-deep p-5">
+            <section className="glass glass-inset overflow-hidden rounded-[1.75rem] p-5">
               <p className="font-script text-2xl text-cream">spotlight</p>
               <button
                 type="button"

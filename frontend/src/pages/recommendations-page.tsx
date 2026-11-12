@@ -106,7 +106,7 @@ export function RecommendationsPage() {
       />
 
       {!similarId && (
-        <section className="powder relative mb-8 overflow-hidden rounded-3xl border border-lavender/15 bg-satin-royal p-5 shadow-whip sm:p-6">
+        <section className="powder glass-soft glass-edge relative mb-8 overflow-hidden rounded-[1.75rem] p-5 sm:p-6">
           <HairWaves className="absolute inset-0 h-full w-full opacity-40" />
           <Rose className="absolute -top-10 -right-8 size-28 opacity-80" />
           <div className="relative">

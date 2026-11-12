@@ -153,7 +153,7 @@ export function CollectionPage() {
         />
       ) : (
         <>
-          <section className="powder mb-6 rounded-3xl border border-border bg-card satin p-4 shadow-whip sm:p-5">
+          <section className="powder glass glass-inset mb-6 rounded-[1.75rem] p-4 sm:p-5">
             <Tabs value={tab} onValueChange={(v) => setTab(v as FacetKind)}>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <TabsList className="h-10 w-full rounded-full bg-accent/80 p-1 sm:w-auto">
@@ -247,7 +247,7 @@ export function CollectionPage() {
                   <span className="w-7" />
                 </div>
               </div>
-              <div className="divide-y divide-border overflow-hidden rounded-3xl border border-border bg-card satin shadow-whip">
+              <div className="glass glass-inset divide-y divide-white/10 overflow-hidden rounded-[1.75rem]">
                 {items.map((item, index) => (
                   <SongRow
                     key={item.song.id}

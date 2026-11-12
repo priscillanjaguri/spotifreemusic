@@ -13,56 +13,69 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Tunewise palette: deep satin purples sampled from the ribbon reference (deep purple,
- * royal purple, amethyst, violet; each with sheen and shadow tones) are the backgrounds and
- * surfaces. Eyeshadow shades (lavender ... orchid) plus silver and cream are reserved for
- * text, highlights and small accents. Components should use the semantic tokens further down.
+ * Tunewise glassmorphism: deep satin eggplant / amethyst base with frosted translucent
+ * panels, soft pink–purple glows, and glossy edge highlights. Darker than light-lavender
+ * glass references — girly and cool, not pastel.
  */
 @theme {
   /* Satin ribbons, darkest to lightest, each as shadow / base / sheen */
-  --color-midnight: #140a1b;
-  --color-deep-purple-shadow: #1c0e24;
-  --color-deep-purple: #2a1632;
-  --color-deep-purple-sheen: #412851;
-  --color-royal-purple-shadow: #22102b;
-  --color-royal-purple: #391e47;
-  --color-royal-purple-sheen: #522b5d;
-  --color-amethyst-shadow: #41124f;
-  --color-amethyst: #5c266f;
-  --color-amethyst-sheen: #6c3480;
-  --color-violet-shadow: #5d2f6a;
-  --color-violet: #7f488e;
-  --color-violet-sheen: #9461a3;
-  --color-satin-rose: #311c36;
+  --color-midnight: #0c0612;
+  --color-deep-purple-shadow: #160a1f;
+  --color-deep-purple: #24112e;
+  --color-deep-purple-sheen: #3a1f48;
+  --color-royal-purple-shadow: #1a0c24;
+  --color-royal-purple: #31183f;
+  --color-royal-purple-sheen: #4a2556;
+  --color-amethyst-shadow: #3a0f48;
+  --color-amethyst: #542463;
+  --color-amethyst-sheen: #6a3078;
+  --color-violet-shadow: #532a60;
+  --color-violet: #754084;
+  --color-violet-sheen: #8c59a0;
+  --color-satin-rose: #2c1534;
 
   /* Labels on the ribbons */
   --color-silver: #c9c0d4;
-  --color-cream: #f5ece6;
+  --color-cream: #f7eef4;
 
-  /* Eyeshadow accents: text, highlights, small details only */
-  --color-lavender: #d9c4ef;
-  --color-lilac: #d4a5e2;
-  --color-mauve: #c77dbd;
-  --color-wisteria: #c98ad3;
-  --color-heliotrope: #a954e2;
-  --color-purple: #8511c4;
-  --color-purple-heart: #69359c;
-  --color-orchid: #a03aa9;
-  --color-orchid-glow: #e7a3de;
+  /* Eyeshadow accents: text, highlights, soft pink/purple glows */
+  --color-lavender: #e0c8f5;
+  --color-lilac: #e0a8ea;
+  --color-mauve: #d487c8;
+  --color-wisteria: #d492de;
+  --color-heliotrope: #b45eeb;
+  --color-purple: #8a18c8;
+  --color-purple-heart: #6d389e;
+  --color-orchid: #b048b8;
+  --color-orchid-glow: #f0b0e6;
   --color-plum: #77236f;
   --color-grape: #4e0759;
-  --color-eggplant: #2a052f;
+  --color-eggplant: #220428;
   --color-rose: #f28bb3;
+  --color-pink-glow: #ff9fd0;
+  --color-glass-edge: #ffe8ff;
 
   --font-sans: "Nunito Variable", ui-rounded, ui-sans-serif, system-ui, sans-serif;
   --font-display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
   --font-script: "Great Vibes", "Snell Roundhand", cursive;
   --font-heading: var(--font-display);
 
-  --shadow-whip: inset 0 1px 0 rgb(255 255 255 / 0.06), 0 14px 34px -16px rgb(8 2 12 / 0.8);
-  --shadow-whip-lg: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 26px 50px -18px rgb(8 2 12 / 0.9);
-  --shadow-glow: 0 0 0 4px rgb(212 165 226 / 0.14), 0 10px 30px -10px rgb(201 138 211 / 0.45);
-  --shadow-polish: inset 0 1px 0 rgb(255 255 255 / 0.3), 0 10px 26px -10px rgb(201 138 211 / 0.55);
+  --shadow-whip:
+    inset 0 1px 0 rgb(255 232 255 / 0.22),
+    inset 0 -1px 0 rgb(80 20 90 / 0.35),
+    0 18px 40px -18px rgb(6 1 12 / 0.85),
+    0 0 40px -12px rgb(180 80 200 / 0.28);
+  --shadow-whip-lg:
+    inset 0 1px 0 rgb(255 232 255 / 0.28),
+    inset 0 -1px 0 rgb(60 10 70 / 0.4),
+    0 28px 60px -20px rgb(4 0 10 / 0.9),
+    0 0 60px -10px rgb(210 100 220 / 0.35);
+  --shadow-glow: 0 0 0 1px rgb(232 168 234 / 0.28), 0 0 36px -6px rgb(240 160 230 / 0.55);
+  --shadow-polish: inset 0 1px 0 rgb(255 255 255 / 0.42), 0 12px 28px -10px rgb(201 100 211 / 0.55);
+  --shadow-glass-inset:
+    inset 0 1px 0 rgb(255 240 255 / 0.28),
+    inset 0 -18px 40px -20px rgb(40 8 55 / 0.55),
+    inset 0 0 0 1px rgb(255 220 255 / 0.08);
 
   --animate-eq: eq 0.9s ease-in-out infinite alternate;
   @keyframes eq {
@@ -74,6 +87,11 @@
   @keyframes float {
     0%, 100% { transform: translateY(0) rotate(0deg); }
     50% { transform: translateY(-10px) rotate(6deg); }
+  }
+  --animate-glow-pulse: glow-pulse 5.5s ease-in-out infinite;
+  @keyframes glow-pulse {
+    0%, 100% { opacity: 0.45; }
+    50% { opacity: 0.85; }
   }
 }
 
@@ -125,55 +143,61 @@
 }
 
 :root {
-  --radius: 0.875rem;
+  --radius: 1rem;
 
   --background: var(--color-deep-purple-shadow);
   --foreground: var(--color-cream);
-  --heading: #f4e8f8;
-  --subtle: #9c88ae;
-  --card: rgb(57 30 71 / 0.82);
+  --heading: #f8ecfb;
+  --subtle: #a890bc;
+  /* Solid fallback; .glass / .satin raise translucency when blur is supported */
+  --card: rgb(49 24 63 / 0.78);
   --card-foreground: var(--color-cream);
-  --popover: var(--color-deep-purple);
+  --popover: rgb(36 17 46 / 0.92);
   --popover-foreground: var(--color-cream);
-  --surface-raised: var(--color-royal-purple-sheen);
+  --surface-raised: rgb(74 37 86 / 0.72);
 
   --primary: var(--color-heliotrope);
   --primary-foreground: #ffffff;
-  --secondary: var(--color-amethyst);
+  --secondary: rgb(84 36 99 / 0.85);
   --secondary-foreground: var(--color-lavender);
-  --muted: var(--color-deep-purple);
-  --muted-foreground: #c3b4d2;
-  --accent: rgb(127 72 142 / 0.38);
+  --muted: rgb(36 17 46 / 0.72);
+  --muted-foreground: #d0bfdE;
+  --accent: rgb(140 80 160 / 0.32);
   --accent-foreground: var(--color-lavender);
   --highlight: var(--color-orchid-glow);
   --destructive: var(--color-rose);
 
-  --border: rgb(217 196 239 / 0.12);
-  --input: rgb(217 196 239 / 0.22);
+  --border: rgb(255 220 255 / 0.16);
+  --input: rgb(255 220 255 / 0.22);
   --ring: var(--color-lilac);
 
-  /* Glossy CTA pill: orchid-violet satin */
-  --cta-from: #b46ccb;
-  --cta-via: var(--color-violet);
-  --cta-to: var(--color-amethyst);
+  --cta-from: #e08ad8;
+  --cta-via: #a85bc4;
+  --cta-to: #6a3078;
 
   --chart-1: var(--color-lavender);
   --chart-2: var(--color-wisteria);
-  --chart-3: var(--color-violet-sheen);
-  --chart-4: var(--color-amethyst-sheen);
-  --chart-5: var(--color-royal-purple-sheen);
+  --chart-3: var(--color-orchid-glow);
+  --chart-4: var(--color-heliotrope);
+  --chart-5: var(--color-amethyst-sheen);
 
-  --sidebar: var(--color-deep-purple);
+  --sidebar: rgb(28 12 38 / 0.72);
   --sidebar-foreground: var(--color-cream);
   --sidebar-primary: var(--color-heliotrope);
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: rgb(82 43 93 / 0.7);
+  --sidebar-accent: rgb(120 60 150 / 0.35);
   --sidebar-accent-foreground: var(--color-lavender);
-  --sidebar-border: rgb(217 196 239 / 0.1);
+  --sidebar-border: rgb(255 220 255 / 0.14);
   --sidebar-ring: var(--color-lilac);
 
-  --player: var(--color-amethyst);
+  --player: rgb(84 36 99 / 0.55);
   --player-foreground: var(--color-lavender);
+
+  --glass-blur: 22px;
+  --glass-saturate: 1.4;
+  --glass-fill: rgb(58 28 78 / 0.42);
+  --glass-fill-strong: rgb(42 18 58 / 0.62);
+  --glass-fill-soft: rgb(110 55 140 / 0.28);
 }
 
 @layer base {
@@ -186,19 +210,20 @@
   }
   body {
     @apply bg-background text-foreground min-h-dvh;
-    background-color: var(--color-deep-purple-shadow);
+    background-color: var(--color-midnight);
     background-image:
-      radial-gradient(50rem 34rem at 0% -10%, rgb(82 43 93 / 0.85), transparent 65%),
-      radial-gradient(42rem 30rem at 105% 5%, rgb(92 38 111 / 0.55), transparent 60%),
-      radial-gradient(50rem 30rem at 60% 115%, rgb(127 72 142 / 0.35), transparent 60%),
-      linear-gradient(180deg, var(--color-deep-purple-shadow), var(--color-midnight));
+      radial-gradient(42rem 32rem at 8% -5%, rgb(255 140 200 / 0.22), transparent 58%),
+      radial-gradient(38rem 28rem at 95% 0%, rgb(170 70 230 / 0.34), transparent 55%),
+      radial-gradient(48rem 34rem at 70% 110%, rgb(120 40 180 / 0.38), transparent 58%),
+      radial-gradient(30rem 24rem at 40% 40%, rgb(90 30 130 / 0.28), transparent 60%),
+      linear-gradient(165deg, #1a0b24 0%, var(--color-midnight) 42%, #12061a 100%);
     background-attachment: fixed;
   }
   h1, h2, h3 {
     font-family: var(--font-heading);
   }
   ::selection {
-    background: rgb(201 138 211 / 0.4);
+    background: rgb(232 168 234 / 0.4);
   }
 }
 
@@ -214,48 +239,149 @@
 }
 
 @utility bg-cta {
-  background-image: linear-gradient(135deg, var(--cta-from), var(--cta-via) 55%, var(--cta-to));
-}
-
-/* Satin ribbon surfaces: folds of shadow and sheen with a soft diagonal highlight. */
-@utility bg-satin-deep {
-  background-image:
-    linear-gradient(115deg, transparent 32%, rgb(255 255 255 / 0.07) 46%, transparent 60%),
-    linear-gradient(165deg, var(--color-deep-purple-sheen) 0%, var(--color-deep-purple) 30%, var(--color-deep-purple-shadow) 60%, var(--color-deep-purple) 82%, #3a2249 100%);
-}
-
-@utility bg-satin-royal {
-  background-image:
-    linear-gradient(115deg, transparent 32%, rgb(255 255 255 / 0.07) 46%, transparent 60%),
-    linear-gradient(165deg, var(--color-royal-purple-sheen) 0%, var(--color-royal-purple) 30%, var(--color-royal-purple-shadow) 60%, var(--color-royal-purple) 82%, #4a2756 100%);
-}
-
-@utility bg-satin-amethyst {
-  background-image:
-    linear-gradient(115deg, transparent 32%, rgb(255 255 255 / 0.07) 46%, transparent 60%),
-    linear-gradient(165deg, var(--color-amethyst-sheen) 0%, var(--color-amethyst) 30%, var(--color-amethyst-shadow) 60%, var(--color-amethyst) 82%, #683179 100%);
-}
-
-@utility bg-satin-violet {
-  background-image:
-    linear-gradient(115deg, transparent 32%, rgb(255 255 255 / 0.07) 46%, transparent 60%),
-    linear-gradient(165deg, var(--color-violet-sheen) 0%, var(--color-violet) 30%, var(--color-violet-shadow) 60%, var(--color-violet) 82%, #8a55a0 100%);
-}
-
-/* Satin sheen over any background colour (cards, panels). */
-@utility satin {
-  background-image:
-    linear-gradient(115deg, transparent 30%, rgb(255 255 255 / 0.05) 45%, transparent 60%),
-    linear-gradient(170deg, rgb(255 255 255 / 0.06), transparent 40%, rgb(0 0 0 / 0.16) 75%, rgb(255 255 255 / 0.03));
+  background-image: linear-gradient(135deg, var(--cta-from), var(--cta-via) 52%, var(--cta-to));
 }
 
 @utility text-gradient {
-  background-image: linear-gradient(100deg, var(--color-lavender), var(--color-orchid-glow) 55%, var(--color-wisteria));
+  background-image: linear-gradient(100deg, var(--color-lavender), var(--color-orchid-glow) 50%, var(--color-pink-glow));
   background-clip: text;
   color: transparent;
 }
 
-/* Glossy sheen across the top half, like fresh nail polish. Needs a positioned parent. */
+/* ---- Glass material ----
+ * Solid eggplant/amethyst fill first (unsupported browsers), then frosted blur when
+ * backdrop-filter is available. Specular edge + soft pink/purple outer glow.
+ */
+@utility glass {
+  position: relative;
+  isolation: isolate;
+  background-color: rgb(42 18 58 / 0.82);
+  border: 1px solid rgb(255 220 255 / 0.16);
+  box-shadow: var(--shadow-whip);
+  background-image:
+    linear-gradient(125deg, rgb(255 240 255 / 0.16) 0%, transparent 34%, transparent 68%, rgb(255 160 220 / 0.06) 100%),
+    linear-gradient(180deg, rgb(120 55 150 / 0.22), rgb(30 10 45 / 0.35));
+  @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    background-color: var(--glass-fill);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  }
+}
+
+@utility glass-strong {
+  position: relative;
+  isolation: isolate;
+  background-color: rgb(28 12 40 / 0.9);
+  border: 1px solid rgb(255 220 255 / 0.18);
+  box-shadow: var(--shadow-whip-lg);
+  background-image:
+    linear-gradient(130deg, rgb(255 245 255 / 0.2) 0%, transparent 36%),
+    linear-gradient(180deg, rgb(100 45 140 / 0.28), rgb(18 6 30 / 0.5));
+  @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    background-color: var(--glass-fill-strong);
+    -webkit-backdrop-filter: blur(28px) saturate(1.45);
+    backdrop-filter: blur(28px) saturate(1.45);
+  }
+}
+
+@utility glass-soft {
+  position: relative;
+  isolation: isolate;
+  background-color: rgb(70 32 95 / 0.7);
+  border: 1px solid rgb(255 220 255 / 0.14);
+  box-shadow: var(--shadow-whip);
+  background-image: linear-gradient(140deg, rgb(255 200 240 / 0.14), transparent 45%);
+  @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    background-color: var(--glass-fill-soft);
+    -webkit-backdrop-filter: blur(18px) saturate(1.3);
+    backdrop-filter: blur(18px) saturate(1.3);
+  }
+}
+
+/* Recessed glass well — matches the thick inset purple glass panel reference */
+@utility glass-inset {
+  box-shadow: var(--shadow-glass-inset), var(--shadow-whip);
+  background-image:
+    linear-gradient(180deg, rgb(255 230 255 / 0.1), transparent 28%),
+    linear-gradient(180deg, rgb(90 35 120 / 0.2), rgb(20 6 32 / 0.45));
+}
+
+@utility glass-edge {
+  border-color: rgb(255 230 255 / 0.22);
+  box-shadow:
+    inset 0 1px 0 rgb(255 245 255 / 0.35),
+    inset 0 -1px 0 rgb(120 40 140 / 0.25),
+    0 0 28px -8px rgb(240 140 220 / 0.4),
+    var(--shadow-whip);
+}
+
+@utility glow-soft {
+  transition: box-shadow 220ms ease, transform 220ms ease, background-color 220ms ease;
+  &:hover {
+    box-shadow:
+      inset 0 1px 0 rgb(255 245 255 / 0.32),
+      0 20px 44px -16px rgb(6 1 12 / 0.85),
+      0 0 48px -8px rgb(240 140 220 / 0.45);
+  }
+}
+
+/* Satin utilities now render as tinted glass ribbons (kept names for call sites). */
+@utility bg-satin-deep {
+  background-color: rgb(28 12 38 / 0.88);
+  background-image:
+    linear-gradient(115deg, rgb(255 240 255 / 0.14) 0%, transparent 42%),
+    linear-gradient(165deg, rgb(70 35 95 / 0.55), rgb(22 8 32 / 0.75));
+  @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    background-color: rgb(28 12 38 / 0.55);
+    -webkit-backdrop-filter: blur(26px) saturate(1.4);
+    backdrop-filter: blur(26px) saturate(1.4);
+  }
+}
+
+@utility bg-satin-royal {
+  background-color: rgb(49 24 63 / 0.88);
+  background-image:
+    linear-gradient(115deg, rgb(255 230 255 / 0.16) 0%, transparent 42%),
+    linear-gradient(165deg, rgb(90 40 120 / 0.5), rgb(35 12 50 / 0.72));
+  @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    background-color: rgb(49 24 63 / 0.48);
+    -webkit-backdrop-filter: blur(22px) saturate(1.35);
+    backdrop-filter: blur(22px) saturate(1.35);
+  }
+}
+
+@utility bg-satin-amethyst {
+  background-color: rgb(84 36 99 / 0.88);
+  background-image:
+    linear-gradient(115deg, rgb(255 220 255 / 0.18) 0%, transparent 40%),
+    linear-gradient(165deg, rgb(130 60 160 / 0.45), rgb(50 18 70 / 0.7));
+  @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    background-color: rgb(84 36 99 / 0.42);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    backdrop-filter: blur(24px) saturate(1.4);
+  }
+}
+
+@utility bg-satin-violet {
+  background-color: rgb(117 64 132 / 0.85);
+  background-image:
+    linear-gradient(115deg, rgb(255 200 240 / 0.2) 0%, transparent 40%),
+    linear-gradient(165deg, rgb(160 80 190 / 0.42), rgb(70 28 95 / 0.65));
+  @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    background-color: rgb(117 64 132 / 0.38);
+    -webkit-backdrop-filter: blur(20px) saturate(1.35);
+    backdrop-filter: blur(20px) saturate(1.35);
+  }
+}
+
+/* Sheen overlay used with bg-card — now a glass specular wash */
+@utility satin {
+  background-image:
+    linear-gradient(125deg, rgb(255 240 255 / 0.14) 0%, transparent 36%, transparent 70%, rgb(255 150 210 / 0.05) 100%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.05), transparent 40%, rgb(20 4 30 / 0.22));
+}
+
+/* Glossy sheen across the top half, like fresh nail polish / glass highlight. */
 @utility gloss {
   position: relative;
   isolation: isolate;
@@ -263,14 +389,14 @@
     content: "";
     pointer-events: none;
     position: absolute;
-    inset: 1px 1px 50% 1px;
+    inset: 1px 1px 48% 1px;
     border-radius: inherit;
-    background: linear-gradient(180deg, rgb(255 255 255 / 0.32), rgb(255 255 255 / 0.02));
-    opacity: 0.6;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.38), rgb(255 255 255 / 0.02));
+    opacity: 0.55;
   }
 }
 
-/* Pressed-powder grain, used on large soft surfaces. */
+/* Soft powder grain kept for large hero panels */
 @utility powder {
   position: relative;
   isolation: isolate;
@@ -281,7 +407,7 @@
     inset: 0;
     z-index: -1;
     border-radius: inherit;
-    opacity: 0.5;
+    opacity: 0.35;
     mix-blend-mode: soft-light;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.92 0 0 0 0 0.85 0 0 0 0 0.98 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
@@ -293,7 +419,7 @@
   height: 12px;
   border-radius: 9999px;
   background: var(--color-cream);
-  box-shadow: 0 0 0 3px rgb(201 138 211 / 0.45);
+  box-shadow: 0 0 0 3px rgb(232 168 234 / 0.5);
 }
 .tw-range::-moz-range-thumb {
   width: 12px;
@@ -301,7 +427,7 @@
   border: 0;
   border-radius: 9999px;
   background: var(--color-cream);
-  box-shadow: 0 0 0 3px rgb(201 138 211 / 0.45);
+  box-shadow: 0 0 0 3px rgb(232 168 234 / 0.5);
 }
 
 @utility scrollbar-none {

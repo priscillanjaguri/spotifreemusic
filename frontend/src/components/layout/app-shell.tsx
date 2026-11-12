@@ -21,10 +21,10 @@ function NavList({ items, onNavigate }: { items: typeof NAV_ITEMS; onNavigate?: 
           onClick={onNavigate}
           className={({ isActive }) =>
             cn(
-              "flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-bold transition-all",
+              "flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-bold transition-all duration-200",
               isActive
-                ? "bg-satin-amethyst text-cream shadow-whip ring-1 ring-lavender/25"
-                : "text-muted-foreground hover:bg-royal-purple/70 hover:text-lavender",
+                ? "glass-soft glass-edge text-cream shadow-glow"
+                : "text-muted-foreground hover:bg-white/5 hover:text-lavender",
             )
           }
         >
@@ -42,21 +42,23 @@ function NavList({ items, onNavigate }: { items: typeof NAV_ITEMS; onNavigate?: 
 
 function Sidebar() {
   return (
-    <aside className="powder fixed inset-y-3 left-3 z-30 hidden w-64 flex-col overflow-hidden rounded-[2rem] border border-lavender/10 bg-satin-deep px-4 py-6 shadow-whip-lg lg:flex">
-      <Rose className="pointer-events-none absolute top-[44%] -right-16 size-44 rotate-12 opacity-60" />
-      <NavLink to="/" className="px-2">
+    <aside className="glass-strong glass-inset powder fixed inset-y-3 left-3 z-30 hidden w-64 flex-col overflow-hidden rounded-[2rem] px-4 py-6 lg:flex">
+      <div className="pointer-events-none absolute -left-10 top-24 size-40 rounded-full bg-pink-glow/20 blur-3xl animate-glow-pulse" />
+      <div className="pointer-events-none absolute -right-8 bottom-28 size-36 rounded-full bg-heliotrope/25 blur-3xl" />
+      <Rose className="pointer-events-none absolute top-[48%] -right-16 size-44 rotate-12 opacity-50" />
+      <NavLink to="/" className="relative px-2">
         <Logo />
       </NavLink>
 
-      <div className="mt-10 flex-1 overflow-y-auto pr-1">
+      <div className="relative mt-10 flex-1 overflow-y-auto pr-1">
         <NavList items={NAV_ITEMS} />
-        <p className="mt-8 px-4 font-script text-xl text-highlight">one product</p>
+        <p className="mt-8 px-4 font-script text-xl text-highlight">one glassy product</p>
         <p className="mt-1 px-4 text-xs leading-relaxed text-muted-foreground">
-          Home, Discover, Collection, Library, For You, Analytics and Companion — same satin purple thread.
+          Frosted panels, soft pink–purple glow — same deep satin thread everywhere.
         </p>
       </div>
 
-      <div className="mt-auto border-t border-sidebar-border pt-4">
+      <div className="relative mt-auto border-t border-sidebar-border/80 pt-4">
         <UserMenu />
       </div>
     </aside>
@@ -65,7 +67,7 @@ function Sidebar() {
 
 function MobileTopBar() {
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-background/80 px-4 py-2.5 backdrop-blur-xl lg:hidden">
+    <header className="glass sticky top-0 z-30 flex items-center justify-between border-b border-white/10 px-4 py-2.5 lg:hidden">
       <NavLink to="/">
         <Logo />
       </NavLink>
@@ -84,7 +86,7 @@ function MobileTabBar() {
   return (
     <nav
       aria-label="Main"
-      className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-lavender/10 bg-deep-purple/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_32px_-12px_rgb(8_2_12/0.8)] backdrop-blur-xl lg:hidden"
+      className="glass-strong fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-white/10 pb-[env(safe-area-inset-bottom)] lg:hidden"
     >
       {MOBILE_PRIMARY.map(({ to, label, icon: Icon, end, short }) => (
         <NavLink
@@ -102,8 +104,8 @@ function MobileTabBar() {
             <>
               <span
                 className={cn(
-                  "grid h-7 w-12 place-items-center rounded-full transition-colors",
-                  isActive && "bg-satin-amethyst ring-1 ring-lavender/20",
+                  "grid h-7 w-12 place-items-center rounded-full transition-all",
+                  isActive && "glass-soft shadow-glow ring-1 ring-lavender/30",
                 )}
               >
                 <Icon className="size-5" />
@@ -129,15 +131,15 @@ function MobileTabBar() {
         >
           <span
             className={cn(
-              "grid h-7 w-12 place-items-center rounded-full transition-colors",
-              moreActive && "bg-satin-amethyst ring-1 ring-lavender/20",
+              "grid h-7 w-12 place-items-center rounded-full transition-all",
+              moreActive && "glass-soft shadow-glow ring-1 ring-lavender/30",
             )}
           >
             <Menu className="size-5" />
           </span>
           More
         </SheetTrigger>
-        <SheetContent side="bottom" className="rounded-t-[2rem] border-lavender/15 bg-satin-deep pb-8">
+        <SheetContent side="bottom" className="glass-strong rounded-t-[2rem] border-lavender/20 pb-8">
           <SheetHeader>
             <SheetTitle className="font-display text-2xl text-heading">More of Tunewise</SheetTitle>
           </SheetHeader>
@@ -156,7 +158,12 @@ function MobileTabBar() {
 export function AppShell() {
   const { current } = usePlayer();
   return (
-    <div className="min-h-dvh">
+    <div className="relative min-h-dvh">
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute -left-24 top-10 size-[28rem] rounded-full bg-pink-glow/15 blur-[100px] animate-glow-pulse" />
+        <div className="absolute right-0 top-1/4 size-[26rem] rounded-full bg-heliotrope/20 blur-[110px]" />
+        <div className="absolute bottom-0 left-1/3 size-[30rem] rounded-full bg-amethyst/30 blur-[120px]" />
+      </div>
       <Sidebar />
       <MobileTopBar />
       <main

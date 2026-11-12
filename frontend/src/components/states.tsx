@@ -25,7 +25,7 @@ export function EmptyState({ icon: Icon, title, description, action, className, 
   return (
     <div
       className={cn(
-        "powder relative flex flex-col items-center justify-center overflow-hidden rounded-3xl border border-lavender/15 bg-satin-royal px-6 py-14 text-center shadow-whip",
+        "powder glass glass-inset relative flex flex-col items-center justify-center overflow-hidden rounded-[1.75rem] px-6 py-14 text-center",
         className,
       )}
     >
@@ -94,7 +94,7 @@ export function ProviderNotConfigured({ message, className }: { message: string;
 
 export function SongListSkeleton({ rows = 6 }: { rows?: number }) {
   return (
-    <div className="divide-y divide-border overflow-hidden rounded-3xl border bg-card satin shadow-whip" aria-busy aria-label="Loading">
+    <div className="glass glass-inset divide-y divide-white/10 overflow-hidden rounded-[1.75rem]" aria-busy aria-label="Loading">
       {Array.from({ length: rows }, (_, i) => (
         <div key={i} className="flex items-center gap-3 px-3 py-3 sm:px-4">
           <Skeleton className="size-11 rounded-xl bg-accent" />

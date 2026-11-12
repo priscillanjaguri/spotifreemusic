@@ -50,7 +50,7 @@ function StatTile({
   hint?: string;
 }) {
   return (
-    <div className="rounded-3xl border border-border bg-card satin p-4 shadow-whip sm:p-5">
+    <div className="glass glass-inset rounded-[1.6rem] p-4 sm:p-5">
       <p className="text-sm font-semibold text-muted-foreground">{label}</p>
       <p className="mt-1 font-display text-3xl font-semibold text-heading sm:text-4xl">{value}</p>
       {hint && <p className="mt-1 text-xs text-subtle">{hint}</p>}
@@ -61,7 +61,7 @@ function StatTile({
 function RankBars({ title, rows, empty }: { title: string; rows: NamedCount[]; empty: string }) {
   const max = rows[0]?.listened_ms || 1;
   return (
-    <section className="rounded-3xl border border-border bg-card satin p-5 shadow-whip">
+    <section className="glass glass-inset rounded-[1.75rem] p-5">
       <h2 className="font-display text-2xl font-semibold text-heading">{title}</h2>
       {rows.length === 0 ? (
         <p className="mt-3 text-sm text-subtle">{empty}</p>
@@ -90,7 +90,7 @@ function RankBars({ title, rows, empty }: { title: string; rows: NamedCount[]; e
 function ListeningChart({ daily }: { daily: { date: string; listened_ms: number }[] }) {
   const max = Math.max(1, ...daily.map((d) => d.listened_ms));
   return (
-    <section className="rounded-3xl border border-border bg-card satin p-5 shadow-whip">
+    <section className="glass glass-inset rounded-[1.75rem] p-5">
       <h2 className="font-display text-2xl font-semibold text-heading">Listening time</h2>
       <div className="mt-5 flex h-36 items-end gap-1.5 sm:gap-2">
         {daily.map((d) => {
@@ -122,7 +122,7 @@ function MemoryCard({ item }: { item: MemoryLaneItem }) {
       type="button"
       disabled={!playable}
       onClick={() => playable && player.play(item.song, [item.song])}
-      className="group flex gap-3 rounded-3xl border border-border bg-card satin p-3 text-left shadow-whip transition-all hover:-translate-y-0.5 hover:bg-surface-raised hover:shadow-whip-lg disabled:opacity-60"
+      className="glass glass-inset glow-soft group flex gap-3 rounded-[1.5rem] p-3 text-left transition-all hover:-translate-y-0.5 disabled:opacity-60"
     >
       <CoverArt src={item.song.cover_url} seed={item.song.id} title={item.song.title} className="size-16 shrink-0" />
       <div className="min-w-0">
@@ -248,7 +248,7 @@ export function AnalyticsPage() {
             <ListeningChart daily={data.daily} />
             <RankBars title="Top artists" rows={data.top_artists} empty="No artist plays yet." />
             <RankBars title="Top genres" rows={data.top_genres} empty="No genre tags on these plays." />
-            <section className="rounded-3xl border border-border bg-card satin p-5 shadow-whip">
+            <section className="glass glass-inset rounded-[1.75rem] p-5">
               <h2 className="font-display text-2xl font-semibold text-heading">Top songs</h2>
               <div className="mt-3 space-y-1">
                 {data.top_songs.map((row) => (
@@ -278,7 +278,7 @@ export function AnalyticsPage() {
           <ErrorState error={timeline.error} onRetry={() => void timeline.refetch()} />
         ) : (
           <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
-            <div className="overflow-x-auto rounded-3xl border border-border bg-card satin p-5 shadow-whip">
+            <div className="overflow-x-auto glass glass-inset rounded-[1.75rem] p-5">
               <div className="flex min-w-[36rem] gap-3">
                 {timeline.data!.weeks.map((w) => {
                   const max = Math.max(1, ...timeline.data!.weeks.map((x) => x.listened_ms));
@@ -302,7 +302,7 @@ export function AnalyticsPage() {
                 })}
               </div>
             </div>
-            <div className="rounded-3xl border border-lavender/15 bg-satin-deep p-5">
+            <div className="glass glass-inset rounded-[1.75rem] p-5">
               <p className="font-script text-2xl text-cream">milestones</p>
               {timeline.data!.milestones.length === 0 ? (
                 <p className="mt-3 text-sm text-lavender/80">Likes, saves and first listens will land here.</p>
@@ -352,7 +352,7 @@ export function AnalyticsPage() {
         )}
       </section>
 
-      <section className="powder relative mt-12 overflow-hidden rounded-[2rem] border border-lavender/15 bg-satin-violet p-6 shadow-whip-lg">
+      <section className="powder glass-soft glass-edge relative mt-12 overflow-hidden rounded-[2rem] p-6">
         <HairWaves className="absolute inset-0 h-full w-full opacity-50" />
         <Rose className="absolute -right-10 -top-8 size-36 opacity-80" />
         <Petal className="absolute bottom-4 left-8 size-8 rotate-12 opacity-70" />

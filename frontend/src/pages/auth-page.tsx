@@ -12,7 +12,7 @@ import { useAuth } from "@/lib/auth";
 
 const MIN_PASSWORD = 10;
 
-const FIELD = "h-12 rounded-2xl border-input bg-muted/60 px-4 text-[0.95rem] focus-visible:bg-surface-raised";
+const FIELD = "h-12 rounded-2xl border-white/15 bg-white/5 px-4 text-[0.95rem] backdrop-blur-md focus-visible:bg-white/10";
 
 const COPY = {
   login: {
@@ -74,7 +74,7 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
 
   return (
     <div className="grid min-h-dvh lg:grid-cols-[1.1fr_1fr]">
-      <section className="powder relative m-3 hidden overflow-hidden rounded-[2.5rem] border border-lavender/10 bg-satin-royal shadow-whip-lg lg:flex lg:flex-col lg:justify-between lg:p-12">
+      <section className="powder glass-strong glass-inset relative m-3 hidden overflow-hidden rounded-[2.5rem] lg:flex lg:flex-col lg:justify-between lg:p-12">
         <HairWaves className="absolute inset-x-0 top-[18%] h-64 w-full" />
         <HairWaves className="absolute inset-x-0 bottom-[8%] h-56 w-full scale-x-[-1] opacity-70" />
         <Rose className="absolute -right-16 -bottom-16 size-80 drop-shadow-2xl" />
@@ -113,7 +113,7 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
             </p>
           </div>
 
-          <div className="rounded-[2rem] border border-border bg-card satin p-6 shadow-whip-lg backdrop-blur sm:p-8">
+          <div className="glass-strong glass-inset glass-edge rounded-[2rem] p-6 sm:p-8">
             <h1 className="font-display text-4xl font-semibold tracking-tight text-heading">{copy.title}</h1>
             <p className="mt-1.5 text-sm text-muted-foreground">{copy.subtitle}</p>
 

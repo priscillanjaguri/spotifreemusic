@@ -33,7 +33,7 @@ export function RecommendationCard({
       onClick={playable ? (e) => onSurfaceClick(e, onPlay) : undefined}
       className={cn(
         playable && "cursor-pointer",
-        "group satin relative flex flex-col rounded-3xl border border-border bg-card p-3 shadow-whip transition-all hover:-translate-y-1 hover:bg-surface-raised hover:shadow-whip-lg",
+        "glass glass-inset glow-soft group relative flex flex-col rounded-[1.5rem] p-3 transition-all hover:-translate-y-1",
         isCurrent && "ring-2 ring-wisteria/60",
       )}
     >
