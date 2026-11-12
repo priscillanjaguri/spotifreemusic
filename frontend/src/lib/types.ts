@@ -126,3 +126,109 @@ export type ListeningEventPayload = {
   completed?: boolean | null;
   client_session_id?: string | null;
 };
+
+export type AnalyticsPeriod = "week" | "month";
+
+export type NamedCount = {
+  id: number | null;
+  name: string;
+  play_count: number;
+  listened_ms: number;
+};
+
+export type TopSongStat = {
+  song: Song;
+  play_count: number;
+  listened_ms: number;
+  completed_count: number;
+};
+
+export type DailyTotal = {
+  date: string;
+  play_count: number;
+  listened_ms: number;
+};
+
+export type AnalyticsResponse = {
+  period: AnalyticsPeriod;
+  offset: number;
+  start: string;
+  end: string;
+  timezone: string;
+  total_listened_ms: number;
+  play_count: number;
+  unique_songs: number;
+  unique_artists: number;
+  completion_rate: number | null;
+  top_artists: NamedCount[];
+  top_genres: NamedCount[];
+  top_songs: TopSongStat[];
+  daily: DailyTotal[];
+};
+
+export type TimelineWeek = {
+  week_start: string;
+  week_end: string;
+  listened_ms: number;
+  play_count: number;
+  unique_songs: number;
+  top_genres: NamedCount[];
+};
+
+export type TimelineMilestone = {
+  at: string;
+  kind: string;
+  label: string;
+  song: Song | null;
+};
+
+export type TasteTimeline = {
+  weeks: TimelineWeek[];
+  milestones: TimelineMilestone[];
+};
+
+export type MemoryLaneKind =
+  | "on_this_day"
+  | "rediscovered"
+  | "first_save"
+  | "first_like"
+  | "most_replayed"
+  | "flashback";
+
+export type MemoryLaneItem = {
+  kind: MemoryLaneKind | string;
+  label: string;
+  at: string | null;
+  song: Song;
+  listened_ms: number | null;
+  play_count: number | null;
+};
+
+export type MemoryLane = { items: MemoryLaneItem[] };
+
+export type CompanionMood = "soft" | "dreamy" | "focus" | "energy" | "chill" | "glow";
+
+export type CompanionInsight = { code: string; label: string };
+
+export type DailyCompanion = {
+  date: string;
+  timezone: string;
+  greeting: string;
+  briefing: string;
+  mood: CompanionMood | string | null;
+  available_moods: CompanionMood[] | string[];
+  insights: CompanionInsight[];
+  playlist: RecommendationItem[];
+  spotlight: MemoryLaneItem | null;
+  cold_start: boolean;
+  mode: string;
+};
+
+export type Preferences = {
+  timezone: string;
+  week_starts_on: number;
+  record_listening_history: boolean;
+  short_term_days: number;
+  long_term_days: number;
+  preferred_genres: string[];
+};

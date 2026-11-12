@@ -17,17 +17,17 @@ tunewise/
 │   │   ├── storage/           # object storage: local filesystem (default) or Cloudflare R2
 │   │   ├── analysis/          # Librosa audio features -- pure, no web/DB/storage imports
 │   │   ├── ml/                # recommender -- pure Python, no web/DB imports
-│   │   # added in later stages:
-│   │   # services/ analytics
+│   │   ├── services/ analytics.py, companion.py   # Stage 5–6 listening intelligence
 │   ├── alembic/versions/      # migrations (0001_initial_schema … 0004_recommender_…)
-│   └── tests/
+│   └── tests/                 # incl. test_e2e_flow.py (auth → … → companion)
 └── frontend/                  # Vite + React + TS + Tailwind
     └── src/
         ├── index.css          # design tokens: purple palette, semantic CSS variables, utilities
         ├── components/ui/     # shadcn/ui primitives (Base UI), restyled through the tokens
         ├── components/        # app components: layout (shell, nav, player bar), music, states
-        ├── lib/               # api client, auth + player contexts, collection + reco hooks
-        └── pages/             # auth, dashboard, collection, discover, library, recommendations
+        ├── lib/               # api client, auth + player contexts, collection / reco / analytics hooks
+        └── pages/             # auth, dashboard, collection, discover, library, recommendations,
+                               # analytics (Taste Timeline + Memory Lane), companion
 ```
 Dependency direction: `api -> services -> models`, and `services -> ml` (never the reverse).
 The ML package receives plain arrays/DataFrames and returns scores, so it can be unit-tested
@@ -62,7 +62,7 @@ and replaced without touching the web layer or UI.
 6. **Short- vs long-term preference** windows are per-user settings (`short_term_days`,
    `long_term_days`). Profiles themselves are computed, not stored, until performance requires it.
 7. **Privacy:** every user-owned table cascades on user delete; `record_listening_history` lets a
-   user stop collection; a "delete my history" endpoint is planned for Stage 5.
+   user stop collection; `DELETE /listening/history` wipes events + playback sessions (likes/saves stay).
 8. **Labelling mock data:** `data_source` CHECK on artists/albums/songs/features
    (`mock_dev | provider | user_provided`). The UI will show a badge for `mock_dev`.
 9. **IDs:** UUID for users (not enumerable); BIGINT identity for everything else (compact, fast,
@@ -78,9 +78,9 @@ and replaced without touching the web layer or UI.
 - [x] 2 Backend: auth, profile, catalogue import, collection, provider interface + Jamendo adapter
 - [x] 3 Frontend: design system, navigation, auth, dashboard, collection, discover
 - [x] 4 Recommendation engine
-- [ ] 5 Listening history + weekly/monthly analytics, Taste Timeline, Memory Lane
-- [ ] 6 Daily companion + full integration
-- [ ] 7 End-to-end testing
+- [x] 5 Listening history + weekly/monthly analytics, Taste Timeline, Memory Lane
+- [x] 6 Daily companion + full integration
+- [x] 7 End-to-end testing
 
 ## Stage 2 decisions
 - **Auth:** Argon2id password hashes; signed JWT in an httpOnly, SameSite=Lax cookie (JS can't read it).
@@ -233,3 +233,28 @@ To swap a font, change its `@import` and its token.
 
 Component variants: Button `cta` (glossy pill), Badge `genre`, `highlight` and `mock`. `SongCard` provides the
 Spotify-style tiles on the dashboard.
+
+## Stage 5 decisions
+- **Analytics on demand** from `listening_events` (no aggregate tables). Period windows use the user's
+  `timezone` and `week_starts_on`. Completion rate ignores events where `completed` is NULL.
+- **Taste Timeline** rolls weekly genre share + listening totals and surfaces milestones (first listen /
+  like / save, most-replayed) from the append-only interaction log and events.
+- **Memory Lane** mixes on-this-day / last-week flashbacks, rediscoveries (gap ≥ 14 days between plays),
+  firsts and favourites. Items are playable when a stream exists.
+- **Privacy UI** on Analytics: toggle `record_listening_history` and `DELETE /api/v1/listening/history`.
+  The player already posts audible-only segments with `client_session_id` for idempotent sessions.
+
+## Stage 6 decisions
+- **Daily companion** (`GET/POST /companion/daily`) builds a briefing + playlist via the Stage 4
+  recommender, optionally nudged by an explicit mood (`soft` / `dreamy` / `focus` / `energy` /
+  `chill` / `glow`) that temporarily blends genre seeds — mood is never inferred.
+- **Navigation** lists Home, Companion, For You, Discover, Collection, My Library, Analytics as one
+  product. Mobile keeps four primaries + a More sheet for Collection / Library / Analytics.
+- **Integration:** Jamendo (or mock_dev) search, My Library uploads, R2/local streaming, recommender,
+  listening events and analytics all share the same catalogue song ids and player.
+
+## Stage 7 decisions
+- **Backend e2e** lives in `tests/test_e2e_flow.py` (auth → search → collect → listen → feedback →
+  recommendations → analytics → companion → history wipe). Domain suites cover analytics and companion.
+- **Frontend verification:** `npm run typecheck` / `npm run build`, plus manual / screenshot passes of
+  the purple product surfaces. See README “Tests” and `docs/TESTING.md`.

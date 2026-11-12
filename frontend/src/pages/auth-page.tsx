@@ -36,7 +36,7 @@ const COPY = {
 const HIGHLIGHTS = [
   { title: "Collect", text: "Keep every song you love in one place, filterable by artist, album and genre." },
   { title: "Discover", text: "Search a catalogue of Creative Commons music and play it right here." },
-  { title: "Understand", text: "Soon: recommendations and listening insights built from your own taste." },
+  { title: "Understand", text: "Recommendations, listening analytics, taste timeline and a daily companion — all from your own taste." },
 ];
 
 export function AuthPage({ mode }: { mode: "login" | "register" }) {

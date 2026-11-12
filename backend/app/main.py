@@ -2,7 +2,19 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, collection, dev, health, library, listening, profile, recommendations, songs
+from app.api import (
+    analytics,
+    auth,
+    collection,
+    companion,
+    dev,
+    health,
+    library,
+    listening,
+    profile,
+    recommendations,
+    songs,
+)
 from app.core.config import get_settings
 
 
@@ -29,6 +41,8 @@ def create_app() -> FastAPI:
         library.router,
         recommendations.router,
         listening.router,
+        analytics.router,
+        companion.router,
     ):
         app.include_router(router, prefix="/api/v1")
     if settings.mock_provider_enabled:

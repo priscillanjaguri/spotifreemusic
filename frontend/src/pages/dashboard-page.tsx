@@ -1,4 +1,4 @@
-import { ArrowRight, Compass, Disc3, Heart, Library, Mic2, Tags, type LucideIcon } from "lucide-react";
+import { ArrowRight, BarChart3, Compass, Disc3, Heart, Library, Mic2, Sparkles, Tags, type LucideIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { HairWaves, Petal, Rose } from "@/components/decor";
 import { PageHeader } from "@/components/layout/app-shell";
@@ -263,12 +263,33 @@ export function DashboardPage() {
         {facets.data && !isNew && (
           <FacetBars title="Most-saved artists" facets={facets.data.artists} param="artist" empty="No artists yet." />
         )}
-        <section className="relative overflow-hidden rounded-3xl border border-lavender/15 bg-satin-deep p-5 md:col-span-2 xl:col-span-3">
+        <Link
+          to="/companion"
+          className="group relative overflow-hidden rounded-3xl border border-lavender/15 bg-satin-amethyst p-5 shadow-whip transition-all hover:-translate-y-0.5 hover:shadow-whip-lg"
+        >
+          <Sparkles className="absolute right-4 top-4 size-8 text-orchid-glow opacity-70" />
+          <p className="font-script text-3xl text-cream">daily companion</p>
+          <p className="mt-1 text-sm text-lavender">A mood-aware mix from your taste and recent listens.</p>
+          <span className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-cream group-hover:text-highlight">
+            Open companion <ArrowRight className="size-4" />
+          </span>
+        </Link>
+        <Link
+          to="/analytics"
+          className="group relative overflow-hidden rounded-3xl border border-lavender/15 bg-satin-deep p-5 shadow-whip transition-all hover:-translate-y-0.5 hover:shadow-whip-lg"
+        >
+          <BarChart3 className="absolute right-4 top-4 size-8 text-lilac opacity-70" />
+          <p className="font-script text-3xl text-highlight">listening insights</p>
+          <p className="mt-1 text-sm text-muted-foreground">Weekly charts, taste timeline and memory lane.</p>
+          <span className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-accent-foreground group-hover:text-highlight">
+            Open analytics <ArrowRight className="size-4" />
+          </span>
+        </Link>
+        <section className="relative overflow-hidden rounded-3xl border border-lavender/15 bg-satin-royal p-5 md:col-span-2 xl:col-span-1">
           <Petal className="absolute top-4 right-6 size-8 rotate-45 opacity-70" />
           <p className="font-script text-3xl text-highlight">how For You listens</p>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Likes, saves, completes and replays shape a short- and long-term taste mix. Skips stay neutral; “not
-            interested” hides a track. Cosine similarity ranks candidates, then MMR keeps the mix from feeling samey.
+          <p className="mt-1 text-sm text-muted-foreground">
+            Likes, saves, completes and replays shape your mix. Skips stay neutral.
           </p>
           <Link to="/recommendations" className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-accent-foreground hover:text-highlight">
             See your picks <ArrowRight className="size-4" />

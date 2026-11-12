@@ -11,8 +11,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ApiError } from "@/lib/api";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { PlayerProvider } from "@/lib/player";
+import { AnalyticsPage } from "@/pages/analytics-page";
 import { AuthPage } from "@/pages/auth-page";
 import { CollectionPage } from "@/pages/collection-page";
+import { CompanionPage } from "@/pages/companion-page";
 import { DashboardPage } from "@/pages/dashboard-page";
 import { DiscoverPage } from "@/pages/discover-page";
 import { LibraryPage } from "@/pages/library-page";
@@ -104,10 +106,12 @@ export default function App() {
                   }
                 >
                   <Route index element={<DashboardPage />} />
+                  <Route path="companion" element={<CompanionPage />} />
                   <Route path="recommendations" element={<RecommendationsPage />} />
                   <Route path="collection" element={<CollectionPage />} />
                   <Route path="discover" element={<DiscoverPage />} />
                   <Route path="library" element={<LibraryPage />} />
+                  <Route path="analytics" element={<AnalyticsPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>

@@ -1,15 +1,22 @@
 import type {
+  AnalyticsPeriod,
+  AnalyticsResponse,
   CollectionFacets,
   CollectionFilter,
   CollectionItem,
   CollectionPage,
   CollectionSource,
+  CompanionMood,
+  DailyCompanion,
   FeedbackAction,
   LibraryPage,
   LibraryUpload,
   ListeningEventPayload,
+  MemoryLane,
+  Preferences,
   RecommendationsResponse,
   SongSearchResponse,
+  TasteTimeline,
   UploadResult,
   User,
 } from "./types";
@@ -167,6 +174,30 @@ export const api = {
       "/listening/events",
       { method: "POST", body: json(payload) },
     ),
-  updatePreferences: (body: { preferred_genres?: string[] }) =>
-    request<{ preferred_genres: string[] }>("/profile/preferences", { method: "PATCH", body: json(body) }),
+  deleteListeningHistory: () =>
+    request<{ deleted_events: number; deleted_sessions: number }>("/listening/history", { method: "DELETE" }),
+
+  analytics: (period: AnalyticsPeriod = "week", offset = 0) =>
+    request<AnalyticsResponse>(
+      `/analytics?${new URLSearchParams({ period, offset: String(offset) })}`,
+    ),
+  tasteTimeline: (weeks = 12) =>
+    request<TasteTimeline>(`/analytics/taste-timeline?${new URLSearchParams({ weeks: String(weeks) })}`),
+  memoryLane: (limit = 24) =>
+    request<MemoryLane>(`/analytics/memory-lane?${new URLSearchParams({ limit: String(limit) })}`),
+
+  dailyCompanion: (mood?: string | null, limit = 12) => {
+    const params = new URLSearchParams({ limit: String(limit) });
+    if (mood) params.set("mood", mood);
+    return request<DailyCompanion>(`/companion/daily?${params}`);
+  },
+  setCompanionMood: (mood: CompanionMood, limit = 12) =>
+    request<DailyCompanion>(`/companion/daily?${new URLSearchParams({ limit: String(limit) })}`, {
+      method: "POST",
+      body: json({ mood }),
+    }),
+
+  preferences: () => request<Preferences>("/profile/preferences"),
+  updatePreferences: (body: Partial<Preferences> & { preferred_genres?: string[] }) =>
+    request<Preferences>("/profile/preferences", { method: "PATCH", body: json(body) }),
 };

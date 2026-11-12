@@ -4,7 +4,9 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user
 from app.core.db import get_db
 from app.models import User
+from app.schemas.analytics import HistoryDeletedOut
 from app.schemas.recommend import ListeningEventIn, ListeningEventOut
+from app.services import analytics as analytics_svc
 from app.services.listening import ListeningRejected, record_event
 
 router = APIRouter(prefix="/listening", tags=["listening"])
@@ -48,3 +50,22 @@ def post_listening_event(
         completed=event.completed,
         play_date=event.play_date.isoformat(),
     )
+
+
+@router.delete(
+    "/history",
+    response_model=HistoryDeletedOut,
+    summary="Delete my listening history",
+)
+def delete_my_history(
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> HistoryDeletedOut:
+    """Remove all listening_events and playback_sessions for the current user.
+
+    Likes, saves and other explicit interactions are kept. Turn off
+    `record_listening_history` in preferences to stop collecting new events.
+    """
+    events, sessions = analytics_svc.delete_listening_history(db, user.id)
+    db.commit()
+    return HistoryDeletedOut(deleted_events=events, deleted_sessions=sessions)
