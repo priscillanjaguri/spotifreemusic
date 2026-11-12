@@ -98,3 +98,31 @@ export type UploadResult = {
   message: string;
   upload: LibraryUpload | null;
 };
+
+export type Explanation = { code: string; label: string };
+
+export type RecommendationItem = {
+  song: Song;
+  score: number;
+  explanations: Explanation[];
+};
+
+export type RecommendationsResponse = {
+  items: RecommendationItem[];
+  cold_start: boolean;
+  mode: "taste" | "similar" | "popular" | "genre_seed" | string;
+  short_term_days: number;
+  long_term_days: number;
+};
+
+export type FeedbackAction = "like" | "not_interested";
+
+export type ListeningEventPayload = {
+  song_id: number;
+  started_at: string;
+  ended_at: string;
+  listened_ms: number;
+  song_duration_ms: number;
+  completed?: boolean | null;
+  client_session_id?: string | null;
+};

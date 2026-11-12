@@ -43,6 +43,7 @@ class PreferencesOut(BaseModel):
     record_listening_history: bool
     short_term_days: int
     long_term_days: int
+    preferred_genres: list[str]
 
 
 class PreferencesUpdate(BaseModel):
@@ -52,6 +53,7 @@ class PreferencesUpdate(BaseModel):
     record_listening_history: bool | None = None
     short_term_days: int | None = Field(default=None, ge=1, le=365)
     long_term_days: int | None = Field(default=None, ge=2, le=3650)
+    preferred_genres: list[str] | None = Field(default=None, max_length=20)
 
     @field_validator("timezone")
     @classmethod

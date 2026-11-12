@@ -4,8 +4,11 @@ import type {
   CollectionItem,
   CollectionPage,
   CollectionSource,
+  FeedbackAction,
   LibraryPage,
   LibraryUpload,
+  ListeningEventPayload,
+  RecommendationsResponse,
   SongSearchResponse,
   UploadResult,
   User,
@@ -147,4 +150,23 @@ export const api = {
   library: () => request<LibraryPage>("/library"),
   libraryItem: (id: number) => request<LibraryUpload>(`/library/${id}`),
   deleteUpload: (id: number) => request<void>(`/library/${id}`, { method: "DELETE" }),
+
+  recommendations: (limit = 24) =>
+    request<RecommendationsResponse>(`/recommendations?${new URLSearchParams({ limit: String(limit) })}`),
+  similarSongs: (songId: number, limit = 12) =>
+    request<RecommendationsResponse>(
+      `/songs/${songId}/similar?${new URLSearchParams({ limit: String(limit) })}`,
+    ),
+  feedback: (song_id: number, action: FeedbackAction, context = "recommendations") =>
+    request<{ song_id: number; interaction_type: string; created_at: string }>("/feedback", {
+      method: "POST",
+      body: json({ song_id, action, context }),
+    }),
+  listeningEvent: (payload: ListeningEventPayload) =>
+    request<{ id: number; song_id: number; listened_ms: number; completed: boolean | null; play_date: string } | null>(
+      "/listening/events",
+      { method: "POST", body: json(payload) },
+    ),
+  updatePreferences: (body: { preferred_genres?: string[] }) =>
+    request<{ preferred_genres: string[] }>("/profile/preferences", { method: "PATCH", body: json(body) }),
 };

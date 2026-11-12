@@ -70,8 +70,10 @@ def import_tracks(db: Session, adapter: MusicProviderAdapter, tracks: list[Provi
                 SongProviderLink.provider_track_id == track.provider_track_id,
             )
         )
-        if link is not None:  # already known: just refresh playback/licence info
-            link.playback_uri, link.license_url = track.stream_url, track.license_url
+        if link is not None:  # already known: just refresh playback/licence/download info
+            link.playback_uri = track.stream_url
+            link.license_url = track.license_url
+            link.download_allowed = bool(track.download_allowed)
             song = link.song
         else:
             song = _create_song(db, provider, track, adapter.data_source)
@@ -103,6 +105,7 @@ def _create_song(db: Session, provider: MusicProvider, track: ProviderTrack, sou
         SongProviderLink(
             provider=provider, provider_track_id=track.provider_track_id,
             playback_uri=track.stream_url, license_url=track.license_url,
+            download_allowed=bool(track.download_allowed),
         )
     )
     db.add(song)

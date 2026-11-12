@@ -79,6 +79,7 @@ class JamendoAdapter(MusicProviderAdapter):
                 pass
 
         genres = ((row.get("musicinfo") or {}).get("tags") or {}).get("genres") or []
+        download_allowed = bool(row.get("audiodownload_allowed"))
         return ProviderTrack(
             provider_track_id=track_id,
             title=title,
@@ -90,7 +91,25 @@ class JamendoAdapter(MusicProviderAdapter):
             genres=[g for g in genres if isinstance(g, str)],
             stream_url=row.get("audio") or None,
             license_url=_https(row.get("license_ccurl")),
+            download_allowed=download_allowed,
         )
+
+    def download_track_bytes(self, provider_track_id: str, *, audioformat: str = "mp32") -> bytes:
+        """Fetch a temporary copy for analysis when audiodownload_allowed. Raises ProviderError."""
+        params = {
+            "client_id": self._client_id,
+            "id": provider_track_id,
+            "audioformat": audioformat,
+            "action": "download",
+        }
+        try:
+            response = self._http.get(f"{BASE_URL}/tracks/file/", params=params, follow_redirects=True)
+            response.raise_for_status()
+        except httpx.HTTPError as exc:
+            raise ProviderError(f"Jamendo download failed: {exc.__class__.__name__}") from exc
+        if not response.content:
+            raise ProviderError("Jamendo download returned empty audio")
+        return response.content
 
 
 def _https(url: str | None) -> str | None:

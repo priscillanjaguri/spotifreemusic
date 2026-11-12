@@ -14,14 +14,15 @@ def test_search_imports_provider_tracks_into_catalogue(client):
     register(client)
     res = search(client)
     assert res.status_code == 200
-    first, collab = res.json()["results"]
-    assert first["title"] == "Night Drive" and first["genres"] == ["chillout", "electronic"]
+    by_title = {s["title"]: s for s in res.json()["results"]}
+    first, collab = by_title["Night Drive"], by_title["Collab Song"]
+    assert first["genres"] == ["chillout", "electronic"]
     assert first["album"]["title"] == "Glow" and first["data_source"] == "provider"
     assert first["playback"] == {"provider": "fake", "stream_url": "http://stream/1.mp3", "license_url": "http://cc/by"}
     assert [a["name"] for a in collab["artists"]] == ["Neon Cat", "Dusty Fox"]  # collaboration keeps both artists
     # Searching again must not create duplicates, and the shared artist is one row.
-    again = search(client).json()["results"]
-    assert [s["id"] for s in again] == [first["id"], collab["id"]]
+    again = {s["title"]: s for s in search(client).json()["results"]}
+    assert again["Night Drive"]["id"] == first["id"] and again["Collab Song"]["id"] == collab["id"]
     assert first["artists"][0]["id"] == collab["artists"][0]["id"]
 
 
@@ -56,7 +57,8 @@ def test_provider_failure_returns_502_not_a_crash(client, provider):
 
 def test_add_list_filter_remove(client):
     register(client)
-    one, collab = search(client).json()["results"]
+    by_title = {s["title"]: s for s in search(client).json()["results"]}
+    one, collab = by_title["Night Drive"], by_title["Collab Song"]
     assert client.post("/api/v1/collection", json={"song_id": one["id"], "source": "search"}).status_code == 201
     assert client.post("/api/v1/collection", json={"song_id": collab["id"]}).status_code == 201
     assert client.post("/api/v1/collection", json={"song_id": one["id"]}).status_code == 409

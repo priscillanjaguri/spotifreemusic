@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Index, Integer, String, func
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
@@ -46,6 +46,8 @@ class UserPreferences(TimestampMixin, Base):
     # Windows used by the recommender to separate "right now" from "who I am".
     short_term_days: Mapped[int] = mapped_column(Integer, default=28, server_default="28")
     long_term_days: Mapped[int] = mapped_column(Integer, default=365, server_default="365")
+    # Onboarding / seed genres for cold start (lowercase names). Empty until the user picks some.
+    preferred_genres: Mapped[list[str]] = mapped_column(ARRAY(String(100)), default=list, server_default="{}")
 
     user: Mapped[User] = relationship(back_populates="preferences")
 

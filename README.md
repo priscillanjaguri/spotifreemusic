@@ -5,10 +5,11 @@
 A personal music discovery and intelligence app: collection management, content-based
 recommendations, listening analytics, taste timeline and a daily companion.
 
-**Status: Stage 3 of 7 complete** (auth, profile, catalogue, collection, Jamendo adapter, and the web UI:
-sign-in, dashboard, collection with filters, discover with search and playback), plus **My Library**:
-upload music files you own and stream them in the app.
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for design decisions and the stage checklist.
+**Status: Stage 4 of 7 complete** — Stages 1–3 (auth, catalogue, Jamendo, deep-satin-purple UI, My Library)
+plus the **content-based recommendation engine**: taste profiles, For You / similar tracks, like & not
+interested, listening events from the player, and offline eval metrics.
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for design decisions and a plain-language
+“How the recommender works” section.
 
 ## Stack
 React + TypeScript + Vite + Tailwind v4 + shadcn/ui (Base UI) + TanStack Query (frontend) · FastAPI + Pydantic (backend) ·
@@ -59,10 +60,10 @@ cd frontend
 npm run typecheck     # tsc, no emit
 npm run build         # typecheck + production bundle in dist/
 ```
-Screens: **Sign in / Create account**, **Home** (stats, recently added, top genres and artists),
-**Collection** (filter by artist, album, genre via `/collection/facets`; remove with undo; play all)
-**Discover** (search, add to collection, play) and **My Library** (upload your own files, see below). A persistent player bar handles playback via
-the provider's stream URL. Layout: sidebar on desktop, top bar and bottom tab bar on mobile.
+Screens: **Sign in / Create account**, **Home** (stats, **For You**, recently added, top genres/artists),
+**For You** (`/recommendations` — seed genres, likes / not interested, More like this),
+**Collection**, **Discover**, and **My Library**. The player bar streams audio and quietly posts
+listening segments so taste profiles can learn from plays, completes and replays.
 
 Design system: a "girly Spotify" look in deep satin purples (sampled from satin-ribbon references). `src/index.css` holds the palette,
 font tokens (placeholder Google Fonts: Cormorant Garamond, Great Vibes, Nunito) and texture utilities
@@ -73,6 +74,22 @@ Primitives live in `src/components/ui` (shadcn/ui), decorative motifs (rose, pet
 ## API documentation
 FastAPI generates it automatically: **http://localhost:8000/docs** (Swagger UI) and
 `/redoc`; the raw spec is at `/openapi.json`. All routes live under `/api/v1`.
+
+## Recommendations
+Content-based picks live in `backend/app/ml/` (NumPy / Pandas / scikit-learn, no web or DB imports).
+Services load signals and candidates, call `ml/`, and expose:
+
+- `GET /api/v1/recommendations`
+- `GET /api/v1/songs/{id}/similar`
+- `POST /api/v1/feedback` (`like` | `not_interested`)
+- `POST /api/v1/listening/events`
+
+Offline metrics (synthetic catalogue, no network):
+
+```bash
+cd backend && source .venv/bin/activate
+python -m scripts.eval_recommender
+```
 
 ## Tests
 ```bash

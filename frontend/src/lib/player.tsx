@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
+import { api } from "./api";
 import type { Song } from "./types";
 
 type PlayerState = {
@@ -25,8 +26,22 @@ type PlayerContextValue = PlayerState & {
 
 const PlayerContext = createContext<PlayerContextValue | null>(null);
 
+function newClientSessionId() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+  return `tw-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+type Segment = {
+  song: Song;
+  startedAt: Date;
+  listenedMs: number;
+  lastTick: number | null; // performance.now() while audible
+};
+
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const sessionIdRef = useRef(newClientSessionId());
+  const segmentRef = useRef<Segment | null>(null);
   const [state, setState] = useState<PlayerState>({
     current: null,
     queue: [],
@@ -39,15 +54,68 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const stateRef = useRef(state);
   stateRef.current = state;
 
-  const load = useCallback((song: Song, queue: Song[]) => {
-    const audio = audioRef.current;
-    if (!audio || !song.playback) return;
-    audio.src = song.playback.stream_url;
-    setState((s) => ({ ...s, current: song, queue, position: 0, duration: song.duration_ms / 1000, isLoading: true }));
-    audio.play().catch(() => {
-      /* surfaced via the audio "error" event, or blocked autoplay which needs a click */
-    });
+  const flushSegment = useCallback(async (completed: boolean | null = null) => {
+    const seg = segmentRef.current;
+    segmentRef.current = null;
+    if (!seg) return;
+    if (seg.lastTick != null) {
+      seg.listenedMs += performance.now() - seg.lastTick;
+      seg.lastTick = null;
+    }
+    const listened = Math.round(seg.listenedMs);
+    if (listened < 1000) return;
+    const endedAt = new Date();
+    try {
+      await api.listeningEvent({
+        song_id: seg.song.id,
+        started_at: seg.startedAt.toISOString(),
+        ended_at: endedAt.toISOString(),
+        listened_ms: listened,
+        song_duration_ms: seg.song.duration_ms,
+        completed,
+        client_session_id: sessionIdRef.current,
+      });
+    } catch {
+      /* listening history is best-effort; never block playback */
+    }
   }, []);
+
+  const beginSegment = useCallback((song: Song) => {
+    segmentRef.current = {
+      song,
+      startedAt: new Date(),
+      listenedMs: 0,
+      lastTick: performance.now(),
+    };
+  }, []);
+
+  const pauseSegmentClock = useCallback(() => {
+    const seg = segmentRef.current;
+    if (!seg || seg.lastTick == null) return;
+    seg.listenedMs += performance.now() - seg.lastTick;
+    seg.lastTick = null;
+  }, []);
+
+  const resumeSegmentClock = useCallback(() => {
+    const seg = segmentRef.current;
+    if (!seg || seg.lastTick != null) return;
+    seg.lastTick = performance.now();
+  }, []);
+
+  const load = useCallback(
+    (song: Song, queue: Song[]) => {
+      const audio = audioRef.current;
+      if (!audio || !song.playback) return;
+      void flushSegment(false);
+      audio.src = song.playback.stream_url;
+      setState((s) => ({ ...s, current: song, queue, position: 0, duration: song.duration_ms / 1000, isLoading: true }));
+      beginSegment(song);
+      audio.play().catch(() => {
+        /* surfaced via the audio "error" event, or blocked autoplay which needs a click */
+      });
+    },
+    [beginSegment, flushSegment],
+  );
 
   const step = useCallback(
     (delta: 1 | -1) => {
@@ -58,11 +126,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       const target = playable[index + delta];
       if (target) load(target, queue);
       else if (delta === 1) {
+        void flushSegment(true);
         audioRef.current?.pause();
         setState((s) => ({ ...s, isPlaying: false }));
       } else if (audioRef.current) audioRef.current.currentTime = 0;
     },
-    [load],
+    [flushSegment, load],
   );
 
   useEffect(() => {
@@ -71,8 +140,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     audio.volume = stateRef.current.volume;
     audioRef.current = audio;
     const on = (event: string, fn: () => void) => audio.addEventListener(event, fn);
-    on("play", () => setState((s) => ({ ...s, isPlaying: true })));
-    on("pause", () => setState((s) => ({ ...s, isPlaying: false })));
+    on("play", () => {
+      resumeSegmentClock();
+      setState((s) => ({ ...s, isPlaying: true }));
+    });
+    on("pause", () => {
+      pauseSegmentClock();
+      setState((s) => ({ ...s, isPlaying: false }));
+    });
     on("waiting", () => setState((s) => ({ ...s, isLoading: true })));
     on("playing", () => setState((s) => ({ ...s, isLoading: false })));
     on("canplay", () => setState((s) => ({ ...s, isLoading: false })));
@@ -80,18 +155,22 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     on("loadedmetadata", () =>
       setState((s) => ({ ...s, duration: Number.isFinite(audio.duration) ? audio.duration : s.duration })),
     );
-    on("ended", () => step(1));
+    on("ended", () => {
+      void flushSegment(true).then(() => step(1));
+    });
     on("error", () => {
       if (!audio.src) return;
+      void flushSegment(false);
       setState((s) => ({ ...s, isPlaying: false, isLoading: false }));
       toast.error("This stream couldn't be played. The provider may be unavailable.");
     });
     return () => {
+      void flushSegment(false);
       audio.pause();
       audio.removeAttribute("src");
       audioRef.current = null;
     };
-  }, [step]);
+  }, [flushSegment, pauseSegmentClock, resumeSegmentClock, step]);
 
   const value: PlayerContextValue = {
     ...state,
@@ -127,6 +206,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       setState((s) => ({ ...s, volume: v }));
     },
     stop: () => {
+      void flushSegment(false);
       const audio = audioRef.current;
       if (audio) {
         audio.pause();

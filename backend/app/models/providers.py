@@ -36,6 +36,8 @@ class SongProviderLink(TimestampMixin, Base):
     # Licence the provider publishes for this track (e.g. a Creative Commons URL).
     # We check it BEFORE doing anything beyond streaming, such as analysing audio.
     license_url: Mapped[str | None] = mapped_column(String(500))
+    # Provider said temporary download for analysis is allowed (Jamendo audiodownload_allowed).
+    download_allowed: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
 
     song = relationship("Song", back_populates="provider_links")
     provider: Mapped[MusicProvider] = relationship()

@@ -48,6 +48,7 @@ _TRACKS = [
         artists=[ProviderArtist(name=a) for a in artists], album_title=album, genres=genres,
         cover_url=None, stream_url=f"{AUDIO_PATH}/{tid}.wav",
         license_url="https://creativecommons.org/publicdomain/zero/1.0/",
+        download_allowed=True,
     )
     for tid, title, artists, album, genres, secs in _CATALOGUE
 ]

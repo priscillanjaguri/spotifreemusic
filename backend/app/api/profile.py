@@ -33,6 +33,11 @@ def update_preferences(
     long = changes.get("long_term_days", prefs.long_term_days)
     if long <= short:
         raise HTTPException(422, "long_term_days must be greater than short_term_days")
+    if "preferred_genres" in changes:
+        cleaned = sorted({
+            g.strip().lower() for g in changes["preferred_genres"] if isinstance(g, str) and g.strip()
+        })[:20]
+        changes["preferred_genres"] = cleaned
     for field, value in changes.items():
         setattr(prefs, field, value)
     db.commit()

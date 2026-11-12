@@ -7,8 +7,10 @@ from app.models import Song, User
 from app.providers.base import MusicProviderAdapter, ProviderError
 from app.providers.registry import get_music_provider
 from app.schemas.music import SongOut, SongSearchResponse
+from app.schemas.recommend import ExplanationOut, RecommendationItemOut, RecommendationsOut
 from app.services.catalog import import_tracks
 from app.services.collection import SONG_LOAD
+from app.services import recommender as reco_svc
 
 router = APIRouter(prefix="/songs", tags=["songs"])
 
@@ -33,6 +35,35 @@ def search_songs(
     songs = import_tracks(db, provider, tracks)  # cache results in our own catalogue
     db.commit()
     return SongSearchResponse(query=q, results=[SongOut.from_song(s) for s in songs])
+
+
+@router.get("/{song_id}/similar", response_model=RecommendationsOut, summary="More like this")
+def similar_songs(
+    song_id: int,
+    limit: int = Query(12, ge=1, le=40),
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+    provider: MusicProviderAdapter | None = Depends(get_music_provider),
+) -> RecommendationsOut:
+    try:
+        result = reco_svc.similar_songs(db, user, song_id, limit=limit, provider=provider)
+    except LookupError:
+        raise HTTPException(404, "Song not found")
+    db.commit()
+    return RecommendationsOut(
+        items=[
+            RecommendationItemOut(
+                song=SongOut.from_song(song),
+                score=round(item.score, 4),
+                explanations=[ExplanationOut(code=e.code, label=e.label) for e in item.explanations],
+            )
+            for song, item in result.items
+        ],
+        cold_start=result.cold_start,
+        mode=result.mode,
+        short_term_days=result.short_term_days,
+        long_term_days=result.long_term_days,
+    )
 
 
 @router.get("/{song_id}", response_model=SongOut)

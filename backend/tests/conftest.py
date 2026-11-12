@@ -80,9 +80,14 @@ class FakeProvider(MusicProviderAdapter):
             raise ProviderError("boom")
         return [
             ProviderTrack("t1", "Night Drive", 200_000, [ProviderArtist("Neon Cat")], "Glow", date(2024, 1, 5),
-                          "http://img/1.jpg", ["electronic", "chillout"], "http://stream/1.mp3", "http://cc/by"),
+                          "http://img/1.jpg", ["electronic", "chillout"], "http://stream/1.mp3", "http://cc/by",
+                          True),
             ProviderTrack("t2", "Collab Song", 180_000, [ProviderArtist("Neon Cat"), ProviderArtist("Dusty Fox")],
-                          None, None, None, ["rock"], "http://stream/2.mp3", None),
+                          None, None, None, ["rock"], "http://stream/2.mp3", None, False),
+            ProviderTrack("t3", "Velvet Static", 210_000, [ProviderArtist("Dusty Fox")], "Glow", date(2023, 6, 1),
+                          "http://img/3.jpg", ["electronic", "lofi"], "http://stream/3.mp3", "http://cc/by", True),
+            ProviderTrack("t4", "Amber Wire", 195_000, [ProviderArtist("Neon Cat")], None, None,
+                          "http://img/4.jpg", ["chillout", "ambient"], "http://stream/4.mp3", "http://cc/by", True),
         ]
 
 

@@ -1,7 +1,8 @@
-import { ArrowRight, Compass, Disc3, Library, Mic2, Tags, type LucideIcon } from "lucide-react";
+import { ArrowRight, Compass, Disc3, Heart, Library, Mic2, Tags, type LucideIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { HairWaves, Petal, Rose } from "@/components/decor";
 import { PageHeader } from "@/components/layout/app-shell";
+import { RecommendationCard } from "@/components/music/recommendation-card";
 import { SongCard } from "@/components/music/song-card";
 import { EmptyState, ErrorState } from "@/components/states";
 import { buttonVariants } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth";
 import { useFacets, useRecentlyAdded } from "@/lib/collection";
 import { greeting, plural, relativeDate } from "@/lib/format";
+import { useForYou } from "@/lib/recommendations";
 import type { Facet } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -122,6 +124,7 @@ export function DashboardPage() {
   const { user } = useAuth();
   const recent = useRecentlyAdded(6);
   const facets = useFacets();
+  const forYou = useForYou(6);
 
   const firstName = user?.display_name.split(" ")[0] ?? "";
   const total = recent.data?.total;
@@ -144,6 +147,7 @@ export function DashboardPage() {
 
   const isNew = total === 0;
   const songs = recent.data?.items.map((i) => i.song) ?? [];
+  const forYouQueue = forYou.data?.items.map((i) => i.song) ?? [];
 
   return (
     <>
@@ -174,6 +178,44 @@ export function DashboardPage() {
         <StatCard icon={Disc3} label="Albums" value={facets.data?.albums.length} tone="heliotrope" to="/collection" />
         <StatCard icon={Tags} label="Genres" value={facets.data?.genres.length} tone="royal" to="/collection" />
       </div>
+
+      <section className="mt-10">
+        <SectionTitle
+          action={
+            <Link to="/recommendations" className="inline-flex items-center gap-1 text-sm font-bold text-accent-foreground hover:text-highlight">
+              Open For You <ArrowRight className="size-4" />
+            </Link>
+          }
+        >
+          For You
+        </SectionTitle>
+        {forYou.isPending ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-6">
+            {Array.from({ length: 6 }, (_, i) => (
+              <Skeleton key={i} className="aspect-[3/4] rounded-3xl bg-accent" />
+            ))}
+          </div>
+        ) : forYou.isError ? (
+          <ErrorState error={forYou.error} onRetry={() => void forYou.refetch()} />
+        ) : forYouQueue.length === 0 ? (
+          <EmptyState
+            icon={Heart}
+            title="Recommendations are warming up"
+            description="Save a few songs or pick seed genres on For You — then Tunewise can start matching your taste."
+            action={
+              <Link to="/recommendations" className={buttonVariants({ variant: "cta" })}>
+                Set your taste
+              </Link>
+            }
+          />
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-6">
+            {forYou.data!.items.map((item) => (
+              <RecommendationCard key={item.song.id} item={item} queue={forYouQueue} context="dashboard" />
+            ))}
+          </div>
+        )}
+      </section>
 
       <section className="mt-10">
         <SectionTitle
@@ -221,15 +263,15 @@ export function DashboardPage() {
         {facets.data && !isNew && (
           <FacetBars title="Most-saved artists" facets={facets.data.artists} param="artist" empty="No artists yet." />
         )}
-        <section className="relative overflow-hidden rounded-3xl border border-dashed border-lilac/40 bg-satin-deep p-5 md:col-span-2 xl:col-span-3">
+        <section className="relative overflow-hidden rounded-3xl border border-lavender/15 bg-satin-deep p-5 md:col-span-2 xl:col-span-3">
           <Petal className="absolute top-4 right-6 size-8 rotate-45 opacity-70" />
-          <p className="font-script text-3xl text-highlight">recommendations are tuning up</p>
+          <p className="font-script text-3xl text-highlight">how For You listens</p>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Soon Tunewise will suggest songs based on what your saved music has in common. The more you collect, the
-            sharper those picks will be.
+            Likes, saves, completes and replays shape a short- and long-term taste mix. Skips stay neutral; “not
+            interested” hides a track. Cosine similarity ranks candidates, then MMR keeps the mix from feeling samey.
           </p>
-          <Link to="/discover" className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-accent-foreground hover:text-highlight">
-            Keep collecting <ArrowRight className="size-4" />
+          <Link to="/recommendations" className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-accent-foreground hover:text-highlight">
+            See your picks <ArrowRight className="size-4" />
           </Link>
         </section>
       </div>

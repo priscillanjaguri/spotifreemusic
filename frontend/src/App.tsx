@@ -16,6 +16,7 @@ import { CollectionPage } from "@/pages/collection-page";
 import { DashboardPage } from "@/pages/dashboard-page";
 import { DiscoverPage } from "@/pages/discover-page";
 import { LibraryPage } from "@/pages/library-page";
+import { RecommendationsPage } from "@/pages/recommendations-page";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -103,6 +104,7 @@ export default function App() {
                   }
                 >
                   <Route index element={<DashboardPage />} />
+                  <Route path="recommendations" element={<RecommendationsPage />} />
                   <Route path="collection" element={<CollectionPage />} />
                   <Route path="discover" element={<DiscoverPage />} />
                   <Route path="library" element={<LibraryPage />} />

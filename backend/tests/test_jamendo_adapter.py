@@ -11,6 +11,7 @@ SAMPLE = {
         {"id": "887202", "name": "Press Record", "duration": "192", "artist_id": "376782",
          "artist_name": "WE ARE FM", "album_name": "Season One", "releasedate": "2011-12-29",
          "image": "https://img/x.jpg", "audio": "https://stream/887202.mp3",
+         "audiodownload_allowed": True,
          "license_ccurl": "http://creativecommons.org/licenses/by-nc-sa/3.0/",
          "musicinfo": {"tags": {"genres": ["pop", "rock"]}}},
         {"id": "2", "name": "No Duration", "duration": "0", "artist_name": "X"},       # unusable
@@ -38,7 +39,9 @@ def test_parses_tracks_and_skips_unusable_rows():
     assert t.duration_ms == 192_000 and t.genres == ["pop", "rock"] and t.album_title == "Season One"
     assert t.stream_url == "https://stream/887202.mp3"
     assert t.license_url == "https://creativecommons.org/licenses/by-nc-sa/3.0/"
+    assert t.download_allowed is True
     assert tracks[1].artists[0].name == "Angus & Friends"
+    assert tracks[1].download_allowed is False
     assert tracks[1].release_date is None and tracks[1].album_title is None  # bad date tolerated
 
 

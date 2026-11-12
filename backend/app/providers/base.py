@@ -31,6 +31,9 @@ class ProviderTrack:
     genres: list[str] = field(default_factory=list)
     stream_url: str | None = None  # a URL for the provider's own player; never a download
     license_url: str | None = None
+    # True when the provider permits temporary download for local analysis (e.g. Jamendo
+    # audiodownload_allowed). Analysis must check this before fetching audio bytes.
+    download_allowed: bool = False
 
 
 class MusicProviderAdapter(ABC):

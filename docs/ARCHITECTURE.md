@@ -16,18 +16,18 @@ tunewise/
 │   │   ├── providers/         # adapter interface, Jamendo + My Library adapters, registry
 │   │   ├── storage/           # object storage: local filesystem (default) or Cloudflare R2
 │   │   ├── analysis/          # Librosa audio features -- pure, no web/DB/storage imports
+│   │   ├── ml/                # recommender -- pure Python, no web/DB imports
 │   │   # added in later stages:
-│   │   # services/ listening, analytics
-│   │   # ml/        recommender -- pure Python, no web/DB imports
-│   ├── alembic/versions/      # migrations (0001_initial_schema)
+│   │   # services/ analytics
+│   ├── alembic/versions/      # migrations (0001_initial_schema … 0004_recommender_…)
 │   └── tests/
 └── frontend/                  # Vite + React + TS + Tailwind
     └── src/
         ├── index.css          # design tokens: purple palette, semantic CSS variables, utilities
         ├── components/ui/     # shadcn/ui primitives (Base UI), restyled through the tokens
         ├── components/        # app components: layout (shell, nav, player bar), music, states
-        ├── lib/               # api client, auth + player contexts, collection hooks, formatting
-        └── pages/             # auth, dashboard, collection, discover
+        ├── lib/               # api client, auth + player contexts, collection + reco hooks
+        └── pages/             # auth, dashboard, collection, discover, library, recommendations
 ```
 Dependency direction: `api -> services -> models`, and `services -> ml` (never the reverse).
 The ML package receives plain arrays/DataFrames and returns scores, so it can be unit-tested
@@ -77,7 +77,7 @@ and replaced without touching the web layer or UI.
 - [x] 1 Scaffold, architecture, schema, migration, tests
 - [x] 2 Backend: auth, profile, catalogue import, collection, provider interface + Jamendo adapter
 - [x] 3 Frontend: design system, navigation, auth, dashboard, collection, discover
-- [ ] 4 Recommendation engine
+- [x] 4 Recommendation engine
 - [ ] 5 Listening history + weekly/monthly analytics, Taste Timeline, Memory Lane
 - [ ] 6 Daily companion + full integration
 - [ ] 7 End-to-end testing
@@ -148,6 +148,51 @@ and replaced without touching the web layer or UI.
   analysis is still running.
 - **Legal test audio.** The fixtures are generated tones (`scripts/make_test_audio.py`). Manual testing
   used Jamendo Creative Commons tracks marked `audiodownload_allowed`. They are not committed.
+
+## Stage 4 decisions
+
+### How the recommender works
+Tunewise recommends with **content**, not collaborative filtering. Every song becomes a vector:
+
+1. **Tags / genres** — multi-hot from catalogue genres (always available).
+2. **Audio** — Librosa numbers (tempo, energy, loudness, spectral centroid / roll-off, zero-crossing
+   rate, key, mode), standardized across the candidate pool. If a song has no audio features yet,
+   those dims are zeroed and ranking still works on tags alone.
+
+Your **taste profile** is a weighted average of song vectors you engaged with:
+
+| Signal | Weight idea | Source |
+|---|---|---|
+| Like (`interested`) | strongest explicit positive | feedback API |
+| Save | strong | collection |
+| Replay / complete / play | medium → strong | listening events from the player |
+| Skip | **ignored** (neutral) | — |
+| Not interested | **excluded** from candidates | feedback API |
+
+Short-term and long-term windows come from `user_preferences.short_term_days` /
+`long_term_days` (defaults 28 / 365). Profiles are computed on demand, not stored.
+The two windows are blended (~60% short / 40% long).
+
+**Ranking:** cosine similarity to the blended profile. Candidates come from (a) songs already in our
+catalogue cache (including your private library), and (b) fresh tag-seeded provider searches.
+Results go through **MMR** for diversity, then a light **exploration** injection so the mix does not
+collapse onto one mood. Each pick gets up to two explanation chips (genre overlap, library vibe,
+sound-alike, exploration, …).
+
+**Cold start:** if there are no usable signals, use `preferred_genres` (onboarding seeds) or genres
+already in your collection; if those are empty too, fall back to a “popular / rich tags” mix from the
+cache.
+
+**Jamendo analysis:** when a provider link has `download_allowed` (Jamendo’s
+`audiodownload_allowed`) and a licence URL, we may temporarily download audio, run Librosa, store
+`song_features`, and discard the file. Streams alone are never enough to analyse.
+
+**Offline eval:** `python -m scripts.eval_recommender` reports precision@k, recall@k, coverage and
+diversity on a synthetic catalogue (no DB/network).
+
+API surface: `GET /recommendations`, `GET /songs/{id}/similar`, `POST /feedback`,
+`POST /listening/events`. UI: **For You** on the dashboard + `/recommendations`, like / not
+interested, and **More like this**.
 
 ### Design system: "girly Spotify" in deep satin purple
 The theme is predominantly deep purple in a Spotify layout: floating sidebar, card grids and a persistent
