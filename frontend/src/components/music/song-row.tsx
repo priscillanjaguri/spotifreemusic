@@ -45,7 +45,7 @@ export function SongRow({ song, queue, index, meta, action, linkFacets }: SongRo
       <div
         className={cn(
           "group flex items-center gap-3 px-3 py-2.5 transition-colors @md:px-4",
-          isCurrent ? "bg-haze/80" : "hover:bg-white/90",
+          isCurrent ? "bg-accent/80" : "hover:bg-surface-raised",
         )}
       >
         {index !== undefined && (
@@ -80,7 +80,7 @@ export function SongRow({ song, queue, index, meta, action, linkFacets }: SongRo
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <p className={cn("min-w-0 truncate font-bold", isCurrent ? "text-purple" : "text-heading")}>{song.title}</p>
+            <p className={cn("min-w-0 truncate font-bold", isCurrent ? "text-accent-foreground" : "text-heading")}>{song.title}</p>
             {song.data_source === "mock_dev" && <MockBadge />}
           </div>
           <p className="truncate text-sm text-muted-foreground">
@@ -88,7 +88,7 @@ export function SongRow({ song, queue, index, meta, action, linkFacets }: SongRo
               ? song.artists.map((a, i) => (
                   <span key={a.id}>
                     {i > 0 && ", "}
-                    <Link to={`/collection?artist=${a.id}`} className="hover:text-purple hover:underline">
+                    <Link to={`/collection?artist=${a.id}`} className="hover:text-accent-foreground hover:underline">
                       {a.name}
                     </Link>
                   </span>
@@ -103,7 +103,7 @@ export function SongRow({ song, queue, index, meta, action, linkFacets }: SongRo
             linkFacets ? (
               <Link
                 to={`/collection?album=${song.album.id}`}
-                className="block truncate text-sm text-muted-foreground hover:text-purple hover:underline"
+                className="block truncate text-sm text-muted-foreground hover:text-accent-foreground hover:underline"
               >
                 {song.album.title}
               </Link>
@@ -138,7 +138,7 @@ export function SongRow({ song, queue, index, meta, action, linkFacets }: SongRo
           <Button
             size="icon-sm"
             variant={action.saved ? "secondary" : "ghost"}
-            className={cn("shrink-0 rounded-full", action.saved ? "bg-haze text-purple" : "text-smoke hover:text-purple")}
+            className={cn("shrink-0 rounded-full", action.saved ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-accent-foreground")}
             onClick={action.onAdd}
             disabled={action.saved || action.pending}
             aria-label={action.saved ? `${song.title} is in your collection` : `Add ${song.title} to collection`}

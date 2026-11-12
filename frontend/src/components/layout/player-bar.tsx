@@ -48,11 +48,11 @@ export function PlayerBar() {
     <div
       role="region"
       aria-label="Now playing"
-      className="gloss fixed inset-x-2 bottom-[4.75rem] z-40 rounded-[1.75rem] border border-white/15 bg-polish text-player-foreground shadow-whip-lg lg:inset-x-auto lg:bottom-4 lg:left-[17.5rem] lg:right-4"
+      className="gloss fixed inset-x-2 bottom-[4.75rem] z-40 rounded-[1.75rem] border border-lavender/20 bg-satin-amethyst text-player-foreground shadow-whip-lg lg:inset-x-auto lg:bottom-4 lg:left-[17.5rem] lg:right-4"
     >
       <div className="absolute inset-x-3 top-0 lg:hidden">
         <div
-          className="h-0.5 rounded-full bg-gradient-to-r from-lilac to-wisteria"
+          className="h-0.5 rounded-full bg-gradient-to-r from-wisteria to-lavender"
           style={{ width: `${p.duration ? (p.position / p.duration) * 100 : 0}%` }}
         />
       </div>
@@ -90,7 +90,7 @@ export function PlayerBar() {
             </Button>
             <Button
               size="icon"
-              className="gloss size-10 rounded-full bg-white text-grape hover:scale-105 hover:bg-white"
+              className="gloss size-10 rounded-full bg-cream text-deep-purple hover:scale-105 hover:bg-cream"
               onClick={p.toggle}
               aria-label={p.isPlaying ? "Pause" : "Play"}
             >

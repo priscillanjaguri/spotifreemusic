@@ -62,9 +62,9 @@ Screens: **Sign in / Create account**, **Home** (stats, recently added, top genr
 and **Discover** (search, add to collection, play). A persistent player bar handles playback via
 the provider's stream URL. Layout: sidebar on desktop, top bar and bottom tab bar on mobile.
 
-Design system: a light "girly Spotify" look in shades of purple. `src/index.css` holds the palette,
+Design system: a "girly Spotify" look in deep satin purples (sampled from satin-ribbon references). `src/index.css` holds the palette,
 font tokens (placeholder Google Fonts: Cormorant Garamond, Great Vibes, Nunito) and texture utilities
-(`powder`, `gloss`, `bg-cta`, `bg-polish`). See `docs/ARCHITECTURE.md` under "Stage 3 decisions".
+(`bg-satin-*`, `satin`, `powder`, `gloss`, `bg-cta`). See `docs/ARCHITECTURE.md` under "Stage 3 decisions".
 Primitives live in `src/components/ui` (shadcn/ui), decorative motifs (rose, petals, hair waves) in
 `src/components/decor.tsx`, and shared app components in `src/components`.
 

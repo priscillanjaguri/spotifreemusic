@@ -30,7 +30,7 @@ function Splash() {
     <div className="grid min-h-dvh place-items-center">
       <div className="flex flex-col items-center gap-5">
         <Logo />
-        <Loader2 className="size-5 animate-spin text-heliotrope" aria-label="Loading" />
+        <Loader2 className="size-5 animate-spin text-orchid-glow" aria-label="Loading" />
       </div>
     </div>
   );

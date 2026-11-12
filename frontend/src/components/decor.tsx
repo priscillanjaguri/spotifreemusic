@@ -11,8 +11,8 @@ export function Rose({ className }: { className?: string }) {
         key={`${scale}-${i}`}
         d={petal}
         fill={fill}
-        stroke="#ffffff"
-        strokeOpacity="0.55"
+        stroke="#d9c4ef"
+        strokeOpacity="0.28"
         strokeWidth={1.2 / scale}
         transform={`rotate(${offset + (360 / count) * i} 50 50) translate(50 50) scale(${scale}) translate(-50 -50)`}
       />
@@ -21,20 +21,20 @@ export function Rose({ className }: { className?: string }) {
     <svg viewBox="0 0 100 100" aria-hidden className={className}>
       <defs>
         <linearGradient id={`${id}-outer`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#efe3f8" />
-          <stop offset="1" stopColor="#c98ad3" />
+          <stop offset="0" stopColor="#5d3a6e" />
+          <stop offset="1" stopColor="#2a1632" />
         </linearGradient>
         <linearGradient id={`${id}-mid`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#e3cdf3" />
-          <stop offset="1" stopColor="#a954e2" />
+          <stop offset="0" stopColor="#7a4290" />
+          <stop offset="1" stopColor="#391e47" />
         </linearGradient>
         <linearGradient id={`${id}-inner`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#d4a5e2" />
-          <stop offset="1" stopColor="#77236f" />
+          <stop offset="0" stopColor="#9461a3" />
+          <stop offset="1" stopColor="#41124f" />
         </linearGradient>
         <radialGradient id={`${id}-bud`} cx="45%" cy="40%" r="60%">
-          <stop offset="0" stopColor="#c77dbd" />
-          <stop offset="1" stopColor="#4e0759" />
+          <stop offset="0" stopColor="#9461a3" />
+          <stop offset="1" stopColor="#2a1632" />
         </radialGradient>
       </defs>
       {ring(5, 1, 0, `url(#${id}-outer)`)}
@@ -59,12 +59,12 @@ export function Petal({ className, style }: { className?: string; style?: React.
     <svg viewBox="0 0 40 40" aria-hidden className={className} style={style}>
       <defs>
         <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#f3d9ef" />
-          <stop offset="1" stopColor="#c98ad3" />
+          <stop offset="0" stopColor="#c98ad3" />
+          <stop offset="1" stopColor="#6c3480" />
         </linearGradient>
       </defs>
       <path d="M20 2C30 10 36 20 30 30c-4 6-16 6-20 0C4 20 10 10 20 2z" fill={`url(#${id})`} />
-      <path d="M20 6c-2 8-2 16 0 26" stroke="#fff" strokeOpacity="0.55" strokeWidth="1.2" fill="none" />
+      <path d="M20 6c-2 8-2 16 0 26" stroke="#f5ece6" strokeOpacity="0.4" strokeWidth="1.2" fill="none" />
     </svg>
   );
 }
@@ -90,7 +90,7 @@ export function HairWaves({ className }: { className?: string }) {
         </linearGradient>
       </defs>
       {strands.map((d, i) => (
-        <path key={d} d={d} fill="none" stroke={`url(#${id})`} strokeWidth={10 - i * 1.4} strokeLinecap="round" opacity={0.18 + i * 0.05} />
+        <path key={d} d={d} fill="none" stroke={`url(#${id})`} strokeWidth={10 - i * 1.4} strokeLinecap="round" opacity={0.1 + i * 0.035} />
       ))}
     </svg>
   );

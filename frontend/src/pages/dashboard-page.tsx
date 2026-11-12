@@ -16,10 +16,10 @@ export const QUICK_SEARCHES = ["lofi", "ambient", "jazz", "synthwave", "piano", 
 
 // Each stat gets its own shade from the palette, lightest to deepest.
 const STAT_TONES = {
-  lavender: "from-lavender to-lilac",
-  wisteria: "from-blush to-wisteria",
-  heliotrope: "from-lilac to-heliotrope",
-  royal: "from-wisteria to-royal-purple",
+  lavender: "from-violet-sheen to-violet-shadow",
+  wisteria: "from-mauve/80 to-amethyst",
+  heliotrope: "from-amethyst-sheen to-amethyst-shadow",
+  royal: "from-royal-purple-sheen to-royal-purple-shadow",
 };
 
 function StatCard({
@@ -38,14 +38,14 @@ function StatCard({
   return (
     <Link
       to={to}
-      className="group rounded-3xl border border-white/80 bg-white/70 p-4 shadow-whip transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-whip-lg sm:p-5"
+      className="group rounded-3xl border border-border bg-card satin p-4 shadow-whip transition-all hover:-translate-y-0.5 hover:bg-surface-raised hover:shadow-whip-lg sm:p-5"
     >
-      <div className={cn("gloss grid size-11 place-items-center rounded-full bg-gradient-to-br text-white shadow-polish", STAT_TONES[tone])}>
+      <div className={cn("gloss grid size-11 place-items-center rounded-full bg-gradient-to-br text-cream ring-1 ring-lavender/20 shadow-polish", STAT_TONES[tone])}>
         <Icon className="size-5" />
       </div>
       <p className="mt-4 text-sm font-semibold text-muted-foreground">{label}</p>
       {value === undefined ? (
-        <Skeleton className="mt-1 h-9 w-14 bg-haze" />
+        <Skeleton className="mt-1 h-9 w-14 bg-accent" />
       ) : (
         <p className="font-display text-4xl font-semibold text-heading [font-variant-numeric:lining-nums]">{value.toLocaleString()}</p>
       )}
@@ -57,7 +57,7 @@ function FacetBars({ title, facets, param, empty }: { title: string; facets: Fac
   const top = facets.slice().sort((a, b) => b.count - a.count).slice(0, 5);
   const max = top[0]?.count ?? 1;
   return (
-    <section className="rounded-3xl border border-white/80 bg-white/70 p-5 shadow-whip">
+    <section className="rounded-3xl border border-border bg-card satin p-5 shadow-whip">
       <h2 className="font-display text-2xl font-semibold text-heading">{title}</h2>
       {top.length === 0 ? (
         <p className="mt-3 text-sm text-subtle">{empty}</p>
@@ -67,12 +67,12 @@ function FacetBars({ title, facets, param, empty }: { title: string; facets: Fac
             <li key={f.id}>
               <Link to={`/collection?${param}=${param === "genre" ? encodeURIComponent(f.name) : f.id}`} className="group block">
                 <div className="flex justify-between text-sm">
-                  <span className="truncate font-semibold text-smoke capitalize group-hover:text-purple">{f.name}</span>
+                  <span className="truncate font-semibold text-muted-foreground capitalize group-hover:text-accent-foreground">{f.name}</span>
                   <span className="text-subtle tabular-nums">{f.count}</span>
                 </div>
-                <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-haze">
+                <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-accent">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-lilac via-wisteria to-heliotrope"
+                    className="h-full rounded-full bg-gradient-to-r from-violet via-wisteria to-lavender"
                     style={{ width: `${Math.max(8, (f.count / max) * 100)}%` }}
                   />
                 </div>
@@ -87,18 +87,18 @@ function FacetBars({ title, facets, param, empty }: { title: string; facets: Fac
 
 function DiscoverCallout() {
   return (
-    <section className="powder relative overflow-hidden rounded-3xl bg-gradient-to-br from-blush via-lilac to-wisteria p-6 shadow-whip">
+    <section className="powder relative overflow-hidden rounded-3xl border border-lavender/15 bg-satin-violet p-6 shadow-whip-lg">
       <HairWaves className="absolute inset-0 h-full w-full opacity-60" />
-      <Rose className="absolute -top-8 -right-8 size-32 opacity-80" />
+      <Rose className="absolute -top-8 -right-8 size-32 opacity-90 drop-shadow-lg" />
       <div className="relative">
-        <p className="font-script text-3xl text-grape">find something new</p>
-        <p className="mt-1 max-w-[16rem] text-sm text-grape/80">Jump into a mood. Every result can be played and saved in one tap.</p>
+        <p className="font-script text-3xl text-cream">find something new</p>
+        <p className="mt-1 max-w-[16rem] text-sm text-lavender">Jump into a mood. Every result can be played and saved in one tap.</p>
         <div className="mt-4 flex flex-wrap gap-2">
           {QUICK_SEARCHES.slice(0, 5).map((q) => (
             <Link
               key={q}
               to={`/discover?q=${encodeURIComponent(q)}`}
-              className="rounded-full bg-white/75 px-3.5 py-1.5 text-sm font-bold text-amethyst shadow-whip transition-colors hover:bg-white hover:text-purple"
+              className="rounded-full bg-deep-purple/60 px-3.5 py-1.5 text-sm font-bold text-cream ring-1 ring-lavender/20 transition-colors hover:bg-deep-purple"
             >
               {q}
             </Link>
@@ -179,7 +179,7 @@ export function DashboardPage() {
         <SectionTitle
           action={
             !isNew && (
-              <Link to="/collection" className="inline-flex items-center gap-1 text-sm font-bold text-purple hover:text-orchid">
+              <Link to="/collection" className="inline-flex items-center gap-1 text-sm font-bold text-accent-foreground hover:text-highlight">
                 See all <ArrowRight className="size-4" />
               </Link>
             )
@@ -190,7 +190,7 @@ export function DashboardPage() {
         {recent.isPending ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-6">
             {Array.from({ length: 6 }, (_, i) => (
-              <Skeleton key={i} className="aspect-[3/4] rounded-3xl bg-haze" />
+              <Skeleton key={i} className="aspect-[3/4] rounded-3xl bg-accent" />
             ))}
           </div>
         ) : isNew ? (
@@ -221,14 +221,14 @@ export function DashboardPage() {
         {facets.data && !isNew && (
           <FacetBars title="Most-saved artists" facets={facets.data.artists} param="artist" empty="No artists yet." />
         )}
-        <section className="relative overflow-hidden rounded-3xl border border-dashed border-lilac bg-petal/70 p-5 md:col-span-2 xl:col-span-3">
+        <section className="relative overflow-hidden rounded-3xl border border-dashed border-lilac/40 bg-satin-deep p-5 md:col-span-2 xl:col-span-3">
           <Petal className="absolute top-4 right-6 size-8 rotate-45 opacity-70" />
-          <p className="font-script text-3xl text-orchid">recommendations are tuning up</p>
-          <p className="mt-1 max-w-2xl text-sm text-smoke">
+          <p className="font-script text-3xl text-highlight">recommendations are tuning up</p>
+          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             Soon Tunewise will suggest songs based on what your saved music has in common. The more you collect, the
             sharper those picks will be.
           </p>
-          <Link to="/discover" className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-purple hover:text-orchid">
+          <Link to="/discover" className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-accent-foreground hover:text-highlight">
             Keep collecting <ArrowRight className="size-4" />
           </Link>
         </section>

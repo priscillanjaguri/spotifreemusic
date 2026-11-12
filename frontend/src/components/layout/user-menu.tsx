@@ -41,8 +41,8 @@ export function UserMenu({ variant = "full" }: { variant?: "full" | "avatar" }) 
   };
 
   const avatar = (
-    <Avatar className="size-9 ring-2 ring-white shadow-whip">
-      <AvatarFallback className="bg-gradient-to-br from-wisteria to-heliotrope text-xs font-bold text-white">
+    <Avatar className="size-9 ring-2 ring-white/10 shadow-whip">
+      <AvatarFallback className="bg-gradient-to-br from-violet-sheen to-amethyst text-xs font-bold text-cream">
         {initials(user.display_name)}
       </AvatarFallback>
     </Avatar>

@@ -12,7 +12,7 @@ import { useAuth } from "@/lib/auth";
 
 const MIN_PASSWORD = 10;
 
-const FIELD = "h-12 rounded-2xl border-lilac/50 bg-powder/60 px-4 text-[0.95rem] focus-visible:bg-white";
+const FIELD = "h-12 rounded-2xl border-input bg-muted/60 px-4 text-[0.95rem] focus-visible:bg-surface-raised";
 
 const COPY = {
   login: {
@@ -74,10 +74,11 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
 
   return (
     <div className="grid min-h-dvh lg:grid-cols-[1.1fr_1fr]">
-      <section className="powder relative m-3 hidden overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-lavender via-haze to-blush shadow-whip lg:flex lg:flex-col lg:justify-between lg:p-12">
+      <section className="powder relative m-3 hidden overflow-hidden rounded-[2.5rem] border border-lavender/10 bg-satin-royal shadow-whip-lg lg:flex lg:flex-col lg:justify-between lg:p-12">
         <HairWaves className="absolute inset-x-0 top-[18%] h-64 w-full" />
         <HairWaves className="absolute inset-x-0 bottom-[8%] h-56 w-full scale-x-[-1] opacity-70" />
-        <Rose className="absolute -right-16 -bottom-16 size-80 opacity-90 drop-shadow-xl" />
+        <Rose className="absolute -right-16 -bottom-16 size-80 drop-shadow-2xl" />
+        <Rose className="absolute right-44 -bottom-10 size-36 rotate-45 opacity-80 drop-shadow-xl" />
         <Rose className="absolute top-10 right-24 size-20 opacity-60" />
         <PetalScatter />
         <Logo className="relative" />
@@ -92,17 +93,17 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
                 <Petal className="mt-0.5 size-7 shrink-0 drop-shadow-sm" />
                 <div>
                   <p className="font-bold text-heading">{h.title}</p>
-                  <p className="text-sm text-smoke">{h.text}</p>
+                  <p className="text-sm text-muted-foreground">{h.text}</p>
                 </div>
               </li>
             ))}
           </ul>
         </div>
-        <p className="relative text-xs text-smoke">Music from Jamendo’s Creative Commons catalogue.</p>
+        <p className="relative text-xs text-muted-foreground">Music from Jamendo’s Creative Commons catalogue.</p>
       </section>
 
       <section className="relative flex items-center justify-center overflow-hidden px-5 py-12 sm:px-8">
-        <Rose className="absolute -top-14 -right-14 size-44 opacity-30 lg:hidden" />
+        <Rose className="absolute -top-14 -right-14 size-44 opacity-70 lg:hidden" />
         <div className="relative w-full max-w-sm">
           <div className="mb-10 lg:hidden">
             <Logo />
@@ -112,7 +113,7 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
             </p>
           </div>
 
-          <div className="rounded-[2rem] border border-white bg-white/75 p-6 shadow-whip-lg backdrop-blur sm:p-8">
+          <div className="rounded-[2rem] border border-border bg-card satin p-6 shadow-whip-lg backdrop-blur sm:p-8">
             <h1 className="font-display text-4xl font-semibold tracking-tight text-heading">{copy.title}</h1>
             <p className="mt-1.5 text-sm text-muted-foreground">{copy.subtitle}</p>
 
@@ -163,7 +164,7 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute inset-y-0 right-1 grid w-11 place-items-center text-subtle hover:text-purple"
+                    className="absolute inset-y-0 right-1 grid w-11 place-items-center text-subtle hover:text-accent-foreground"
                     aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -193,7 +194,7 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
 
           <p className="mt-8 text-center text-sm text-muted-foreground">
             {copy.switchText}{" "}
-            <Link to={copy.switchTo} state={location.state} className="font-bold text-purple hover:text-orchid">
+            <Link to={copy.switchTo} state={location.state} className="font-bold text-accent-foreground hover:text-highlight">
               {copy.switchLink}
             </Link>
           </p>

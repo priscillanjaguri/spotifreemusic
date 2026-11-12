@@ -16,7 +16,7 @@ export function SongCard({ song, queue, meta }: { song: Song; queue: Song[]; met
   return (
     <div
       className={cn(
-        "group relative rounded-3xl border border-white/80 bg-white/70 p-3 shadow-whip transition-all hover:-translate-y-1 hover:bg-white hover:shadow-whip-lg",
+        "group satin relative rounded-3xl border border-border bg-card p-3 shadow-whip transition-all hover:-translate-y-1 hover:bg-surface-raised hover:shadow-whip-lg",
         isCurrent && "ring-2 ring-wisteria/60",
       )}
     >
@@ -42,7 +42,7 @@ export function SongCard({ song, queue, meta }: { song: Song; queue: Song[]; met
         </button>
       </div>
       <div className="mt-3 px-1 pb-1">
-        <p className={cn("truncate font-bold", isCurrent ? "text-purple" : "text-heading")}>{song.title}</p>
+        <p className={cn("truncate font-bold", isCurrent ? "text-accent-foreground" : "text-heading")}>{song.title}</p>
         <p className="truncate text-sm text-muted-foreground">{artistNames(song.artists)}</p>
         <div className="mt-2 flex items-center justify-between gap-2">
           {meta && <span className="text-xs text-subtle">{meta}</span>}

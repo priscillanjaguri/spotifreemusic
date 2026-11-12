@@ -16,22 +16,22 @@ type EmptyStateProps = {
 };
 
 const TONES = {
-  lavender: "from-lavender to-wisteria text-white",
-  orchid: "from-blush via-mauve to-orchid text-white",
-  rose: "from-blush to-rose/80 text-white",
+  lavender: "from-violet-sheen to-amethyst-shadow text-cream",
+  orchid: "from-mauve/80 via-amethyst to-royal-purple-shadow text-cream",
+  rose: "from-rose/70 to-amethyst-shadow text-cream",
 };
 
 export function EmptyState({ icon: Icon, title, description, action, className, tone = "lavender" }: EmptyStateProps) {
   return (
     <div
       className={cn(
-        "powder relative flex flex-col items-center justify-center overflow-hidden rounded-3xl border border-lilac/40 bg-white/60 px-6 py-14 text-center shadow-whip",
+        "powder relative flex flex-col items-center justify-center overflow-hidden rounded-3xl border border-lavender/15 bg-satin-royal px-6 py-14 text-center shadow-whip",
         className,
       )}
     >
       <Petal className="absolute top-6 left-[12%] size-6 rotate-[-25deg] opacity-60" />
       <Petal className="absolute right-[10%] bottom-8 size-8 rotate-[140deg] opacity-50" />
-      <div className={cn("gloss mb-5 grid size-16 place-items-center rounded-full bg-gradient-to-br shadow-polish", TONES[tone])}>
+      <div className={cn("gloss mb-5 grid size-16 place-items-center rounded-full bg-gradient-to-br ring-1 ring-lavender/20 shadow-polish", TONES[tone])}>
         <Icon className="size-7" aria-hidden />
       </div>
       <h3 className="font-display text-2xl font-semibold text-heading">{title}</h3>
@@ -75,15 +75,15 @@ export function ProviderNotConfigured({ message, className }: { message: string;
           <p className="mt-3 text-xs text-subtle">
             Get a free client ID at{" "}
             <a
-              className="font-semibold text-purple underline-offset-4 hover:underline"
+              className="font-semibold text-accent-foreground underline-offset-4 hover:underline"
               href="https://developer.jamendo.com"
               target="_blank"
               rel="noreferrer"
             >
               developer.jamendo.com
             </a>
-            , add <code className="rounded-md bg-haze px-1.5 py-0.5 text-amethyst">JAMENDO_CLIENT_ID</code> to{" "}
-            <code className="rounded-md bg-haze px-1.5 py-0.5 text-amethyst">.env</code>, and restart the API. Your
+            , add <code className="rounded-md bg-accent px-1.5 py-0.5 text-accent-foreground">JAMENDO_CLIENT_ID</code> to{" "}
+            <code className="rounded-md bg-accent px-1.5 py-0.5 text-accent-foreground">.env</code>, and restart the API. Your
             collection keeps working in the meantime.
           </p>
         </>
@@ -94,16 +94,16 @@ export function ProviderNotConfigured({ message, className }: { message: string;
 
 export function SongListSkeleton({ rows = 6 }: { rows?: number }) {
   return (
-    <div className="divide-y divide-border overflow-hidden rounded-3xl border bg-card shadow-whip" aria-busy aria-label="Loading">
+    <div className="divide-y divide-border overflow-hidden rounded-3xl border bg-card satin shadow-whip" aria-busy aria-label="Loading">
       {Array.from({ length: rows }, (_, i) => (
         <div key={i} className="flex items-center gap-3 px-3 py-3 sm:px-4">
-          <Skeleton className="size-11 rounded-xl bg-haze" />
+          <Skeleton className="size-11 rounded-xl bg-accent" />
           <div className="flex-1 space-y-2">
-            <Skeleton className="h-3.5 w-2/5 bg-haze" />
-            <Skeleton className="h-3 w-1/4 bg-powder" />
+            <Skeleton className="h-3.5 w-2/5 bg-accent" />
+            <Skeleton className="h-3 w-1/4 bg-muted" />
           </div>
-          <Skeleton className="hidden h-3 w-24 bg-powder md:block" />
-          <Skeleton className="size-8 rounded-full bg-haze" />
+          <Skeleton className="hidden h-3 w-24 bg-muted md:block" />
+          <Skeleton className="size-8 rounded-full bg-accent" />
         </div>
       ))}
     </div>
