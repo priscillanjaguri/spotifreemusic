@@ -15,7 +15,7 @@ SAMPLE = {
          "musicinfo": {"tags": {"genres": ["pop", "rock"]}}},
         {"id": "2", "name": "No Duration", "duration": "0", "artist_name": "X"},       # unusable
         {"id": "3", "name": "", "duration": "100", "artist_name": "X"},                  # unusable
-        {"id": "4", "name": "Single", "duration": "60", "artist_name": "Solo", "releasedate": "garbage"},
+        {"id": "4", "name": "Single", "duration": "60", "artist_name": "Angus &amp; Friends", "releasedate": "garbage"},
     ],
 }
 
@@ -38,6 +38,7 @@ def test_parses_tracks_and_skips_unusable_rows():
     assert t.duration_ms == 192_000 and t.genres == ["pop", "rock"] and t.album_title == "Season One"
     assert t.stream_url == "https://stream/887202.mp3"
     assert t.license_url == "https://creativecommons.org/licenses/by-nc-sa/3.0/"
+    assert tracks[1].artists[0].name == "Angus & Friends"
     assert tracks[1].release_date is None and tracks[1].album_title is None  # bad date tolerated
 
 

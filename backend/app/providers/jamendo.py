@@ -7,6 +7,7 @@ Verified against the live API (run `python -m scripts.check_jamendo` to re-check
 Cover art comes back as https://usercontent.jamendo.com/... (300px by default) and
 stream URLs as https://prod-1.storage.jamendo.com/... MP3s that support range requests.
 """
+import html
 from datetime import date
 
 import httpx
@@ -62,9 +63,9 @@ class JamendoAdapter(MusicProviderAdapter):
     def _parse(row: dict) -> ProviderTrack | None:
         """Convert one Jamendo row; return None for rows we can't use safely."""
         try:
-            track_id, title = str(row["id"]), str(row["name"]).strip()
+            track_id, title = str(row["id"]), _text(row["name"])
             duration_s = int(row["duration"])
-            artist_name = str(row["artist_name"]).strip()
+            artist_name = _text(row["artist_name"])
         except (KeyError, TypeError, ValueError):
             return None
         if not (track_id and title and artist_name) or duration_s <= 0:
@@ -83,7 +84,7 @@ class JamendoAdapter(MusicProviderAdapter):
             title=title,
             duration_ms=duration_s * 1000,
             artists=[ProviderArtist(name=artist_name, provider_artist_id=str(row.get("artist_id") or "") or None)],
-            album_title=(row.get("album_name") or "").strip() or None,
+            album_title=_text(row.get("album_name") or "") or None,
             release_date=released,
             cover_url=row.get("image") or row.get("album_image") or None,
             genres=[g for g in genres if isinstance(g, str)],
@@ -97,3 +98,8 @@ def _https(url: str | None) -> str | None:
     if not url:
         return None
     return "https://" + url[len("http://"):] if url.startswith("http://") else url
+
+
+def _text(value: object) -> str:
+    """Jamendo HTML-escapes some names (e.g. "Angus &amp; Friends")."""
+    return html.unescape(str(value)).strip()
