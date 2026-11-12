@@ -33,6 +33,23 @@ class Settings(BaseSettings):
     # tones when no real provider is configured. Ignored outside ENVIRONMENT=development.
     dev_mock_provider: bool = False
 
+    # My Library: music files the user owns and uploads.
+    library_storage_dir: Path = REPO_ROOT / "var" / "library"
+    library_max_file_mb: int = 200
+    library_max_files_per_request: int = 50
+    # Run Librosa feature extraction after each upload (needs requirements-analysis.txt).
+    library_analysis_enabled: bool = True
+    # Cloudflare R2 (S3-compatible). All four must be set to store uploads in R2 instead of on disk.
+    r2_account_id: str | None = None
+    r2_access_key_id: str | None = None
+    r2_secret_access_key: str | None = None
+    r2_bucket: str | None = None
+    r2_presign_seconds: int = 600
+
+    @property
+    def r2_enabled(self) -> bool:
+        return all((self.r2_account_id, self.r2_access_key_id, self.r2_secret_access_key, self.r2_bucket))
+
     @property
     def mock_provider_enabled(self) -> bool:
         return self.dev_mock_provider and self.environment == "development" and not self.jamendo_client_id

@@ -5,11 +5,14 @@ streaming provider. *Playback* (how to play it somewhere) lives in
 `providers.py`. That split lets us add or swap providers without touching
 the catalogue, analytics or recommender.
 """
-from datetime import date
+import uuid
+from datetime import date, datetime
 
 from sqlalchemy import (
-    BigInteger, CheckConstraint, Date, Float, ForeignKey, Index, Integer, String, Boolean, func,
+    BigInteger, CheckConstraint, Date, DateTime, Float, ForeignKey, Index, Integer, SmallInteger, String, Boolean,
+    func,
 )
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
@@ -70,6 +73,10 @@ class Song(TimestampMixin, Base):
     isrc: Mapped[str | None] = mapped_column(String(12), unique=True)  # international recording id
     cover_url: Mapped[str | None] = mapped_column(String(1000))
     data_source: Mapped[str] = mapped_column(String(20), default="user_provided")
+    # Set for songs a user uploaded to My Library: only that user may see, collect or stream them.
+    owner_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
 
     album: Mapped[Album | None] = relationship()
     artist_links: Mapped[list["SongArtist"]] = relationship(
@@ -129,12 +136,24 @@ class SongFeatures(Base):
     __tablename__ = "song_features"
 
     song_id: Mapped[int] = mapped_column(ForeignKey("songs.id", ondelete="CASCADE"), primary_key=True)
-    tempo: Mapped[float] = mapped_column(Float)  # BPM
-    energy: Mapped[float] = mapped_column(Float)  # 0..1
-    danceability: Mapped[float] = mapped_column(Float)
-    acousticness: Mapped[float] = mapped_column(Float)
-    valence: Mapped[float] = mapped_column(Float)  # musical positiveness
-    instrumentalness: Mapped[float] = mapped_column(Float)
+    # Nullable: a value is only stored when it was actually measured. Librosa gives tempo,
+    # energy and the spectral values below; danceability/valence/etc. need a trained model.
+    tempo: Mapped[float | None] = mapped_column(Float)  # BPM
+    energy: Mapped[float | None] = mapped_column(Float)  # 0..1
+    danceability: Mapped[float | None] = mapped_column(Float)
+    acousticness: Mapped[float | None] = mapped_column(Float)
+    valence: Mapped[float | None] = mapped_column(Float)  # musical positiveness
+    instrumentalness: Mapped[float | None] = mapped_column(Float)
+    rms: Mapped[float | None] = mapped_column(Float)  # mean root-mean-square amplitude
+    loudness_db: Mapped[float | None] = mapped_column(Float)
+    spectral_centroid_hz: Mapped[float | None] = mapped_column(Float)  # "brightness"
+    spectral_rolloff_hz: Mapped[float | None] = mapped_column(Float)
+    zero_crossing_rate: Mapped[float | None] = mapped_column(Float)
+    key: Mapped[int | None] = mapped_column(SmallInteger)  # pitch class, 0 = C ... 11 = B
+    mode: Mapped[int | None] = mapped_column(SmallInteger)  # 1 = major, 0 = minor
+    key_confidence: Mapped[float | None] = mapped_column(Float)
+    analyzer: Mapped[str | None] = mapped_column(String(50))  # e.g. "librosa-1.0.0"
+    analyzed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     feature_source: Mapped[str] = mapped_column(String(20), default="user_provided")
 
     song: Mapped[Song] = relationship(back_populates="features")
@@ -147,4 +166,5 @@ class SongFeatures(Base):
             name="unit_interval",
         ),
         CheckConstraint(f"feature_source IN {DATA_SOURCES}", name="feature_source_valid"),
+        CheckConstraint("key BETWEEN 0 AND 11 AND mode IN (0, 1)", name="key_mode_valid"),
     )

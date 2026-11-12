@@ -19,6 +19,11 @@ pyjwt>=2.9,<3.0
 # HTTP client for music providers (and tests)
 httpx>=0.27,<1.0
 
+# My Library: multipart uploads, audio tags, Cloudflare R2 (S3-compatible) storage
+python-multipart>=0.0.9
+mutagen>=1.47,<2.0
+boto3>=1.34,<2.0
+
 # Machine learning (Stage 4)
 numpy>=1.26,<3.0
 pandas>=2.2,<3.0

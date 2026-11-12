@@ -40,7 +40,8 @@ def my_facets(user: User = Depends(get_current_user), db: Session = Depends(get_
 def add_to_collection(
     body: CollectionAdd, user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ) -> CollectionItemOut:
-    if db.get(Song, body.song_id) is None:
+    song = db.get(Song, body.song_id)
+    if song is None or (song.owner_user_id is not None and song.owner_user_id != user.id):
         raise HTTPException(404, "Song not found")
     if db.scalar(select(UserCollection.id).where(UserCollection.user_id == user.id, UserCollection.song_id == body.song_id)):
         raise HTTPException(409, "Song is already in your collection")

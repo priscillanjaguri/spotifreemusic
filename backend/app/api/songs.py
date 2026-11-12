@@ -36,8 +36,8 @@ def search_songs(
 
 
 @router.get("/{song_id}", response_model=SongOut)
-def get_song(song_id: int, db: Session = Depends(get_db), _user: User = Depends(get_current_user)) -> SongOut:
+def get_song(song_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> SongOut:
     song = db.get(Song, song_id, options=list(SONG_LOAD))
-    if song is None:
+    if song is None or (song.owner_user_id is not None and song.owner_user_id != user.id):
         raise HTTPException(404, "Song not found")
     return SongOut.from_song(song)

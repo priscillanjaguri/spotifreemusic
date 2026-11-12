@@ -65,7 +65,7 @@ class SongSearchResponse(BaseModel):
 
 class CollectionAdd(BaseModel):
     song_id: int
-    source: Literal["search", "recommendation", "daily_companion", "manual"] = "manual"
+    source: Literal["search", "recommendation", "daily_companion", "manual"] = "manual"  # "upload" is set by My Library only
 
 
 class CollectionItemOut(BaseModel):
@@ -91,3 +91,73 @@ class CollectionFacets(BaseModel):
     artists: list[FacetOut]
     albums: list[FacetOut]
     genres: list[FacetOut]
+
+
+class AudioFeaturesOut(BaseModel):
+    tempo: float | None
+    energy: float | None
+    loudness_db: float | None
+    spectral_centroid_hz: float | None
+    key: int | None
+    mode: int | None
+    key_name: str | None
+    analyzer: str | None
+
+
+class LibraryUploadOut(BaseModel):
+    id: int
+    original_filename: str
+    audio_format: str
+    size_bytes: int
+    created_at: datetime
+    analysis_status: Literal["pending", "running", "done", "failed", "unavailable"]
+    analysis_error: str | None
+    song: SongOut | None
+    features: AudioFeaturesOut | None
+
+    @classmethod
+    def from_upload(cls, upload) -> "LibraryUploadOut":
+        from app.analysis.audio_features import PITCH_CLASSES
+
+        f = upload.song.features if upload.song is not None else None
+        features = None
+        if f is not None:
+            key_name = (
+                f"{PITCH_CLASSES[f.key]} {'major' if f.mode == 1 else 'minor'}"
+                if f.key is not None and f.mode is not None else None
+            )
+            features = AudioFeaturesOut(
+                tempo=f.tempo, energy=f.energy, loudness_db=f.loudness_db, spectral_centroid_hz=f.spectral_centroid_hz,
+                key=f.key, mode=f.mode, key_name=key_name, analyzer=f.analyzer,
+            )
+        return cls(
+            id=upload.id, original_filename=upload.original_filename, audio_format=upload.audio_format,
+            size_bytes=upload.size_bytes, created_at=upload.created_at, analysis_status=upload.analysis_status,
+            analysis_error=upload.analysis_error, song=SongOut.from_song(upload.song) if upload.song else None,
+            features=features,
+        )
+
+
+class LibraryLimits(BaseModel):
+    accepted_extensions: list[str]
+    max_file_mb: int
+    max_files_per_request: int
+    storage_backend: str
+    analysis_available: bool
+
+
+class LibraryPage(BaseModel):
+    total: int
+    items: list[LibraryUploadOut]
+    limits: LibraryLimits
+
+
+class UploadResultOut(BaseModel):
+    filename: str
+    status: Literal["added", "duplicate", "rejected"]
+    message: str
+    upload: LibraryUploadOut | None
+
+
+class UploadResponse(BaseModel):
+    results: list[UploadResultOut]

@@ -1,0 +1,5 @@
+# Optional: audio feature extraction for My Library uploads (tempo, energy, key, ...).
+# Without it uploads still work and show "analysis unavailable".
+# MP3/M4A decoding falls back to ffmpeg (via audioread) when libsndfile can't read a format.
+-r requirements.txt
+librosa>=0.10

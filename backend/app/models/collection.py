@@ -9,7 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base
 from app.models.catalog import Song
 
-COLLECTION_SOURCES = ("search", "recommendation", "daily_companion", "import", "manual")
+COLLECTION_SOURCES = ("search", "recommendation", "daily_companion", "import", "manual", "upload")
 
 
 class UserCollection(Base):
