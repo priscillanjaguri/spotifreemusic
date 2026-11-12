@@ -13,7 +13,9 @@ tunewise/
 │   │   └── api/               # HTTP layer only: validate in, call service, shape out
 │   │   ├── schemas/           # Pydantic request/response models
 │   │   ├── services/          # business logic (catalogue import, collection queries)
-│   │   ├── providers/         # adapter interface, Jamendo adapter, registry
+│   │   ├── providers/         # adapter interface, Jamendo + My Library adapters, registry
+│   │   ├── storage/           # object storage: local filesystem (default) or Cloudflare R2
+│   │   ├── analysis/          # Librosa audio features -- pure, no web/DB/storage imports
 │   │   # added in later stages:
 │   │   # services/ listening, analytics
 │   │   # ml/        recommender -- pure Python, no web/DB imports
@@ -31,13 +33,13 @@ Dependency direction: `api -> services -> models`, and `services -> ml` (never t
 The ML package receives plain arrays/DataFrames and returns scores, so it can be unit-tested
 and replaced without touching the web layer or UI.
 
-## Database (15 tables)
+## Database (16 tables)
 | Group | Tables |
 |---|---|
 | Accounts | `users`, `user_preferences` |
 | Catalogue (provider-independent) | `artists`, `albums`, `songs`, `song_artists`, `genres`, `song_genres`, `song_features` |
 | Providers (playback side) | `music_providers`, `song_provider_links` |
-| User data | `user_collections`, `user_interactions`, `playback_sessions`, `listening_events` |
+| User data | `user_collections`, `user_interactions`, `playback_sessions`, `listening_events`, `library_uploads` |
 
 ### Decisions worth understanding
 1. **Catalogue vs. playback are separate.** Songs never reference a provider. `song_provider_links`
@@ -109,6 +111,43 @@ and replaced without touching the web layer or UI.
   `mock_dev` (shown as a **Sample** badge, per decision 8) with generated tones. It exists so the UI can be
   exercised without a Jamendo key; it is never selected when a real provider is configured or outside
   development. Tests still use their own fake provider.
+
+## My Library decisions
+- **A provider like any other.** `my_library` is a `MusicProviderAdapter` (never searched). Each upload
+  becomes a catalogue song with a `song_provider_links` row whose `playback_uri` is our own
+  `/api/v1/library/{id}/stream`, so the collection, player and future recommender need no special cases.
+- **Private by construction.** `songs.owner_user_id` marks uploaded songs. `songs/{id}`, `collection`
+  (POST), `library/*`, stream and cover all return 404 to anyone but the owner, so ids can't be probed.
+  Artists and albums stay shared metadata, matched by name like provider imports. On delete, a user-provided
+  artist or album that nothing else uses is removed too.
+- **`library_uploads`** stores the file record: owner, song, SHA-256, original filename, sniffed format,
+  size, storage backend and key, cover key, and analysis status. `UNIQUE (user_id, content_sha256)`
+  enforces dedupe even under concurrent uploads. The same bytes from two users are two private copies.
+- **Validation runs before anything is stored:**
+  1. The extension must be on the allow-list.
+  2. Magic bytes must match that extension (a FLAC renamed `.mp3` is rejected).
+  3. The size limit is enforced while streaming to a temp file.
+  4. mutagen must parse the file and find a duration.
+
+  Rejections are per file (`status: rejected` with a reason). They never fail the whole request.
+- **Storage abstraction** (`app/storage`): `put_file`, `delete`, `local_copy` (for analysis), and
+  `local_path` / `presigned_url` (for serving). Local disk serves through `FileResponse`, which answers
+  `Range` with 206. R2 (boto3, S3 API, `region=auto`) gets a 307 redirect to a presigned GET, so audio
+  bytes never pass through the API. On delete, rows go first and files second: a stray file is harmless,
+  but a row pointing at nothing is not.
+- **Analysis hook.** After an upload, `BackgroundTasks` queues `run_analysis`, which moves the status
+  through `pending → running → done | failed | unavailable`. It analyses the first 120 s and stores only
+  measured values: tempo (left null when there's no steady beat), energy from RMS loudness, loudness dB,
+  spectral centroid and roll-off, zero-crossing rate, and key/mode via Krumhansl–Schmuckler with a
+  confidence score. Spotify-style danceability, valence, acousticness and instrumentalness need a
+  trained model. Migration 0003 made those columns nullable rather than storing invented numbers.
+  Librosa is an optional extra (`requirements-analysis.txt`). The job runs in the API process, so at
+  higher volume it should move to a worker queue (RQ/Celery/Arq) behind the same function.
+- **Upload UI.** The endpoint accepts many files per request. The page sends one file per request,
+  two at a time, using XHR so each file gets its own progress bar. Rows poll every 2.5 s while any
+  analysis is still running.
+- **Legal test audio.** The fixtures are generated tones (`scripts/make_test_audio.py`). Manual testing
+  used Jamendo Creative Commons tracks marked `audiodownload_allowed`. They are not committed.
 
 ### Design system: "girly Spotify" in deep satin purple
 The theme is predominantly deep purple in a Spotify layout: floating sidebar, card grids and a persistent

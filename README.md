@@ -6,7 +6,8 @@ A personal music discovery and intelligence app: collection management, content-
 recommendations, listening analytics, taste timeline and a daily companion.
 
 **Status: Stage 3 of 7 complete** (auth, profile, catalogue, collection, Jamendo adapter, and the web UI:
-sign-in, dashboard, collection with filters, discover with search and playback).
+sign-in, dashboard, collection with filters, discover with search and playback), plus **My Library**:
+upload music files you own and stream them in the app.
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for design decisions and the stage checklist.
 
 ## Stack
@@ -32,6 +33,7 @@ python -c "import secrets; print(secrets.token_urlsafe(48))"   # paste as SECRET
 cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
+pip install -r requirements-analysis.txt   # optional: Librosa audio analysis for My Library
 alembic upgrade head                    # create tables via migrations
 uvicorn app.main:app --reload           # http://localhost:8000
 
@@ -59,7 +61,7 @@ npm run build         # typecheck + production bundle in dist/
 ```
 Screens: **Sign in / Create account**, **Home** (stats, recently added, top genres and artists),
 **Collection** (filter by artist, album, genre via `/collection/facets`; remove with undo; play all)
-and **Discover** (search, add to collection, play). A persistent player bar handles playback via
+**Discover** (search, add to collection, play) and **My Library** (upload your own files, see below). A persistent player bar handles playback via
 the provider's stream URL. Layout: sidebar on desktop, top bar and bottom tab bar on mobile.
 
 Design system: a "girly Spotify" look in deep satin purples (sampled from satin-ribbon references). `src/index.css` holds the palette,
@@ -102,7 +104,58 @@ licence URL is stored so we can check it before any audio analysis (Librosa, pla
 Spotify is deliberately NOT used for audio features (its terms forbid feeding its content to ML
 models, and the audio-features endpoint is closed to new apps).
 
+## My Library (your own music files)
+Upload files you own (MP3, M4A/AAC, FLAC, OGG, WAV) on the **My Library** page: drag and drop, or
+**Add music** on mobile. Each file is:
+- **Checked:** the extension must be accepted and the content must really be that format (magic bytes,
+  then mutagen). There is a size limit, `LIBRARY_MAX_FILE_MB` (default 200).
+- **Deduplicated per user** by SHA-256. Re-uploading the same bytes reports "Already in your library".
+- **Tagged** with mutagen: title, artists, album, genre, date, duration and embedded cover art. When there
+  are no tags it falls back to the filename (`Artist - Title.mp3`).
+- **Catalogued** as a private song (`data_source='user_provided'`, `songs.owner_user_id`) and added to
+  your collection, so it plays in the normal player. Other users get 404 for it everywhere.
+- **Analysed** in the background with Librosa: tempo, energy/RMS, loudness, spectral centroid and
+  roll-off, zero-crossing rate, and key/mode. The results go into `song_features`. This is optional:
+  install `requirements-analysis.txt`. Without it, files still upload and play and show "Not analysed".
+  `ffmpeg` on the PATH lets it decode M4A/AAC.
+
+Files are stored under `var/library/` (git-ignored; change it with `LIBRARY_STORAGE_DIR`), or in
+Cloudflare R2 when configured. Streaming is owner-only. Local files support HTTP Range requests,
+so seeking works. With R2 the stream URL redirects to a presigned URL that expires after
+`R2_PRESIGN_SECONDS` (default 600). Deleting a file removes the stored objects and the song,
+plus its album and artists if nothing else uses them.
+
+Regenerate the test fixtures (generated tones only) with `python -m scripts.make_test_audio`.
+
+### How to enable Cloudflare R2
+You need to create two things in Cloudflare: **an R2 bucket** and **an R2 API token** for it.
+
+1. In the Cloudflare dashboard, open **R2 Object Storage** and enable it. Cloudflare asks for a payment
+   method even for the free tier.
+2. **Create a bucket**, for example `tunewise-music`. Leave it private: don't connect a custom domain
+   and don't enable the public `r2.dev` URL. Playback uses short-lived presigned URLs instead.
+3. Go to **R2 → Manage R2 API Tokens → Create API token**:
+   - Permission: **Object Read & Write**.
+   - Scope: **Apply to specific buckets only**, pick your bucket.
+   - TTL: as you prefer.
+
+   Create it, then copy the **Access Key ID** and **Secret Access Key**. The secret is shown only once.
+4. Copy your **Account ID** from the R2 overview page (right-hand side).
+5. Put the four values in `.env` and restart the backend:
+   ```
+   R2_ACCOUNT_ID=<account id>
+   R2_ACCESS_KEY_ID=<access key id>
+   R2_SECRET_ACCESS_KEY=<secret access key>
+   R2_BUCKET=tunewise-music
+   ```
+
+R2 is used only when all four are set; otherwise uploads go to the local disk. No bucket CORS rule is
+needed for playback, because the `<audio>` element follows the redirect without CORS. Add a GET rule for
+your site's origin only if you later read the files with `fetch` or Web Audio. Files uploaded before
+switching stay on the old backend: they report `storage_mismatch` (503) until they're re-uploaded.
+
 ## API overview (all under `/api/v1`, full docs at `/docs`)
 `auth/register|login|logout|me` · `profile` (PATCH, DELETE) · `profile/preferences` ·
 `songs/search?q=` · `songs/{id}` · `collection` (GET with `artist_id`/`album_id`/`genre`, POST) ·
-`collection/facets` · `collection/{song_id}` (DELETE). Login uses an httpOnly, SameSite=Lax cookie.
+`collection/facets` · `collection/{song_id}` (DELETE) · `library` (GET) · `library/uploads` (POST, multipart
+`files`) · `library/{id}` (GET, DELETE) · `library/{id}/stream` (Range) · `library/{id}/cover`. Login uses an httpOnly, SameSite=Lax cookie.
