@@ -3,8 +3,8 @@
 Spotifree is **one Docker image**: Vite SPA served by FastAPI, plus **Postgres**.
 Optional: Jamendo (`JAMENDO_CLIENT_ID`) and Cloudflare R2 (`R2_*`).
 
-**Chosen host: [Railway](https://railway.app)** — one project, web service + Postgres.
-[Render](https://render.com) is the documented fallback (`render.yaml` Blueprint).
+**Chosen host (free): [Render](https://render.com)** — Blueprint (`render.yaml`): free web + free Postgres.
+[Railway](https://railway.app) is optional paid (`railway.toml`); not used while staying on free tier.
 
 Do **not** split the SPA to Vercel and the API elsewhere; the production app is same-origin.
 
@@ -18,34 +18,22 @@ Do **not** split the SPA to Vercel and the API elsewhere; the production app is 
 | `docker-compose.yml` | Local production-shaped stack |
 | `.env.example` | All env vars (never commit `.env`) |
 
-## Railway (recommended)
+## Render free (recommended)
 
 1. Push this repo to GitHub as **`priscillanjaguri/spotifreemusic`** on `main` (QH’s GitHub — not `brn-mwai`).
-2. [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub** → pick `spotifreemusic`.
-3. **Add PostgreSQL** in the same project; Railway injects `DATABASE_URL` into the web service (link the variable if needed).
-4. Set variables on the **web** service (Variables tab):
+2. [dashboard.render.com](https://dashboard.render.com) → **New** → **Blueprint** → connect **`priscillanjaguri/spotifreemusic`** → apply root `render.yaml`.
+3. Blueprint creates free web **`spotifree`** + free Postgres **`spotifree-db`**, generates `SECRET_KEY`, sets `ENVIRONMENT=production` / `COOKIE_SECURE=true` / `LIBRARY_ANALYSIS_ENABLED=false`, and wires `DATABASE_URL`.
+4. After the first public URL exists, set `CORS_ORIGINS` in the dashboard:  
+   `["https://YOUR-SERVICE.onrender.com","https://localhost","capacitor://localhost"]`  
+   Optional: `JAMENDO_CLIENT_ID`, `R2_*` (never commit values).
+5. Confirm `/api/v1/health` → point the Android APK **Server URL** at that HTTPS origin (no trailing slash).
 
-| Variable | Required | Notes |
-| --- | --- | --- |
-| `SECRET_KEY` | Yes | `python -c "import secrets; print(secrets.token_urlsafe(48))"` |
-| `DATABASE_URL` | Yes | From Postgres plugin (auto or reference) |
-| `ENVIRONMENT` | Yes | `production` |
-| `COOKIE_SECURE` | Yes | `true` |
-| `CORS_ORIGINS` | Yes | JSON list including your public HTTPS URL **and** Capacitor origins: `["https://YOUR.up.railway.app","https://localhost","capacitor://localhost"]` |
-| `JAMENDO_CLIENT_ID` | No | Discover / CC catalogue |
-| `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET` | No | My Library object storage |
-| `LIBRARY_ANALYSIS_ENABLED` | No | Prefer `false` on free tiers (CPU) |
+**Free-tier limits:** web spins down after **15 minutes** idle (~1 minute cold start); **750** free instance hours/month; free Postgres **expires after 30 days**; ephemeral filesystem.
 
-5. Deploy → open the public HTTPS URL → confirm `/api/v1/health` returns `{"status":"ok",...}`.
-6. Point the Android APK **Server URL** at that HTTPS origin (no trailing slash). See below.
+## Railway (paid alternative)
 
-## Render (alternative)
-
-1. Same GitHub repo (`priscillanjaguri/spotifreemusic`) on `main`.
-2. Render → **New** → **Blueprint** → select the repo (uses `render.yaml`).
-3. Fill blueprint prompts for optional secrets (`CORS_ORIGINS`, Jamendo, R2).
-4. After the first URL is known, set `CORS_ORIGINS` to include `https://<service>.onrender.com` plus Capacitor origins.
-5. Same APK Server URL steps as Railway.
+1. Same GitHub repo on `main`.
+2. [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub** → `spotifreemusic` → add Postgres → set env vars (see Project store `docs/github-and-host.md` / `.env.example`).
 
 ## Local Docker (smoke test)
 

@@ -1,7 +1,7 @@
-# Render Blueprint: one web service (Docker) + managed Postgres.
+# Render Blueprint (preferred free host): one web service (Docker) + managed Postgres.
 # Dashboard: New → Blueprint → connect GitHub repo priscillanjaguri/spotifreemusic → apply this file.
-# Prefer Railway if you want the fewest clicks; this file is the Render equivalent.
-# Docs: docs/DEPLOY.md
+# Free tier: web spins down after ~15m idle; free Postgres expires after 30 days.
+# Docs: docs/DEPLOY.md and Project store docs/github-and-host.md
 
 databases:
   - name: spotifree-db
