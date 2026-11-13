@@ -36,8 +36,7 @@ Do **not** split the SPA to Vercel and the API elsewhere; the production app is 
 | `CORS_ORIGINS` | Yes | JSON list including your public HTTPS URL **and** Capacitor origins: `["https://YOUR.up.railway.app","https://localhost","capacitor://localhost"]` |
 | `JAMENDO_CLIENT_ID` | No | Discover / CC catalogue |
 | `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` | No | Spotify Client Credentials; metadata for ML only (no streaming) |
-| `GENIUS_ACCESS_TOKEN` | No | Genius Client Access Token (or Client ID) for plain lyrics |
-| `GENIUS_CLIENT_SECRET` / `GENIUS_CLIENT_ID` | No | Needed when Bearer alone fails; OAuth client-credentials |
+| `GENIUS_ACCESS_TOKEN` / `GENIUS_CLIENT_*` | No | Unused for lyrics (LRCLIB is keyless). Kept optional for future Genius metadata. |
 | `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET` | No | My Library object storage |
 | `LIBRARY_ANALYSIS_ENABLED` | No | Prefer `false` on free tiers (CPU) |
 
@@ -51,7 +50,7 @@ Do **not** split the SPA to Vercel and the API elsewhere; the production app is 
 3. Fill blueprint prompts for optional secrets (`CORS_ORIGINS`, Jamendo, R2, Spotify).
 4. After the first URL is known, set `CORS_ORIGINS` to include `https://<service>.onrender.com` plus Capacitor origins.
 5. Set `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` in the Render dashboard (or Cursor app secrets) to enable library / Jamendo metadata enrichment for recommendations. Leave unset to skip gracefully.
-6. Set `GENIUS_ACCESS_TOKEN` (and `GENIUS_CLIENT_SECRET` if Client Access Token alone is rejected) for plain lyrics via `GET /api/v1/lyrics/{song_id}`. Leave unset to return 503 gracefully.
+6. Plain lyrics use **LRCLIB** (no API key) via `GET /api/v1/lyrics/{song_id}`. Genius env vars are optional/unused for lyric bodies.
 7. Same APK Server URL steps as Railway.
 
 ## Local Docker (smoke test)

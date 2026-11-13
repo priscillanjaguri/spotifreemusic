@@ -210,16 +210,22 @@ export function PlayerBar() {
                 <pre className="whitespace-pre-wrap font-sans text-[15px] leading-relaxed text-cream/95">
                   {lyrics.lyrics}
                 </pre>
-                {lyrics.genius_url && (
-                  <a
-                    href={lyrics.genius_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-block text-xs text-lilac hover:text-white hover:underline"
-                  >
-                    Source: Genius
-                  </a>
-                )}
+                <p className="text-xs text-lavender/60">
+                  Source: {lyrics.source === "lrclib" ? "LRCLIB" : lyrics.source}
+                  {lyrics.genius_url ? (
+                    <>
+                      {" · "}
+                      <a
+                        href={lyrics.genius_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-lilac hover:text-white hover:underline"
+                      >
+                        Genius
+                      </a>
+                    </>
+                  ) : null}
+                </p>
               </div>
             )}
           </div>
