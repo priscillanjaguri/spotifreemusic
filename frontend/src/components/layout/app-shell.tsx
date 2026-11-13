@@ -86,7 +86,7 @@ function MobileTabBar() {
   return (
     <nav
       aria-label="Main"
-      className="glass-strong fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-white/10 pb-[env(safe-area-inset-bottom)] lg:hidden"
+      className="glass-strong fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-white/10 pb-[env(safe-area-inset-bottom,0px)] lg:hidden"
     >
       {MOBILE_PRIMARY.map(({ to, label, icon: Icon, end, short }) => (
         <NavLink
@@ -169,7 +169,9 @@ export function AppShell() {
       <main
         className={cn(
           "mx-auto max-w-6xl px-4 pt-6 sm:px-6 lg:ml-[17rem] lg:max-w-none lg:px-10 lg:pt-10",
-          current ? "pb-44 lg:pb-32" : "pb-28 lg:pb-12",
+          current
+            ? "pb-[var(--mobile-main-pad-player)] lg:pb-32"
+            : "pb-[var(--mobile-main-pad)] lg:pb-12",
         )}
       >
         <div className="mx-auto max-w-6xl">

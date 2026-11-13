@@ -92,7 +92,7 @@ export function PlayerBar() {
       <div
         role="region"
         aria-label="Now playing"
-        className="gloss glass-strong glass-edge fixed inset-x-2 bottom-[4.75rem] z-40 rounded-[1.75rem] text-player-foreground lg:inset-x-auto lg:bottom-4 lg:left-[17.5rem] lg:right-4"
+        className="gloss glass-strong glass-edge fixed inset-x-2 z-40 rounded-[1.75rem] text-player-foreground bottom-[var(--mobile-player-bottom)] lg:inset-x-auto lg:bottom-4 lg:left-[17.5rem] lg:right-4"
       >
         <div className="absolute inset-x-3 top-0 lg:hidden">
           <div
@@ -100,9 +100,9 @@ export function PlayerBar() {
             style={{ width: `${p.duration ? (p.position / p.duration) * 100 : 0}%` }}
           />
         </div>
-        <div className="flex items-center gap-3 p-2.5 lg:grid lg:grid-cols-[1fr_minmax(0,1.4fr)_1fr] lg:gap-6 lg:px-4">
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            <CoverArt src={song.cover_url} seed={song.id} title={song.title} className="size-11" />
+        <div className="flex items-center gap-2 p-2.5 sm:gap-3 lg:grid lg:grid-cols-[1fr_minmax(0,1.4fr)_1fr] lg:gap-6 lg:px-4">
+          <div className="flex min-w-0 flex-1 items-center gap-2.5 sm:gap-3">
+            <CoverArt src={song.cover_url} seed={song.id} title={song.title} className="size-11 shrink-0" />
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <p className="truncate text-sm font-bold text-white">{song.title}</p>
@@ -127,7 +127,7 @@ export function PlayerBar() {
             </div>
           </div>
 
-          <div className="flex items-center gap-1 lg:flex-col lg:gap-1.5">
+          <div className="flex shrink-0 items-center gap-1 lg:flex-col lg:gap-1.5">
             <div className="flex items-center gap-1 lg:gap-2">
               <Button size="icon-sm" variant="ghost" className="hidden text-lavender hover:bg-white/10 hover:text-white sm:inline-flex" onClick={p.previous} aria-label="Previous">
                 <SkipBack className="fill-current" />
@@ -151,15 +151,16 @@ export function PlayerBar() {
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-1 lg:gap-2">
+          <div className="flex shrink-0 items-center justify-end gap-1.5 lg:gap-2">
             <Button
-              size="icon-sm"
-              variant="ghost"
-              className="text-lavender hover:bg-white/10 hover:text-white"
+              size="sm"
+              variant="secondary"
+              className="glass-soft h-8 gap-1.5 border-lavender/25 bg-white/10 px-2.5 text-cream hover:bg-white/15 hover:text-white"
               onClick={() => setLyricsOpen(true)}
               aria-label="Show lyrics"
             >
-              <ScrollText />
+              <ScrollText className="size-3.5" />
+              <span className="text-xs font-bold">Lyrics</span>
             </Button>
             <div className="hidden items-center gap-2 lg:flex">
               <Button
@@ -176,6 +177,15 @@ export function PlayerBar() {
                 <X />
               </Button>
             </div>
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              className="text-lavender/70 hover:bg-white/10 hover:text-white lg:hidden"
+              onClick={p.stop}
+              aria-label="Close player"
+            >
+              <X />
+            </Button>
           </div>
         </div>
       </div>
@@ -190,6 +200,7 @@ export function PlayerBar() {
             <SheetDescription className="text-lavender/80">
               {song.title}
               {artistNames(song.artists) ? ` · ${artistNames(song.artists)}` : ""}
+              <span className="mt-1 block text-xs text-lavender/55">Plain lyrics from LRCLIB for the current track.</span>
             </SheetDescription>
           </SheetHeader>
           <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-2">
