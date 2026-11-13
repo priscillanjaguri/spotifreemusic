@@ -193,6 +193,15 @@
   --player: rgb(84 36 99 / 0.55);
   --player-foreground: var(--color-lavender);
 
+  /* Mobile chrome: tab row is h-16; pad with home-indicator safe area. */
+  --mobile-tab-h: calc(4rem + env(safe-area-inset-bottom, 0px));
+  /* Gap between mini-player bottom edge and top of tab bar. */
+  --mobile-player-gap: 0.5rem;
+  --mobile-player-bottom: calc(var(--mobile-tab-h) + var(--mobile-player-gap));
+  /* Content padding clears tab + ~4.5rem player + gap. */
+  --mobile-main-pad-player: calc(var(--mobile-tab-h) + 5.5rem);
+  --mobile-main-pad: calc(var(--mobile-tab-h) + 1rem);
+
   --glass-blur: 22px;
   --glass-saturate: 1.4;
   --glass-fill: rgb(58 28 78 / 0.42);
