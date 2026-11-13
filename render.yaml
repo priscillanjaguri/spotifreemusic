@@ -1,5 +1,5 @@
 # Render Blueprint: one web service (Docker) + managed Postgres.
-# Dashboard: New → Blueprint → connect GitHub repo brn-mwai/tunewise → apply this file.
+# Dashboard: New → Blueprint → connect GitHub repo priscillanjaguri/tunewise → apply this file.
 # Prefer Railway if you want the fewest clicks; this file is the Render equivalent.
 # Docs: docs/DEPLOY.md
 

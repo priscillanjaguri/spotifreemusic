@@ -20,7 +20,7 @@ Do **not** split the SPA to Vercel and the API elsewhere; the production app is 
 
 ## Railway (recommended)
 
-1. Push this repo to GitHub (`brn-mwai/tunewise` on `main`).
+1. Push this repo to GitHub as **`priscillanjaguri/tunewise`** on `main` (QH’s GitHub — not `brn-mwai`).
 2. [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub** → pick `tunewise`.
 3. **Add PostgreSQL** in the same project; Railway injects `DATABASE_URL` into the web service (link the variable if needed).
 4. Set variables on the **web** service (Variables tab):
@@ -41,7 +41,7 @@ Do **not** split the SPA to Vercel and the API elsewhere; the production app is 
 
 ## Render (alternative)
 
-1. Same GitHub repo on `main`.
+1. Same GitHub repo (`priscillanjaguri/tunewise`) on `main`.
 2. Render → **New** → **Blueprint** → select the repo (uses `render.yaml`).
 3. Fill blueprint prompts for optional secrets (`CORS_ORIGINS`, Jamendo, R2).
 4. After the first URL is known, set `CORS_ORIGINS` to include `https://<service>.onrender.com` plus Capacitor origins.
