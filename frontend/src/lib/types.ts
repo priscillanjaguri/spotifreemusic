@@ -30,6 +30,14 @@ export type Song = {
 
 export type SongSearchResponse = { query: string; results: Song[] };
 
+export type Lyrics = {
+  title: string;
+  artist: string;
+  lyrics: string;
+  source: string;
+  genius_url: string | null;
+};
+
 export type CollectionSource = "search" | "recommendation" | "daily_companion" | "manual";
 
 export type CollectionItem = {
