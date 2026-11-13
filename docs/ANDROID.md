@@ -51,6 +51,9 @@ VITE_API_BASE_URL=https://music.example.com npm run android:apk
 - Cleartext HTTP to LAN IPs is allowed in the debug APK (`usesCleartextTraffic` + network security config).
 - CORS must allow Capacitor origins (`https://localhost`, `capacitor://localhost`). Defaults and
   `.env.example` include these; production `CORS_ORIGINS` should too.
+- **My Library uploads** on the APK use `@capawesome/capacitor-file-picker` (not the WebView
+  `<input type="file">`), with `launchMode=singleTop` and `READ_MEDIA_AUDIO` so picking from
+  Downloads keeps the selection when returning to the app.
 
 ## Status bar
 

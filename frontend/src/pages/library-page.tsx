@@ -29,31 +29,53 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatBytes, plural } from "@/lib/format";
 import { type QueueItem, useDeleteUpload, useLibrary, useUploadQueue } from "@/lib/library";
+import { isNativeLibraryPicker, pickLibraryAudioFiles } from "@/lib/pick-library-audio";
 import { usePlayer } from "@/lib/player";
 import type { LibraryLimits, LibraryUpload, Song } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const FORMATS = "MP3, M4A/AAC, FLAC, OGG or WAV";
 
-/** Android Chrome-friendly picker: label + input (not a nested role=button click proxy). */
+/** Native FilePicker on Capacitor; HTML file input on web. */
 function Dropzone({
   onFiles,
   accept,
   limits,
   compact,
 }: {
-  onFiles: (files: FileList) => void;
+  onFiles: (files: FileList | File[]) => void;
   accept: string;
   limits?: LibraryLimits;
   compact: boolean;
 }) {
   const inputId = "spotifree-library-file";
+  const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
+  const [picking, setPicking] = useState(false);
   const depth = useRef(0);
+  const native = isNativeLibraryPicker();
+
+  const openPicker = async () => {
+    if (picking) return;
+    if (!native) {
+      inputRef.current?.click();
+      return;
+    }
+    setPicking(true);
+    try {
+      const files = await pickLibraryAudioFiles();
+      if (files?.length) onFiles(files);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Couldn't open the file picker.");
+    } finally {
+      setPicking(false);
+    }
+  };
 
   return (
     <section
@@ -84,18 +106,21 @@ function Dropzone({
       <Rose className={cn("pointer-events-none absolute -right-10 -bottom-12 opacity-80 drop-shadow-xl", compact ? "size-32" : "size-48")} />
       <Petal className="pointer-events-none absolute top-6 left-[8%] size-6 rotate-[-20deg] opacity-60" />
       <Petal className="pointer-events-none absolute top-[40%] left-[22%] hidden size-4 rotate-[60deg] opacity-40 sm:block" />
-      <input
-        id={inputId}
-        type="file"
-        multiple
-        accept={accept}
-        className="sr-only"
-        // capture omitted on purpose — we want the file picker, not the camera/mic.
-        onChange={(e) => {
-          if (e.target.files?.length) onFiles(e.target.files);
-          e.target.value = "";
-        }}
-      />
+      {!native && (
+        <input
+          id={inputId}
+          ref={inputRef}
+          type="file"
+          multiple
+          accept={accept}
+          className="sr-only"
+          // capture omitted — file picker, not camera/mic.
+          onChange={(e) => {
+            if (e.target.files?.length) onFiles(e.target.files);
+            e.target.value = "";
+          }}
+        />
+      )}
       <div className={cn("relative flex items-center gap-5", compact ? "flex-row justify-center text-left" : "flex-col")}>
         <span className="gloss grid size-16 shrink-0 place-items-center rounded-full bg-cta text-white shadow-polish">
           <Upload className="size-7" />
@@ -112,16 +137,17 @@ function Dropzone({
           <p className="mt-1.5 text-sm text-muted-foreground">
             {FORMATS} · up to {limits?.max_file_mb ?? 200} MB each
           </p>
-          <label
-            htmlFor={inputId}
-            className={cn(
-              buttonVariants({ variant: "cta", size: "lg" }),
-              "mt-4 inline-flex min-h-12 cursor-pointer touch-manipulation px-6",
-            )}
+          <Button
+            type="button"
+            variant="cta"
+            size="lg"
+            disabled={picking}
+            onClick={() => void openPicker()}
+            className="mt-4 min-h-12 touch-manipulation px-6"
           >
-            <FolderHeart data-icon="inline-start" />
-            Choose audio files
-          </label>
+            {picking ? <Loader2 data-icon="inline-start" className="animate-spin" /> : <FolderHeart data-icon="inline-start" />}
+            {picking ? "Opening files…" : "Choose audio files"}
+          </Button>
         </div>
       </div>
     </section>

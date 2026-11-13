@@ -16,7 +16,7 @@
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBarLaunch"
-            android:launchMode="singleTask"
+            android:launchMode="singleTop"
             android:exported="true">
 
             <intent-filter>
@@ -40,4 +40,8 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- My Library: pick audio from Downloads / device storage (Android 13+) -->
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <!-- Pre-13 storage access for the same picker path -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
 </manifest>
