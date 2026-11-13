@@ -12,6 +12,7 @@ import type {
   LibraryPage,
   LibraryUpload,
   ListeningEventPayload,
+  Lyrics,
   MemoryLane,
   Preferences,
   RecommendationsResponse,
@@ -166,6 +167,8 @@ export const api = {
 
   searchSongs: (q: string, limit = 24) =>
     request<SongSearchResponse>(`/songs/search?${new URLSearchParams({ q, limit: String(limit) })}`),
+
+  lyrics: (songId: number) => request<Lyrics>(`/lyrics/${songId}`),
 
   collection: (filter: CollectionFilter | null, limit = 50, offset = 0) => {
     const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });

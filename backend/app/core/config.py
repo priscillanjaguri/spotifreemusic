@@ -52,6 +52,13 @@ class Settings(BaseSettings):
     # never used for playback URLs. Both id + secret required to enable.
     spotify_client_id: str | None = None
     spotify_client_secret: str | None = None
+    # Optional Genius lyrics (server-side only — never exposed to the SPA/APK).
+    # Prefer Client Access Token as Bearer. When the token alone is rejected, set
+    # GENIUS_CLIENT_SECRET and use the token (or GENIUS_CLIENT_ID) for OAuth
+    # client-credentials. Plain lyrics only; no karaoke / Musixmatch.
+    genius_access_token: str | None = None
+    genius_client_id: str | None = None
+    genius_client_secret: str | None = None
     # Development only: serve an invented catalogue (labelled 'mock_dev') with generated
     # tones when no real provider is configured. Ignored outside ENVIRONMENT=development.
     dev_mock_provider: bool = False
@@ -83,6 +90,13 @@ class Settings(BaseSettings):
     @property
     def spotify_enabled(self) -> bool:
         return bool(self.spotify_client_id and self.spotify_client_secret)
+
+    @property
+    def genius_enabled(self) -> bool:
+        # Bearer token alone, or Client ID (+ optional token-as-id) with secret.
+        if self.genius_access_token:
+            return True
+        return bool(self.genius_client_id and self.genius_client_secret)
 
     @property
     def mock_provider_enabled(self) -> bool:
