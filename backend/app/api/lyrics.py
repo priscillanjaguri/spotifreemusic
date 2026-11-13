@@ -38,7 +38,16 @@ def get_lyrics(
         result = lyrics_svc.get_lyrics_for_song(db, settings, song_id, user.id)
     except LookupError:
         raise HTTPException(404, detail={"code": "song_not_found", "message": "Song not found"})
-    except RuntimeError:
+    except RuntimeError as exc:
+        msg = str(exc)
+        if msg.startswith("lyrics_fetch_failed"):
+            raise HTTPException(
+                502,
+                detail={
+                    "code": "lyrics_fetch_failed",
+                    "message": "Genius matched this song but the lyrics page could not be loaded.",
+                },
+            )
         raise HTTPException(
             503,
             detail={
