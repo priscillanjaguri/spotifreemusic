@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Deep purple Tunewise chrome (status bar / splash). -->
+    <!-- Deep purple Spotifree chrome (status bar / splash). -->
     <color name="colorPrimary">#2a0a3d</color>
     <color name="colorPrimaryDark">#160a1f</color>
     <color name="colorAccent">#c4a0ff</color>

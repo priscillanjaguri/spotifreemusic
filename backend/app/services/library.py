@@ -74,7 +74,7 @@ def ingest(
     if ext not in ACCEPTED_EXTENSIONS:
         return IngestResult(filename, "rejected", "Unsupported file type. Use MP3, M4A/AAC, FLAC, OGG or WAV.")
 
-    with tempfile.TemporaryDirectory(prefix="tunewise-upload-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="spotifree-upload-") as tmp:
         path = Path(tmp) / f"audio{ext}"
         spooled = _spool(stream, path, max_bytes)
         if spooled is None:

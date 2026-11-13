@@ -1,11 +1,11 @@
-/* Tunewise service worker — installability + app-shell cache only.
+/* Spotifree service worker — installability + app-shell cache only.
  *
  * NEVER cache:
  *   - /api/* (auth cookies, private library, recommendations)
  *   - audio streams / Range responses / library media
  * Network-first for navigations; cache-first only for hashed build assets.
  */
-const SHELL_CACHE = "tunewise-shell-v1";
+const SHELL_CACHE = "spotifree-shell-v1";
 const SHELL_URLS = ["/", "/manifest.webmanifest", "/favicon.svg", "/icon-192.png", "/icon-512.png"];
 
 self.addEventListener("install", (event) => {

@@ -1,7 +1,7 @@
 /** Runtime API origin for Capacitor / cross-origin clients. Empty = same-origin `/api`. */
 
-const STORAGE_KEY = "tunewise_api_base";
-const TOKEN_KEY = "tunewise_access_token";
+const STORAGE_KEY = "spotifree_api_base";
+const TOKEN_KEY = "spotifree_access_token";
 
 function fromEnv(): string {
   const raw = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() ?? "";

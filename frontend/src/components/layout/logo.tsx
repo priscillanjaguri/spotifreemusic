@@ -7,7 +7,7 @@ export function Logo({ className, compact }: { className?: string; compact?: boo
       <span className="gloss grid size-10 place-items-center rounded-full bg-cta shadow-polish">
         <AudioWaveform className="size-5 text-white" aria-hidden />
       </span>
-      {!compact && <span className="font-script text-gradient pr-1 text-[2rem] leading-none">Tunewise</span>}
+      {!compact && <span className="font-script text-gradient pr-1 text-[2rem] leading-none">Spotifree</span>}
     </span>
   );
 }

@@ -1,16 +1,16 @@
-# Production-shaped stack: Postgres + Tunewise (API serving the built SPA).
+# Production-shaped stack: Postgres + Spotifree (API serving the built SPA).
 # Copy .env.example → .env and fill SECRET_KEY (+ optional Jamendo / R2). Never commit .env.
 services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_USER: tunewise
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tunewise}
-      POSTGRES_DB: tunewise
+      POSTGRES_USER: spotifree
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-spotifree}
+      POSTGRES_DB: spotifree
     volumes:
-      - tunewise_pg:/var/lib/postgresql/data
+      - spotifree_pg:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U tunewise -d tunewise"]
+      test: ["CMD-SHELL", "pg_isready -U spotifree -d spotifree"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -18,10 +18,10 @@ services:
   app:
     build: .
     ports:
-      - "${TUNEWISE_PORT:-8000}:8000"
+      - "${SPOTIFREE_PORT:-8000}:8000"
     environment:
       ENVIRONMENT: production
-      DATABASE_URL: postgresql+psycopg://tunewise:${POSTGRES_PASSWORD:-tunewise}@db:5432/tunewise
+      DATABASE_URL: postgresql+psycopg://spotifree:${POSTGRES_PASSWORD:-spotifree}@db:5432/spotifree
       SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in .env}
       COOKIE_SECURE: ${COOKIE_SECURE:-true}
       CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:8000"]}
@@ -34,11 +34,11 @@ services:
       R2_BUCKET: ${R2_BUCKET:-}
       FRONTEND_DIST: /app/frontend/dist
     volumes:
-      - tunewise_library:/app/var/library
+      - spotifree_library:/app/var/library
     depends_on:
       db:
         condition: service_healthy
 
 volumes:
-  tunewise_pg:
-  tunewise_library:
+  spotifree_pg:
+  spotifree_library:

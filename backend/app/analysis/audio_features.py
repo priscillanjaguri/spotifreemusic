@@ -83,7 +83,7 @@ def _load_via_ffmpeg(path: Path, max_seconds: float, cause: Exception):
     ffmpeg = shutil.which("ffmpeg")
     if ffmpeg is None:
         raise ValueError(f"Could not decode audio ({cause.__class__.__name__}); install ffmpeg for this format") from cause
-    with tempfile.TemporaryDirectory(prefix="tunewise-decode-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="spotifree-decode-") as tmp:
         wav = Path(tmp) / "decoded.wav"
         result = subprocess.run(
             [ffmpeg, "-loglevel", "error", "-y", "-i", str(path), "-t", str(max_seconds), "-ac", "1",

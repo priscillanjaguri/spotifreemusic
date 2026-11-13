@@ -360,7 +360,7 @@ export function AnalyticsPage() {
           <p className="font-script text-3xl text-cream">privacy</p>
           <h2 className="mt-1 font-display text-3xl font-semibold text-heading">Your listening, your rules</h2>
           <p className="mt-2 text-sm text-lavender">
-            Tunewise only records audible time when history is on. Turning it off stops new events; delete clears
+            Spotifree only records audible time when history is on. Turning it off stops new events; delete clears
             past plays without removing likes or saves.
           </p>
           <div className="mt-5 flex flex-wrap items-center gap-3">

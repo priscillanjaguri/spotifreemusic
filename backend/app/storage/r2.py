@@ -51,7 +51,7 @@ class R2Storage(ObjectStorage):
     def local_copy(self, object_key: str) -> Iterator[Path]:
         from botocore.exceptions import BotoCoreError, ClientError
 
-        with tempfile.TemporaryDirectory(prefix="tunewise-r2-") as tmp:
+        with tempfile.TemporaryDirectory(prefix="spotifree-r2-") as tmp:
             path = Path(tmp) / Path(object_key).name
             try:
                 self.client.download_file(self.bucket, object_key, str(path))

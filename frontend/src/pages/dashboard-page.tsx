@@ -315,7 +315,7 @@ export function DashboardPage() {
           <EmptyState
             icon={Heart}
             title="Recommendations are warming up"
-            description="Save a few songs or pick seed genres on For You — then Tunewise can start matching your taste."
+            description="Save a few songs or pick seed genres on For You — then Spotifree can start matching your taste."
             action={
               <Link to="/recommendations" className={buttonVariants({ variant: "cta" })}>
                 Set your taste

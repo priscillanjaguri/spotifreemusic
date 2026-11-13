@@ -1,4 +1,4 @@
-# Tunewise — one image: Vite SPA + FastAPI (Postgres + R2 via env).
+# Spotifree — one image: Vite SPA + FastAPI (Postgres + R2 via env).
 # Single-platform hosts (Railway / Render): build this Dockerfile, attach Postgres, set env vars.
 FROM node:22-bookworm AS frontend
 WORKDIR /src/frontend

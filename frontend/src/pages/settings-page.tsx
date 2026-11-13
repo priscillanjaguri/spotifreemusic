@@ -53,7 +53,7 @@ export function SettingsPage({ required = false, onSaved }: Props) {
         <Logo className="justify-center" />
         <h1 className="font-display text-3xl text-heading">Server URL</h1>
         <p className="text-sm text-subtle">
-          The Android app talks to your Tunewise backend. Enter the host your phone can reach — a LAN IP on
+          The Android app talks to your Spotifree backend. Enter the host your phone can reach — a LAN IP on
           the same Wi‑Fi (e.g. <code className="text-cream">http://192.168.1.20:8741</code>) or a deployed
           HTTPS URL. Postgres, and R2 if you use it, must be reachable from that host.
         </p>

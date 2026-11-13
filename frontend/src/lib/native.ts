@@ -1,7 +1,7 @@
 import { Capacitor } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
 
-/** Deep purple status bar to match Tunewise chrome. */
+/** Deep purple status bar to match Spotifree chrome. */
 export async function initNativeChrome(): Promise<void> {
   if (!Capacitor.isNativePlatform()) return;
   try {

@@ -19,7 +19,7 @@ const COPY = {
     title: "Welcome back",
     subtitle: "Sign in to pick up where your ears left off.",
     submit: "Sign in",
-    switchText: "New to Tunewise?",
+    switchText: "New to Spotifree?",
     switchLink: "Create an account",
     switchTo: "/register",
   },

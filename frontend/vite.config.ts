@@ -19,6 +19,6 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    proxy: { "/api": process.env.TUNEWISE_API_URL ?? "http://localhost:8000" },
+    proxy: { "/api": process.env.SPOTIFREE_API_URL ?? "http://localhost:8000" },
   },
 });

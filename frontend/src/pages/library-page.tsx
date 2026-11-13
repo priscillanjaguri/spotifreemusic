@@ -51,7 +51,7 @@ function Dropzone({
   limits?: LibraryLimits;
   compact: boolean;
 }) {
-  const inputId = "tunewise-library-file";
+  const inputId = "spotifree-library-file";
   const [dragging, setDragging] = useState(false);
   const depth = useRef(0);
 
@@ -309,7 +309,7 @@ export function LibraryPage() {
         description={
           uploads.length
             ? `${plural(uploads.length, "file")} · ${formatBytes(totalBytes)}. They play here and show up in your collection.`
-            : "Upload music files you own. Tunewise reads their tags and cover art, and plays them right here."
+            : "Upload music files you own. Spotifree reads their tags and cover art, and plays them right here."
         }
         actions={
           songs.length > 0 && (

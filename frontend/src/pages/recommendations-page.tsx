@@ -112,7 +112,7 @@ export function RecommendationsPage() {
           <div className="relative">
             <p className="font-script text-3xl text-cream">seed your taste</p>
             <p className="mt-1 max-w-xl text-sm text-lavender">
-              Tap a few moods. Tunewise uses them when listening history is still thin — you can change them anytime.
+              Tap a few moods. Spotifree uses them when listening history is still thin — you can change them anytime.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               {SEED_GENRES.map((g) => {

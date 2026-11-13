@@ -1,5 +1,5 @@
 # Railway: one service from this Dockerfile + a linked Postgres plugin.
-# Dashboard: New Project → Deploy from GitHub (priscillanjaguri/tunewise) → Add PostgreSQL → set env vars.
+# Dashboard: New Project → Deploy from GitHub (priscillanjaguri/spotifree) → Add PostgreSQL → set env vars.
 # Docs: docs/DEPLOY.md and Project store docs/github-and-host.md
 
 [build]

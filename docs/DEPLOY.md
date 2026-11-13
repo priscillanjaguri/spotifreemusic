@@ -1,6 +1,6 @@
-# Deploy Tunewise (single platform)
+# Deploy Spotifree (single platform)
 
-Tunewise is **one Docker image**: Vite SPA served by FastAPI, plus **Postgres**.
+Spotifree is **one Docker image**: Vite SPA served by FastAPI, plus **Postgres**.
 Optional: Jamendo (`JAMENDO_CLIENT_ID`) and Cloudflare R2 (`R2_*`).
 
 **Chosen host: [Railway](https://railway.app)** — one project, web service + Postgres.
@@ -20,8 +20,8 @@ Do **not** split the SPA to Vercel and the API elsewhere; the production app is 
 
 ## Railway (recommended)
 
-1. Push this repo to GitHub as **`priscillanjaguri/tunewise`** on `main` (QH’s GitHub — not `brn-mwai`).
-2. [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub** → pick `tunewise`.
+1. Push this repo to GitHub as **`priscillanjaguri/spotifree`** on `main` (QH’s GitHub — not `brn-mwai`).
+2. [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub** → pick `spotifree`.
 3. **Add PostgreSQL** in the same project; Railway injects `DATABASE_URL` into the web service (link the variable if needed).
 4. Set variables on the **web** service (Variables tab):
 
@@ -41,7 +41,7 @@ Do **not** split the SPA to Vercel and the API elsewhere; the production app is 
 
 ## Render (alternative)
 
-1. Same GitHub repo (`priscillanjaguri/tunewise`) on `main`.
+1. Same GitHub repo (`priscillanjaguri/spotifree`) on `main`.
 2. Render → **New** → **Blueprint** → select the repo (uses `render.yaml`).
 3. Fill blueprint prompts for optional secrets (`CORS_ORIGINS`, Jamendo, R2).
 4. After the first URL is known, set `CORS_ORIGINS` to include `https://<service>.onrender.com` plus Capacitor origins.
@@ -58,11 +58,11 @@ docker compose up --build
 ## Android APK → hosted Server URL
 
 APK artifact (Project store, not in git):
-`media/android-apk/tunewise-debug.apk`
+`media/android-apk/spotifree-debug.apk`
 
 1. Install the debug APK on the phone (allow unknown sources for the installer).
-2. Open **Tunewise** → **Server URL** (first launch, or Account → Server URL).
-3. Enter the public HTTPS origin only, e.g. `https://tunewise-production.up.railway.app` (no `/api` path).
+2. Open **Spotifree** → **Server URL** (first launch, or Account → Server URL).
+3. Enter the public HTTPS origin only, e.g. `https://spotifree-production.up.railway.app` (no `/api` path).
 4. **Save & connect** → sign in / create account.
 
 The WebView talks to that host over HTTPS; CORS must allow `https://localhost` and `capacitor://localhost`.

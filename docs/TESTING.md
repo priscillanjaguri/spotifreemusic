@@ -1,4 +1,4 @@
-# Testing Tunewise
+# Testing Spotifree
 
 ## Backend (pytest)
 

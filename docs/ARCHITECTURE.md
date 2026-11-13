@@ -2,7 +2,7 @@
 
 ## Folder structure
 ```
-tunewise/
+spotifree/
 ├── README.md  .env.example  .gitignore
 ├── docs/ARCHITECTURE.md
 ├── backend/
@@ -152,7 +152,7 @@ and replaced without touching the web layer or UI.
 ## Stage 4 decisions
 
 ### How the recommender works
-Tunewise recommends with **content**, not collaborative filtering. Every song becomes a vector:
+Spotifree recommends with **content**, not collaborative filtering. Every song becomes a vector:
 
 1. **Tags / genres** — multi-hot from catalogue genres (always available).
 2. **Audio** — Librosa numbers (tempo, energy, loudness, spectral centroid / roll-off, zero-crossing

@@ -1,10 +1,10 @@
-/** Register the Tunewise service worker (shell cache only — never private audio). */
+/** Register the Spotifree service worker (shell cache only — never private audio). */
 export function registerServiceWorker() {
   if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
 
   const register = () => {
     navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch((err) => {
-      console.warn("Tunewise SW registration failed", err);
+      console.warn("Spotifree SW registration failed", err);
     });
   };
 

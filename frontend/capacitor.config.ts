@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: "com.tunewise.app",
-  appName: "Tunewise",
+  appId: "com.spotifree.app",
+  appName: "Spotifree",
   webDir: "dist",
   server: {
     // Allow http:// LAN API hosts from the WebView (debug / sideload builds).

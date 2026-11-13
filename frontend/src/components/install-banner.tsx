@@ -7,7 +7,7 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
-/** Soft “Install Tunewise” chip when Chrome fires beforeinstallprompt (Android). */
+/** Soft “Install Spotifree” chip when Chrome fires beforeinstallprompt (Android). */
 export function InstallBanner() {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const [hidden, setHidden] = useState(() => localStorage.getItem("tw-install-dismissed") === "1");
@@ -26,7 +26,7 @@ export function InstallBanner() {
   return (
     <div className="glass-strong glass-edge fixed inset-x-3 top-3 z-50 flex items-center gap-3 rounded-2xl p-3 shadow-whip-lg lg:left-auto lg:right-6 lg:w-[22rem]">
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-bold text-heading">Install Tunewise</p>
+        <p className="text-sm font-bold text-heading">Install Spotifree</p>
         <p className="text-xs text-muted-foreground">Add to your home screen for full-screen play & uploads.</p>
       </div>
       <Button

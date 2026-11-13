@@ -1,6 +1,8 @@
-# Tunewise
+# Spotifree
 
 > Understand your music. Discover beyond it.
+
+Formerly **Tunewise** — same product, new name (**Spotifree** = Spotify + free).
 
 A personal music discovery and intelligence app: collection management, content-based
 recommendations, listening analytics, taste timeline and a daily companion.
@@ -21,9 +23,9 @@ Python 3.11+, Node 20+, PostgreSQL 14+ (with the `contrib` package, which provid
 
 ```bash
 # 1. Database (once)
-createuser --pwprompt tunewise
-createdb -O tunewise tunewise
-createdb -O tunewise tunewise_test      # tests WIPE this database; keep it separate
+createuser --pwprompt spotifree
+createdb -O spotifree spotifree
+createdb -O spotifree spotifree_test      # tests WIPE this database; keep it separate
 
 # 2. Configuration
 cp .env.example .env                    # then edit: passwords + SECRET_KEY
@@ -43,8 +45,8 @@ npm install
 npm run dev                             # http://localhost:5173 (proxies /api to :8000)
 ```
 
-The dev server proxies `/api` to `http://localhost:8000`; set `TUNEWISE_API_URL` to point it elsewhere,
-e.g. `TUNEWISE_API_URL=http://localhost:8741 npm run dev -- --port 5791`.
+The dev server proxies `/api` to `http://localhost:8000`; set `SPOTIFREE_API_URL` to point it elsewhere,
+e.g. `SPOTIFREE_API_URL=http://localhost:8741 npm run dev -- --port 5791`.
 
 ### Trying the UI without a Jamendo key
 Set `DEV_MOCK_PROVIDER=true` in `.env` (only honoured when `ENVIRONMENT=development` and
@@ -67,14 +69,14 @@ audio or `/api`).
 Design system: deep satin / glass purple. Tokens in `src/index.css`. See `docs/ARCHITECTURE.md`.
 
 ## Install on Android (APK — recommended)
-A Capacitor debug APK wraps the Vite UI and talks to your Tunewise backend over a configurable
+A Capacitor debug APK wraps the Vite UI and talks to your Spotifree backend over a configurable
 **Server URL**. The phone must reach that host (same Wi‑Fi LAN IP or a deployed HTTPS URL). The
 backend needs **Postgres** (and **R2** if you store library files there); Jamendo is optional.
 
-1. Copy `tunewise-debug.apk` to the phone (USB, Drive, chat, etc.).
+1. Copy `spotifree-debug.apk` to the phone (USB, Drive, chat, etc.).
 2. Open the file. If Android blocks it, allow **Install unknown apps** / **Unknown sources** for
    that app (Files, Chrome, Drive, …), then confirm the install.
-3. Open **Tunewise**. On first launch, enter your **Server URL**, e.g.
+3. Open **Spotifree**. On first launch, enter your **Server URL**, e.g.
    `http://192.168.1.20:8741` (PC LAN IP + API port) or `https://your.deployed.host`.
 4. Tap **Save & connect**, then sign in. Account menu → **Server URL** changes the host later.
 
@@ -89,14 +91,14 @@ npm run android:apk   # → android/app/build/outputs/apk/debug/app-debug.apk
 See [`docs/ANDROID.md`](docs/ANDROID.md) for cleartext LAN notes, Bearer auth, and CORS.
 
 ## Install on Android (Chrome PWA)
-Tunewise is also a Progressive Web App. On a phone:
+Spotifree is also a Progressive Web App. On a phone:
 
 1. Open the site in **Chrome** (HTTPS in production, or your LAN/dev URL).
 2. Tap the **⋮** menu → **Install app** / **Add to Home screen** (wording varies by Chrome version).
-3. Confirm. Tunewise opens full-screen (`display: standalone`) from the home-screen icon.
+3. Confirm. Spotifree opens full-screen (`display: standalone`) from the home-screen icon.
 4. Sign in, open **My Library**, tap **Choose audio files**, upload, then play from Library / Collection.
 
-If Chrome shows no Install option yet, use the in-app **Install Tunewise** chip when it appears, or
+If Chrome shows no Install option yet, use the in-app **Install Spotifree** chip when it appears, or
 **Add to Home screen**. The service worker must control the page (reload once after first visit).
 
 ## Deploy (one product: SPA + API + Postgres)
@@ -104,7 +106,7 @@ If Chrome shows no Install option yet, use the in-app **Install Tunewise** chip 
 **One host for the whole stack** — do not split the frontend to Vercel and the API elsewhere.
 Preferred: **Railway** (`railway.toml` + `Dockerfile`). Fallback: **Render** (`render.yaml`).
 
-Tunewise needs **Postgres** (and optionally Cloudflare R2 + a Jamendo client ID). The Docker image
+Spotifree needs **Postgres** (and optionally Cloudflare R2 + a Jamendo client ID). The Docker image
 builds the Vite SPA and serves it from FastAPI on `$PORT` (same origin for the PWA and browser UI).
 
 ```bash
@@ -190,7 +192,7 @@ private song, and optionally analysed with Librosa. Storage is local disk by def
 are all set. See below for R2 setup. Regenerate tone fixtures with `python -m scripts.make_test_audio`.
 
 ### How to enable Cloudflare R2
-1. In Cloudflare, enable **R2 Object Storage** and create a private bucket (e.g. `tunewise-music`).
+1. In Cloudflare, enable **R2 Object Storage** and create a private bucket (e.g. `spotifree-music`).
 2. Create an R2 API token with **Object Read & Write** scoped to that bucket; copy Access Key ID + Secret.
 3. Copy your Account ID from the R2 overview.
 4. Put all four values in `.env` and restart the backend. Without them, uploads stay on local disk.

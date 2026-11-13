@@ -1,15 +1,15 @@
 # Render Blueprint: one web service (Docker) + managed Postgres.
-# Dashboard: New → Blueprint → connect GitHub repo priscillanjaguri/tunewise → apply this file.
+# Dashboard: New → Blueprint → connect GitHub repo priscillanjaguri/spotifree → apply this file.
 # Prefer Railway if you want the fewest clicks; this file is the Render equivalent.
 # Docs: docs/DEPLOY.md
 
 databases:
-  - name: tunewise-db
+  - name: spotifree-db
     plan: free
 
 services:
   - type: web
-    name: tunewise
+    name: spotifree
     runtime: docker
     dockerfilePath: ./Dockerfile
     dockerContext: .
@@ -18,7 +18,7 @@ services:
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: tunewise-db
+          name: spotifree-db
           property: connectionString
       - key: SECRET_KEY
         generateValue: true

@@ -55,7 +55,7 @@ def test_bearer_and_query_token_auth_for_native_clients(client):
 
 def test_tampered_cookie_is_rejected(client):
     register(client)
-    client.cookies.set("tunewise_session", "garbage.token.value")
+    client.cookies.set("spotifree_session", "garbage.token.value")
     assert client.get("/api/v1/auth/me").status_code == 401
 
 

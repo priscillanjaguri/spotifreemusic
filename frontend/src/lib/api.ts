@@ -97,7 +97,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
       headers,
     });
   } catch {
-    throw new ApiError(0, "Can't reach Tunewise right now. Check your Server URL and try again.");
+    throw new ApiError(0, "Can't reach Spotifree right now. Check your Server URL and try again.");
   }
 
   if (response.status === 204) return undefined as T;

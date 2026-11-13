@@ -283,12 +283,12 @@ def test_local_storage_refuses_keys_outside_its_root(storage):
 def _r2(client=None):
     from app.storage.r2 import R2Storage
 
-    return R2Storage("acct123", "AKIDEXAMPLE", "secret-example", "tunewise-music", client=client)
+    return R2Storage("acct123", "AKIDEXAMPLE", "secret-example", "spotifree-music", client=client)
 
 
 def test_r2_presigned_url_is_short_lived_and_scoped():
     url = _r2().presigned_url("users/u/1-abc.mp3", "audio/mpeg", 600)
-    assert url.startswith("https://acct123.r2.cloudflarestorage.com/tunewise-music/users/u/1-abc.mp3?")
+    assert url.startswith("https://acct123.r2.cloudflarestorage.com/spotifree-music/users/u/1-abc.mp3?")
     assert "X-Amz-Expires=600" in url and "response-content-type=audio%2Fmpeg" in url
 
 
@@ -299,8 +299,8 @@ def test_r2_put_and_delete_use_the_bucket(tmp_path):
     src = tmp_path / "a.mp3"
     src.write_bytes(b"ID3data")
     with Stubber(r2.client) as stub:
-        stub.add_response("put_object", {}, {"Bucket": "tunewise-music", "Key": "k.mp3", "Body": ANY, "ContentType": "audio/mpeg"})
-        stub.add_response("delete_object", {}, {"Bucket": "tunewise-music", "Key": "k.mp3"})
+        stub.add_response("put_object", {}, {"Bucket": "spotifree-music", "Key": "k.mp3", "Body": ANY, "ContentType": "audio/mpeg"})
+        stub.add_response("delete_object", {}, {"Bucket": "spotifree-music", "Key": "k.mp3"})
         r2.put_file("k.mp3", src, "audio/mpeg")
         r2.delete("k.mp3")
         stub.assert_no_pending_responses()

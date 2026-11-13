@@ -1,13 +1,13 @@
-# Tunewise Android APK (Capacitor)
+# Spotifree Android APK (Capacitor)
 
 The Vite/React UI is packaged with **Capacitor** into a native Android WebView app
-(`com.tunewise.app`). It is a real APK for sideloading — not a PWA shortcut.
+(`com.spotifree.app`). It is a real APK for sideloading — not a PWA shortcut.
 
 ## What you need on the phone path
 
 | Piece | Required |
 | --- | --- |
-| Tunewise API (FastAPI) reachable from the phone | Yes |
+| Spotifree API (FastAPI) reachable from the phone | Yes |
 | PostgreSQL behind that API | Yes |
 | Cloudflare R2 | Only if library files are stored in R2 |
 | Jamendo client ID | Optional (Discover / CC catalogue) |
@@ -19,9 +19,9 @@ Point the app at your LAN machine or a **single-platform HTTPS host** (Railway o
 
 ## Install the debug APK
 
-1. Transfer `tunewise-debug.apk` to the device.
+1. Transfer `spotifree-debug.apk` to the device.
 2. Allow **Install unknown apps** for the installer you used (Files / Chrome / Drive / …).
-3. Install and open **Tunewise**.
+3. Install and open **Spotifree**.
 4. Set **Server URL** to something the phone can open, for example:
    - Same Wi‑Fi: `http://192.168.x.x:8741` (run the API with `--host 0.0.0.0`)
    - Deployed: `https://music.example.com`

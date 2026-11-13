@@ -118,7 +118,7 @@ def build_daily_companion(
         insights.append(
             CompanionInsight(
                 "fresh",
-                "Play a few tracks and Tunewise will start shaping today's mix around you.",
+                "Play a few tracks and Spotifree will start shaping today's mix around you.",
             )
         )
 
@@ -139,7 +139,7 @@ def build_daily_companion(
         )
     else:
         briefing = (
-            "A gentle start: Tunewise mixed what it knows about you with a few new shades. "
+            "A gentle start: Spotifree mixed what it knows about you with a few new shades. "
             "Pick a mood anytime to steer the day."
         )
 

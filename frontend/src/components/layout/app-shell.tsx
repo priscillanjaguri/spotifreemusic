@@ -141,7 +141,7 @@ function MobileTabBar() {
         </SheetTrigger>
         <SheetContent side="bottom" className="glass-strong rounded-t-[2rem] border-lavender/20 pb-8">
           <SheetHeader>
-            <SheetTitle className="font-display text-2xl text-heading">More of Tunewise</SheetTitle>
+            <SheetTitle className="font-display text-2xl text-heading">More of Spotifree</SheetTitle>
           </SheetHeader>
           <div className="mt-4 px-1">
             <NavList items={MOBILE_MORE} onNavigate={() => setOpen(false)} />

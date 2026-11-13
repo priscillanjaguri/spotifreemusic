@@ -56,7 +56,7 @@ def analyse_provider_song(db: Session, adapter: MusicProviderAdapter, song: Song
         return None
 
     suffix = ".mp3"
-    with tempfile.TemporaryDirectory(prefix="tunewise-provider-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="spotifree-provider-") as tmp:
         path = Path(tmp) / f"track{suffix}"
         path.write_bytes(raw)
         try:

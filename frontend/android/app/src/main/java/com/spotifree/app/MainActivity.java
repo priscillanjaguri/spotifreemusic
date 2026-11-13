@@ -1,4 +1,4 @@
-package com.tunewise.app;
+package com.spotifree.app;
 
 import com.getcapacitor.BridgeActivity;
 

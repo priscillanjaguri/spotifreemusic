@@ -22,7 +22,7 @@ from app.static_spa import mount_spa
 def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(
-        title="Tunewise API",
+        title="Spotifree API",
         version="0.1.0",
         description="Understand your music. Discover beyond it.",
     )

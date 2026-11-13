@@ -8,7 +8,7 @@ from argon2.exceptions import InvalidHashError, VerifyMismatchError
 
 from app.core.config import get_settings
 
-SESSION_COOKIE = "tunewise_session"
+SESSION_COOKIE = "spotifree_session"
 _hasher = PasswordHasher()  # Argon2id with safe defaults; the salt is embedded in each hash
 # Verified against when an email doesn't exist, so "unknown email" and "wrong password"
 # take the same time and can't be told apart by an attacker.
