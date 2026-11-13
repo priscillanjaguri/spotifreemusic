@@ -16,10 +16,8 @@ psycopg[binary]>=3.2,<4.0
 argon2-cffi>=23.1,<26.0
 pyjwt>=2.9,<3.0
 
-# HTTP client for music providers (and tests)
+# HTTP client for music providers / LRCLIB lyrics (and tests)
 httpx>=0.27,<1.0
-# Genius song-page fetch (Cloudflare often blocks plain httpx from cloud IPs)
-curl_cffi>=0.7,<1.0
 
 # My Library: multipart uploads, audio tags, Cloudflare R2 (S3-compatible) storage
 python-multipart>=0.0.9
