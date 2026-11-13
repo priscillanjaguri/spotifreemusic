@@ -85,10 +85,16 @@ def get_lyrics_for_song(db: Session, settings: Settings, song_id: int, user_id) 
         raise RuntimeError("genius_not_configured")
 
     result: LyricsResult | None = None
+    fetch_error: str | None = None
     try:
         hit = client.search_song(title, artist)
         if hit:
-            lyrics = client.fetch_lyrics(hit.url)
+            try:
+                lyrics = client.fetch_lyrics(hit.url)
+            except ProviderError as exc:
+                fetch_error = str(exc)
+                log.info("Genius lyrics page failed for song_id=%s: %s", song_id, exc)
+                lyrics = None
             if lyrics:
                 result = LyricsResult(
                     song_id=song_id,
@@ -98,6 +104,9 @@ def get_lyrics_for_song(db: Session, settings: Settings, song_id: int, user_id) 
                     source="genius",
                     genius_url=hit.url,
                 )
+            elif fetch_error:
+                # Distinguish match-but-blocked from true misses (helps ops / smoke tests).
+                raise RuntimeError(f"lyrics_fetch_failed:{fetch_error}")
     except ProviderError as exc:
         log.info("Genius lyrics lookup failed for song_id=%s: %s", song_id, exc)
         result = None

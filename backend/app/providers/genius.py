@@ -148,22 +148,56 @@ class GeniusClient:
         """Fetch the Genius song page and extract plain lyrics text."""
         if not song_url.startswith("https://genius.com/"):
             raise ProviderError("Refusing to fetch lyrics from a non-Genius URL")
+        html = self._fetch_song_html(song_url)
+        if _looks_like_challenge(html):
+            raise ProviderError("Genius page fetch blocked (challenge page)")
+        text = extract_lyrics_from_html(html)
+        return text or None
+
+    def _fetch_song_html(self, song_url: str) -> str:
+        """Prefer curl_cffi Chrome impersonation; fall back to httpx."""
+        headers = {
+            "Accept": "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Referer": "https://genius.com/",
+        }
+        try:
+            from curl_cffi import requests as creq
+
+            resp = creq.get(
+                song_url,
+                headers=headers,
+                impersonate="chrome124",
+                timeout=30,
+                allow_redirects=True,
+            )
+            if resp.status_code >= 400:
+                raise ProviderError(f"Genius page HTTP {resp.status_code}")
+            return resp.text
+        except ProviderError:
+            raise
+        except Exception as exc:
+            log.info("curl_cffi Genius fetch failed (%s); trying httpx", exc.__class__.__name__)
+
         try:
             resp = self.http.get(
                 song_url,
-                headers={
-                    "User-Agent": PAGE_UA,
-                    "Accept": "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
-                    "Accept-Language": "en-US,en;q=0.9",
-                    "Referer": "https://genius.com/",
-                },
+                headers={**headers, "User-Agent": PAGE_UA},
             )
             resp.raise_for_status()
-            html = resp.text
+            return resp.text
         except httpx.HTTPError as exc:
             raise ProviderError(f"Genius page fetch failed: {exc.__class__.__name__}") from exc
-        text = extract_lyrics_from_html(html)
-        return text or None
+
+
+def _looks_like_challenge(html: str) -> bool:
+    sample = html[:4000].lower()
+    return (
+        "cf-browser-verification" in sample
+        or "just a moment" in sample
+        or "cdn-cgi/challenge" in sample
+        or ("cloudflare" in sample and "data-lyrics-container" not in html)
+    )
 
 
 class _LyricsHTMLParser(HTMLParser):
