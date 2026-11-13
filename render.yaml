@@ -1,5 +1,5 @@
 # Render Blueprint: one web service (Docker) + managed Postgres.
-# Dashboard: New → Blueprint → connect GitHub repo priscillanjaguri/spotifree → apply this file.
+# Dashboard: New → Blueprint → connect GitHub repo priscillanjaguri/spotifreemusic → apply this file.
 # Prefer Railway if you want the fewest clicks; this file is the Render equivalent.
 # Docs: docs/DEPLOY.md
 

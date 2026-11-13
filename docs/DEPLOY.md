@@ -20,8 +20,8 @@ Do **not** split the SPA to Vercel and the API elsewhere; the production app is 
 
 ## Railway (recommended)
 
-1. Push this repo to GitHub as **`priscillanjaguri/spotifree`** on `main` (QH’s GitHub — not `brn-mwai`).
-2. [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub** → pick `spotifree`.
+1. Push this repo to GitHub as **`priscillanjaguri/spotifreemusic`** on `main` (QH’s GitHub — not `brn-mwai`).
+2. [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub** → pick `spotifreemusic`.
 3. **Add PostgreSQL** in the same project; Railway injects `DATABASE_URL` into the web service (link the variable if needed).
 4. Set variables on the **web** service (Variables tab):
 
@@ -41,7 +41,7 @@ Do **not** split the SPA to Vercel and the API elsewhere; the production app is 
 
 ## Render (alternative)
 
-1. Same GitHub repo (`priscillanjaguri/spotifree`) on `main`.
+1. Same GitHub repo (`priscillanjaguri/spotifreemusic`) on `main`.
 2. Render → **New** → **Blueprint** → select the repo (uses `render.yaml`).
 3. Fill blueprint prompts for optional secrets (`CORS_ORIGINS`, Jamendo, R2).
 4. After the first URL is known, set `CORS_ORIGINS` to include `https://<service>.onrender.com` plus Capacitor origins.
