@@ -1,10 +1,12 @@
 # Deploy Spotifree (single platform)
 
 Spotifree is **one Docker image**: Vite SPA served by FastAPI, plus **Postgres**.
-Optional: Jamendo (`JAMENDO_CLIENT_ID`) and Cloudflare R2 (`R2_*`).
+Optional: Jamendo (`JAMENDO_CLIENT_ID`), Cloudflare R2 (`R2_*`), and Spotify Client
+Credentials (`SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET`) for **metadata-only** ML
+enrichment (genres / popularity / audio-features — never playback).
 
-**Chosen host: [Railway](https://railway.app)** — one project, web service + Postgres.
-[Render](https://render.com) is the documented fallback (`render.yaml` Blueprint).
+**Chosen host: [Render](https://render.com)** free Blueprint (`render.yaml`).
+[Railway](https://railway.app) remains documented as an alternative.
 
 Do **not** split the SPA to Vercel and the API elsewhere; the production app is same-origin.
 
@@ -33,6 +35,7 @@ Do **not** split the SPA to Vercel and the API elsewhere; the production app is 
 | `COOKIE_SECURE` | Yes | `true` |
 | `CORS_ORIGINS` | Yes | JSON list including your public HTTPS URL **and** Capacitor origins: `["https://YOUR.up.railway.app","https://localhost","capacitor://localhost"]` |
 | `JAMENDO_CLIENT_ID` | No | Discover / CC catalogue |
+| `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` | No | Spotify Client Credentials; metadata for ML only (no streaming) |
 | `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET` | No | My Library object storage |
 | `LIBRARY_ANALYSIS_ENABLED` | No | Prefer `false` on free tiers (CPU) |
 
@@ -43,9 +46,10 @@ Do **not** split the SPA to Vercel and the API elsewhere; the production app is 
 
 1. Same GitHub repo (`priscillanjaguri/spotifreemusic`) on `main`.
 2. Render → **New** → **Blueprint** → select the repo (uses `render.yaml`).
-3. Fill blueprint prompts for optional secrets (`CORS_ORIGINS`, Jamendo, R2).
+3. Fill blueprint prompts for optional secrets (`CORS_ORIGINS`, Jamendo, R2, Spotify).
 4. After the first URL is known, set `CORS_ORIGINS` to include `https://<service>.onrender.com` plus Capacitor origins.
-5. Same APK Server URL steps as Railway.
+5. Set `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` in the Render dashboard (or Cursor app secrets) to enable library / Jamendo metadata enrichment for recommendations. Leave unset to skip gracefully.
+6. Same APK Server URL steps as Railway.
 
 ## Local Docker (smoke test)
 

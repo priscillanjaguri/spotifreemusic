@@ -227,16 +227,45 @@ def analysis_available() -> bool:
     return librosa_available()
 
 
+def _spotify_enrich_upload_song(db: Session, song_id: int) -> None:
+    """Best-effort Spotify metadata enrich after upload (safe if Spotify unset)."""
+    try:
+        from app.core.config import get_settings
+        from app.services.spotify_enrichment import enrich_song_with_spotify
+
+        settings = get_settings()
+        if not settings.spotify_enabled:
+            return
+        song = db.scalars(
+            select(Song)
+            .where(Song.id == song_id)
+            .options(
+                selectinload(Song.artist_links).selectinload(SongArtist.artist),
+                selectinload(Song.genres),
+                selectinload(Song.features),
+                selectinload(Song.provider_links).selectinload(SongProviderLink.provider),
+            )
+        ).first()
+        if song is None:
+            return
+        enrich_song_with_spotify(db, song, settings=settings)
+        db.commit()
+    except Exception:
+        log.exception("Spotify enrichment failed for song %s", song_id)
+        db.rollback()
+
 def run_analysis(upload_id: int, session_factory: SessionFactory, storage: ObjectStorage, enabled: bool = True) -> None:
     """Background job: measure the upload's audio and store it in song_features."""
     with session_factory() as db:
         upload = db.get(LibraryUpload, upload_id)
         if upload is None or upload.song_id is None:
             return
+        song_id = upload.song_id
         if not enabled or not librosa_available():
             upload.analysis_status = "unavailable"
             upload.analysis_error = "Audio analysis is not installed on this server."
             db.commit()
+            _spotify_enrich_upload_song(db, song_id)
             return
         upload.analysis_status, upload.analysis_error = "running", None
         db.commit()
@@ -246,11 +275,13 @@ def run_analysis(upload_id: int, session_factory: SessionFactory, storage: Objec
         except AnalysisUnavailable as exc:
             upload.analysis_status, upload.analysis_error = "unavailable", str(exc)[:300]
             db.commit()
+            _spotify_enrich_upload_song(db, song_id)
             return
         except Exception as exc:
             log.exception("Audio analysis failed for upload %s", upload_id)
             upload.analysis_status, upload.analysis_error = "failed", (str(exc) or exc.__class__.__name__)[:300]
             db.commit()
+            _spotify_enrich_upload_song(db, song_id)
             return
 
         row = db.get(SongFeatures, upload.song_id) or SongFeatures(song_id=upload.song_id)
@@ -261,3 +292,4 @@ def run_analysis(upload_id: int, session_factory: SessionFactory, storage: Objec
         db.add(row)
         upload.analysis_status = "done"
         db.commit()
+        _spotify_enrich_upload_song(db, song_id)

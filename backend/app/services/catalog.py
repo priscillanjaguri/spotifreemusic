@@ -80,6 +80,18 @@ def import_tracks(db: Session, adapter: MusicProviderAdapter, tracks: list[Provi
         if song not in songs:
             songs.append(song)
     db.flush()
+    # Optional Spotify metadata enrich for newly imported / refreshed provider tracks.
+    try:
+        from app.core.config import get_settings
+        from app.services.spotify_enrichment import enrich_songs_best_effort
+
+        settings = get_settings()
+        if settings.spotify_enabled and songs:
+            enrich_songs_best_effort(db, songs, settings=settings)
+            db.flush()
+    except Exception:
+        # Never fail catalogue import because Spotify metadata is unavailable.
+        pass
     return songs
 
 

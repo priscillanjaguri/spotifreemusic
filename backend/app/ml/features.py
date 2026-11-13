@@ -21,6 +21,11 @@ AUDIO_FEATURE_NAMES: tuple[str, ...] = (
     "spectral_centroid_hz",
     "spectral_rolloff_hz",
     "zero_crossing_rate",
+    # Spotify audio-features (and any future provider) when Librosa leaves them empty.
+    "danceability",
+    "acousticness",
+    "valence",
+    "instrumentalness",
 )
 
 
