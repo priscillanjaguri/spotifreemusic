@@ -16,11 +16,13 @@ target_metadata = Base.metadata
 
 
 def _url() -> str:
+    from app.core.config import get_settings, normalize_database_url
+
     url = os.environ.get("ALEMBIC_DATABASE_URL")
     if url:
-        return url
-    from app.core.config import get_settings
+        return normalize_database_url(url)
     return get_settings().database_url
+
 
 
 def run_migrations_offline() -> None:

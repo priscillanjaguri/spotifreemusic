@@ -1,0 +1,47 @@
+# Render Blueprint: one web service (Docker) + managed Postgres.
+# Dashboard: New → Blueprint → connect GitHub repo brn-mwai/tunewise → apply this file.
+# Prefer Railway if you want the fewest clicks; this file is the Render equivalent.
+# Docs: docs/DEPLOY.md
+
+databases:
+  - name: tunewise-db
+    plan: free
+
+services:
+  - type: web
+    name: tunewise
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tunewise-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ENVIRONMENT
+        value: production
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: LIBRARY_ANALYSIS_ENABLED
+        value: "false"
+      - key: DEV_MOCK_PROVIDER
+        value: "false"
+      # After first deploy, set these in the Render dashboard (never commit values):
+      # CORS_ORIGINS=["https://<your-service>.onrender.com","https://localhost","capacitor://localhost"]
+      # JAMENDO_CLIENT_ID, R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET
+      - key: CORS_ORIGINS
+        sync: false
+      - key: JAMENDO_CLIENT_ID
+        sync: false
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET
+        sync: false

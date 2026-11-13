@@ -1,4 +1,6 @@
 .env
+.env.*
+!.env.example
 .venv/
 __pycache__/
 *.pyc
@@ -7,3 +9,8 @@ dist/
 .pytest_cache/
 *.tsbuildinfo
 var/
+*.apk
+.DS_Store
+.railway/
+.render/
+agent-tools/

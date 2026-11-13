@@ -1,4 +1,5 @@
 # Tunewise — one image: Vite SPA + FastAPI (Postgres + R2 via env).
+# Single-platform hosts (Railway / Render): build this Dockerfile, attach Postgres, set env vars.
 FROM node:22-bookworm AS frontend
 WORKDIR /src/frontend
 COPY frontend/package.json frontend/package-lock.json ./
@@ -19,5 +20,6 @@ ENV FRONTEND_DIST=/app/frontend/dist \
     PYTHONPATH=/app/backend \
     ENVIRONMENT=production
 WORKDIR /app/backend
+# Railway / Render inject PORT; local / Compose default to 8000.
 EXPOSE 8000
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

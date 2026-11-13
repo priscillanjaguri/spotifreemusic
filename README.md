@@ -99,11 +99,13 @@ Tunewise is also a Progressive Web App. On a phone:
 If Chrome shows no Install option yet, use the in-app **Install Tunewise** chip when it appears, or
 **Add to Home screen**. The service worker must control the page (reload once after first visit).
 
-## Deploy (one product: SPA + API)
-Tunewise needs **Postgres** (and optionally Cloudflare R2 + a Jamendo client ID). Cursor’s simple
-`publish-app` host is aimed at Node/static apps with optional platform Postgres — this stack is
-**FastAPI + Alembic + optional R2**, so the supported path is Docker Compose (or any host that runs
-the same pieces).
+## Deploy (one product: SPA + API + Postgres)
+
+**One host for the whole stack** — do not split the frontend to Vercel and the API elsewhere.
+Preferred: **Railway** (`railway.toml` + `Dockerfile`). Fallback: **Render** (`render.yaml`).
+
+Tunewise needs **Postgres** (and optionally Cloudflare R2 + a Jamendo client ID). The Docker image
+builds the Vite SPA and serves it from FastAPI on `$PORT` (same origin for the PWA and browser UI).
 
 ```bash
 cp .env.example .env   # set SECRET_KEY; never commit .env
@@ -123,6 +125,9 @@ FRONTEND_DIST=../frontend/dist ENVIRONMENT=production \
 ```
 
 `COOKIE_SECURE=true` when serving over HTTPS. Keep `JAMENDO_*` and `R2_*` in the environment only.
+
+Full host click-path (Railway/Render env vars, health check, APK Server URL):
+[`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 ## API documentation
 FastAPI generates it automatically: **http://localhost:8000/docs** (Swagger UI) and

@@ -12,7 +12,10 @@ The Vite/React UI is packaged with **Capacitor** into a native Android WebView a
 | Cloudflare R2 | Only if library files are stored in R2 |
 | Jamendo client ID | Optional (Discover / CC catalogue) |
 
-There is no hosted Tunewise cloud in this repo. Point the app at your LAN machine or a deployed host.
+Point the app at your LAN machine or a **single-platform HTTPS host** (Railway or Render — see
+[`DEPLOY.md`](DEPLOY.md)). After deploy, set **Server URL** to the public origin
+(e.g. `https://….up.railway.app`) with no path suffix.
+
 
 ## Install the debug APK
 

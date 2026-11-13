@@ -1,0 +1,13 @@
+# Railway: one service from this Dockerfile + a linked Postgres plugin.
+# Dashboard: New Project → Deploy from GitHub (brn-mwai/tunewise) → Add PostgreSQL → set env vars.
+# Docs: docs/DEPLOY.md and Project store docs/github-and-host.md
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/api/v1/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5

@@ -7,8 +7,17 @@
 **/node_modules
 **/dist
 frontend/dist
+frontend/android
+frontend/ios
+**/*.apk
 var/
 .pytest_cache
 *.pyc
 **/*.tsbuildinfo
 backend/.venv
+backend/tests
+docs
+*.md
+!README.md
+.railway
+.render
