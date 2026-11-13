@@ -53,9 +53,9 @@ export function SettingsPage({ required = false, onSaved }: Props) {
         <Logo className="justify-center" />
         <h1 className="font-display text-3xl text-heading">Server URL</h1>
         <p className="text-sm text-subtle">
-          The Android app talks to your Spotifree backend. Enter the host your phone can reach — a LAN IP on
-          the same Wi‑Fi (e.g. <code className="text-cream">http://192.168.1.20:8741</code>) or a deployed
-          HTTPS URL. Postgres, and R2 if you use it, must be reachable from that host.
+          Sideload builds default to{" "}
+          <code className="text-cream">https://spotifree-rw0a.onrender.com</code>. Change this only if you
+          need a LAN API (e.g. <code className="text-cream">http://192.168.1.20:8741</code>) or another host.
         </p>
       </div>
 
@@ -67,7 +67,7 @@ export function SettingsPage({ required = false, onSaved }: Props) {
             <Input
               id="server-url"
               className={cn(FIELD, "pl-10")}
-              placeholder="http://192.168.x.x:8741"
+              placeholder="https://spotifree-rw0a.onrender.com"
               value={url}
               onChange={(e) => {
                 setUrl(e.target.value);

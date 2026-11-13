@@ -3,9 +3,16 @@
 const STORAGE_KEY = "spotifree_api_base";
 const TOKEN_KEY = "spotifree_access_token";
 
+/** Default hosted API for APK / production builds when env is unset. */
+export const DEFAULT_HOSTED_API_BASE = "https://spotifree-rw0a.onrender.com";
+
 function fromEnv(): string {
   const raw = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() ?? "";
-  return normalizeApiBase(raw);
+  const fromVite = normalizeApiBase(raw);
+  if (fromVite) return fromVite;
+  // Capacitor / production APK: prefer the hosted Spotifree origin so first launch needs no setup.
+  if (import.meta.env.PROD) return normalizeApiBase(DEFAULT_HOSTED_API_BASE);
+  return "";
 }
 
 /** Strip trailing slash; reject path-only values. */
