@@ -48,6 +48,10 @@ class Settings(BaseSettings):
     cookie_secure: bool = False
     # Optional: without it the app runs, but search/playback report "provider not configured".
     jamendo_client_id: str | None = None
+    # Optional Spotify Web API (Client Credentials). Metadata / ML enrichment ONLY —
+    # never used for playback URLs. Both id + secret required to enable.
+    spotify_client_id: str | None = None
+    spotify_client_secret: str | None = None
     # Development only: serve an invented catalogue (labelled 'mock_dev') with generated
     # tones when no real provider is configured. Ignored outside ENVIRONMENT=development.
     dev_mock_provider: bool = False
@@ -75,6 +79,10 @@ class Settings(BaseSettings):
     @property
     def r2_enabled(self) -> bool:
         return all((self.r2_account_id, self.r2_access_key_id, self.r2_secret_access_key, self.r2_bucket))
+
+    @property
+    def spotify_enabled(self) -> bool:
+        return bool(self.spotify_client_id and self.spotify_client_secret)
 
     @property
     def mock_provider_enabled(self) -> bool:
