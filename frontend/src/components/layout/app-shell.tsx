@@ -172,7 +172,7 @@ function BottomChrome() {
       )}
     >
       {current ? (
-        <div className="shrink-0 px-2 pb-2 lg:px-0 lg:pb-0">
+        <div className="shrink-0 px-2 pb-3 lg:px-0 lg:pb-0">
           <PlayerBar />
         </div>
       ) : null}
