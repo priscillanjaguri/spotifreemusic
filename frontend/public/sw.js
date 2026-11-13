@@ -5,7 +5,8 @@
  *   - audio streams / Range responses / library media
  * Network-first for navigations; cache-first only for hashed build assets.
  */
-const SHELL_CACHE = "spotifree-shell-v1";
+/* Bump on every shell/layout ship so clients drop stale index.html + hashed assets. */
+const SHELL_CACHE = "spotifree-shell-v3-player-chrome";
 const SHELL_URLS = ["/", "/manifest.webmanifest", "/favicon.svg", "/icon-192.png", "/icon-512.png"];
 
 self.addEventListener("install", (event) => {
@@ -71,20 +72,19 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Static shell assets: cache-first.
+  // Hashed Vite assets: stale-while-revalidate so deploys aren't stuck behind SW.
   if (isShellAsset(url)) {
     event.respondWith(
-      caches.match(req).then(
-        (hit) =>
-          hit ||
-          fetch(req).then((res) => {
-            if (res.ok) {
-              const copy = res.clone();
-              caches.open(SHELL_CACHE).then((c) => c.put(req, copy)).catch(() => undefined);
-            }
+      caches.open(SHELL_CACHE).then(async (cache) => {
+        const cached = await cache.match(req);
+        const network = fetch(req)
+          .then((res) => {
+            if (res.ok) cache.put(req, res.clone()).catch(() => undefined);
             return res;
-          }),
-      ),
+          })
+          .catch(() => cached);
+        return cached || network;
+      }),
     );
   }
 });

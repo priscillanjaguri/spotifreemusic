@@ -86,7 +86,7 @@ function MobileTabBar() {
   return (
     <nav
       aria-label="Main"
-      className="glass-strong fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-white/10 pb-[env(safe-area-inset-bottom,0px)] lg:hidden"
+      className="glass-strong grid h-16 shrink-0 grid-cols-5 border-t border-white/10"
     >
       {MOBILE_PRIMARY.map(({ to, label, icon: Icon, end, short }) => (
         <NavLink
@@ -95,7 +95,7 @@ function MobileTabBar() {
           end={end}
           className={({ isActive }) =>
             cn(
-              "flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-bold transition-colors",
+              "flex h-full flex-col items-center justify-center gap-1 text-[11px] font-bold transition-colors",
               isActive ? "text-accent-foreground" : "text-subtle hover:text-accent-foreground",
             )
           }
@@ -122,7 +122,7 @@ function MobileTabBar() {
             <button
               type="button"
               className={cn(
-                "flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-bold transition-colors",
+                "flex h-full flex-col items-center justify-center gap-1 text-[11px] font-bold transition-colors",
                 moreActive ? "text-accent-foreground" : "text-subtle hover:text-accent-foreground",
               )}
               aria-label="More destinations"
@@ -155,6 +155,34 @@ function MobileTabBar() {
   );
 }
 
+/**
+ * One bottom chrome stack: on phones the mini-player is a flex sibling above the
+ * tab row (plus safe-area), so tabs can never cover controls. On lg the same
+ * wrapper becomes the desktop floating player slot and the tab row is hidden.
+ */
+function BottomChrome() {
+  const { current } = usePlayer();
+  return (
+    <div
+      className={cn(
+        "fixed z-40 flex flex-col",
+        "inset-x-0 bottom-0 pb-[env(safe-area-inset-bottom,0px)]",
+        "lg:inset-x-auto lg:bottom-4 lg:left-[17.5rem] lg:right-4 lg:pb-0",
+        !current && "lg:hidden",
+      )}
+    >
+      {current ? (
+        <div className="shrink-0 px-2 pb-2 lg:px-0 lg:pb-0">
+          <PlayerBar />
+        </div>
+      ) : null}
+      <div className="lg:hidden">
+        <MobileTabBar />
+      </div>
+    </div>
+  );
+}
+
 export function AppShell() {
   const { current } = usePlayer();
   return (
@@ -178,8 +206,7 @@ export function AppShell() {
           <Outlet />
         </div>
       </main>
-      <PlayerBar />
-      <MobileTabBar />
+      <BottomChrome />
     </div>
   );
 }

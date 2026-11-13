@@ -46,9 +46,15 @@ def mount_spa(app: FastAPI) -> bool:
     if assets.is_dir():
         app.mount("/assets", StaticFiles(directory=assets), name="spa-assets")
 
+    _html_headers = {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+    }
+
     @app.get("/", include_in_schema=False)
     async def spa_index():
-        return FileResponse(root / "index.html")
+        # Always revalidate the shell so new hashed JS/CSS ship after deploys.
+        return FileResponse(root / "index.html", headers=_html_headers)
 
     @app.get("/{full_path:path}", include_in_schema=False)
     async def spa_fallback(full_path: str):
@@ -68,7 +74,7 @@ def mount_spa(app: FastAPI) -> bool:
         # Missing hashed asset → 404 (don't return HTML as JS).
         if name.startswith("assets/"):
             raise HTTPException(404, "Not found")
-        return FileResponse(root / "index.html")
+        return FileResponse(root / "index.html", headers=_html_headers)
 
     log.info("Serving SPA from %s", root)
     return True

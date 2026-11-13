@@ -92,7 +92,7 @@ export function PlayerBar() {
       <div
         role="region"
         aria-label="Now playing"
-        className="gloss glass-strong glass-edge fixed inset-x-2 z-40 rounded-[1.75rem] text-player-foreground bottom-[var(--mobile-player-bottom)] lg:inset-x-auto lg:bottom-4 lg:left-[17.5rem] lg:right-4"
+        className="gloss glass-strong glass-edge relative w-full rounded-[1.75rem] text-player-foreground"
       >
         <div className="absolute inset-x-3 top-0 lg:hidden">
           <div
@@ -155,7 +155,7 @@ export function PlayerBar() {
             <Button
               size="sm"
               variant="secondary"
-              className="glass-soft h-8 gap-1.5 border-lavender/25 bg-white/10 px-2.5 text-cream hover:bg-white/15 hover:text-white"
+              className="glass-soft h-8 shrink-0 gap-1.5 border-lavender/25 bg-white/10 px-2.5 text-cream hover:bg-white/15 hover:text-white"
               onClick={() => setLyricsOpen(true)}
               aria-label="Show lyrics"
             >
@@ -193,7 +193,7 @@ export function PlayerBar() {
       <Sheet open={lyricsOpen} onOpenChange={setLyricsOpen}>
         <SheetContent
           side="bottom"
-          className="glass-strong glass-edge max-h-[70vh] rounded-t-[2rem] border-lavender/20 pb-[env(safe-area-inset-bottom)] lg:left-[17.5rem] lg:right-4 lg:mx-auto lg:max-w-xl"
+          className="glass-strong glass-edge max-h-[70vh] rounded-t-[2rem] border-lavender/20 pb-[env(safe-area-inset-bottom,0px)] lg:left-[17.5rem] lg:right-4 lg:mx-auto lg:max-w-xl"
         >
           <SheetHeader className="border-b border-white/10 pb-3">
             <SheetTitle className="font-display text-xl text-cream">Lyrics</SheetTitle>
