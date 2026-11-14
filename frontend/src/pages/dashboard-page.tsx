@@ -104,12 +104,16 @@ function StatCard({
     <Link to={to} className="glow-soft group relative block transition-transform duration-200 hover:-translate-y-0.5">
       <PhotoStatShell src={photo} position={position} clearPhoto>
         {notesAccent && (
-          <MoodPhoto
-            src={MOOD.musicNotesSmoke}
-            opacity={0.55}
-            position="center 30%"
-            className="inset-auto -right-2 -top-2 h-[58%] w-[62%] opacity-90"
-          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-1 -top-1 z-[4] h-[62%] w-[68%] overflow-hidden opacity-70"
+            style={{
+              WebkitMaskImage: "radial-gradient(ellipse at 70% 30%, black 20%, transparent 72%)",
+              maskImage: "radial-gradient(ellipse at 70% 30%, black 20%, transparent 72%)",
+            }}
+          >
+            <MoodPhoto src={MOOD.musicNotesSmoke} opacity={1} position="center 25%" className="inset-0" />
+          </div>
         )}
         {accent !== undefined && <PulseCardAccents variant={accent} />}
         <div className="relative z-10 gloss grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-orchid-glow/90 to-heliotrope text-cream ring-1 ring-white/35 shadow-polish">
@@ -307,24 +311,24 @@ export function DashboardPage() {
         {/* Clear starry-headphones well — moon / Saturn / headphones readable */}
         <MoodPhoto
           src={MOOD.starryHeadphones}
-          opacity={0.92}
-          position="center 35%"
+          opacity={0.95}
+          position="center top"
           drift
           className="inset-0"
         />
         {/* music-notes-smoke kept as visible accent wash (not the primary layer) */}
         <MoodPhoto
           src={MOOD.musicNotesSmoke}
-          opacity={0.42}
+          opacity={0.4}
           position="right center"
-          className="inset-y-0 right-0 left-auto w-[55%] sm:w-[46%]"
+          className="inset-y-0 right-0 left-auto w-[50%] sm:w-[42%]"
         />
         <div
           aria-hidden
-          className="absolute inset-0 bg-gradient-to-b from-[#1a0b28]/45 via-[#160a1f]/55 to-[#0c0612]/78"
+          className="absolute inset-0 bg-gradient-to-b from-[#1a0b28]/35 via-[#160a1f]/48 to-[#0c0612]/72"
         />
-        <FairyLights className="opacity-60" />
-        <ButterflyDrift className="opacity-35" />
+        <FairyLights className="opacity-55" />
+        <ButterflyDrift className="opacity-30" />
 
         <div className="relative mb-4">
           <p className="font-script text-2xl text-orchid-glow">your week in colour</p>
@@ -338,7 +342,7 @@ export function DashboardPage() {
             value={week.data ? formatTotalDuration(week.data.total_listened_ms) : undefined}
             hint={listenHint}
             photo={MOOD.starryHeadphones}
-            position="center 22%"
+            position="center 8%"
             to="/analytics"
             accent={0}
             notesAccent
@@ -348,7 +352,7 @@ export function DashboardPage() {
             label="Songs saved"
             value={total}
             photo={MOOD.starryHeadphones}
-            position="center 48%"
+            position="center 28%"
             to="/collection"
             accent={1}
             notesAccent
@@ -359,7 +363,7 @@ export function DashboardPage() {
             value={week.data?.top_genres[0]?.name ?? facets.data?.genres[0]?.name}
             hint="This week"
             photo={MOOD.starryHeadphones}
-            position="center 68%"
+            position="center 55%"
             to="/analytics"
             accent={2}
             notesAccent
@@ -369,7 +373,7 @@ export function DashboardPage() {
             label="Artists"
             value={facets.data?.artists.length}
             photo={MOOD.starryHeadphones}
-            position="center 35%"
+            position="center 18%"
             to="/collection"
             accent={3}
             notesAccent

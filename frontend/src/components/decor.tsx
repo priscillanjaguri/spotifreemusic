@@ -381,13 +381,14 @@ export function PhotoStatShell({
       <MoodPhoto src={src} opacity={1} position={position} className="inset-0" />
       {clearPhoto ? (
         <>
+          {/* Light veil only — keep moon/stars/Saturn/headphones readable */}
           <div
             aria-hidden
-            className="absolute inset-0 bg-gradient-to-br from-[#3a1058]/25 via-transparent to-[#160a1f]/35"
+            className="absolute inset-0 bg-gradient-to-br from-[#2a0c40]/18 via-transparent to-[#160a1f]/22"
           />
           <div
             aria-hidden
-            className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-[#12061c]/88 via-[#1a0b28]/45 to-transparent"
+            className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-[#12061c]/72 via-[#1a0b28]/28 to-transparent"
           />
         </>
       ) : (
