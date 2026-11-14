@@ -125,10 +125,13 @@ export function RecommendationsPage() {
       </section>
 
       {!similarId && (
-        <section className="relative mt-8 mb-8 overflow-hidden rounded-[1.75rem] p-5 sm:p-6 ring-1 ring-lavender/25">
-          <MoodPhoto src={MOOD.headphones} opacity={0.55} position="center" className="inset-0" />
+        <section className="relative mt-8 mb-8 overflow-hidden rounded-[1.75rem] p-5 sm:p-6 ring-1 ring-orchid-glow/35">
+          <MoodPhoto src={MOOD.lookingUp} opacity={0.5} position="center 25%" className="inset-0" />
           <MoodAccent src={MOOD.butterflyNeon} side="right" className="opacity-60" />
-          <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-[#1a0b28]/88 via-[#24112e]/75 to-[#1a0b28]/45" />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-r from-[#6a2098]/75 via-[#4a1870]/65 to-[#2a0c48]/55"
+          />
           <div className="relative">
             <p className="font-script text-3xl text-cream">seed your taste</p>
             <p className="mt-1 max-w-xl text-sm text-lavender">
@@ -147,7 +150,7 @@ export function RecommendationsPage() {
                       "rounded-full px-3.5 py-1.5 text-sm font-bold ring-1 transition-colors",
                       on
                         ? "bg-cta text-white ring-lavender/30"
-                        : "bg-deep-purple/55 text-cream ring-lavender/20 hover:bg-deep-purple",
+                        : "bg-[#5a1a78]/65 text-cream ring-orchid-glow/30 hover:bg-[#6a2098]",
                     )}
                   >
                     {g}
@@ -159,36 +162,44 @@ export function RecommendationsPage() {
         </section>
       )}
 
-      {active.isPending ? (
-        <GridSkeleton />
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={HeartHandshake}
-          title="No picks yet"
-          description="Search and save a few songs, or choose seed genres above. Then come back for a fresh mix."
-          action={
-            <Link to="/discover" className={buttonVariants({ variant: "cta" })}>
-              Discover music
-            </Link>
-          }
+      <div className="relative overflow-hidden rounded-[2rem] p-4 ring-1 ring-orchid-glow/25 sm:p-5">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#5a1a78]/35 via-[#3a1058]/45 to-[#1a0b28]/55"
         />
-      ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
-          {items.map((item) => (
-            <RecommendationCard
-              key={item.song.id}
-              item={item}
-              queue={queue}
-              context={similarId ? "similar" : "recommendations"}
+        <div className="relative">
+          {active.isPending ? (
+            <GridSkeleton />
+          ) : items.length === 0 ? (
+            <EmptyState
+              icon={HeartHandshake}
+              title="No picks yet"
+              description="Search and save a few songs, or choose seed genres above. Then come back for a fresh mix."
+              action={
+                <Link to="/discover" className={buttonVariants({ variant: "cta" })}>
+                  Discover music
+                </Link>
+              }
             />
-          ))}
-        </div>
-      )}
+          ) : (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
+              {items.map((item) => (
+                <RecommendationCard
+                  key={item.song.id}
+                  item={item}
+                  queue={queue}
+                  context={similarId ? "similar" : "recommendations"}
+                />
+              ))}
+            </div>
+          )}
 
-      <p className="relative mt-10 flex items-start gap-2 text-sm text-subtle">
-        <Petal className="mt-0.5 size-4 shrink-0 opacity-70" />
-        Skips stay neutral. Only an explicit like or “not interested” reshapes what shows up next.
-      </p>
+          <p className="relative mt-10 flex items-start gap-2 text-sm text-lavender/80">
+            <Petal className="mt-0.5 size-4 shrink-0 opacity-70" />
+            Skips stay neutral. Only an explicit like or “not interested” reshapes what shows up next.
+          </p>
+        </div>
+      </div>
     </>
   );
 }

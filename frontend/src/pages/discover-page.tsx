@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Loader2, Play, Search, SearchX, X } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
-import { MOOD, PhotoHero } from "@/components/decor";
+import { FairyLights, MOOD, PhotoHero } from "@/components/decor";
 import { Logo } from "@/components/layout/logo";
 import { SongRow } from "@/components/music/song-row";
 import { EmptyState, ErrorState, ProviderNotConfigured, SongListSkeleton } from "@/components/states";
@@ -17,11 +17,11 @@ import { QUICK_SEARCHES } from "./dashboard-page";
 const MIN_QUERY = 2;
 
 const MOODS = [
-  { q: "lofi", label: "Late-night lofi", photo: MOOD.headphones },
-  { q: "ambient", label: "Ambient drift", photo: MOOD.beach },
-  { q: "jazz", label: "Smoky jazz", photo: MOOD.cozy },
+  { q: "lofi", label: "Late-night lofi", photo: MOOD.lookingUp },
+  { q: "ambient", label: "Ambient drift", photo: MOOD.lantern },
+  { q: "jazz", label: "Smoky jazz", photo: MOOD.booksHeadphones },
   { q: "synthwave", label: "Neon synthwave", photo: MOOD.butterflyNeon },
-  { q: "piano", label: "Solo piano", photo: MOOD.tulips },
+  { q: "piano", label: "Solo piano", photo: MOOD.windowGirl },
   { q: "folk", label: "Campfire folk", photo: MOOD.sunset },
 ];
 
@@ -70,7 +70,12 @@ export function DiscoverPage() {
 
   return (
     <>
-      <PhotoHero src={MOOD.headphones} position="center 40%" dense>
+      <PhotoHero src={MOOD.lantern} position="center 35%" dense className="ring-1 ring-orchid-glow/30">
+        <FairyLights warm className="opacity-90" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-[#b45eeb]/25 via-transparent to-[#ffd89a]/20"
+        />
         <Logo className="mb-3" />
         <p className="font-script text-2xl text-orchid-glow">Explore</p>
         <h1 className="mt-1 font-display text-4xl font-semibold text-cream sm:text-5xl">Discover</h1>
@@ -79,15 +84,15 @@ export function DiscoverPage() {
         </p>
       </PhotoHero>
 
-      <form onSubmit={onSubmit} role="search" className="relative mt-6 mb-6">
-        <Search className="pointer-events-none absolute top-1/2 left-5 size-5 -translate-y-1/2 text-orchid-glow" />
+      <form onSubmit={onSubmit} role="search" className="relative mt-6 mb-6 overflow-hidden rounded-full">
+        <Search className="pointer-events-none absolute top-1/2 left-5 z-10 size-5 -translate-y-1/2 text-orchid-glow" />
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Search songs, artists or genres"
           aria-label="Search songs"
           maxLength={100}
-          className="h-14 rounded-full border-white/15 bg-white/8 pr-32 pl-13 text-base shadow-whip-lg backdrop-blur-xl placeholder:text-subtle focus-visible:shadow-glow md:text-base"
+          className="relative z-10 h-14 rounded-full border-orchid-glow/25 bg-[#5a1a78]/35 pr-32 pl-13 text-base shadow-whip-lg backdrop-blur-xl placeholder:text-subtle focus-visible:shadow-glow md:text-base"
         />
         <div className="absolute top-1/2 right-2 flex -translate-y-1/2 items-center gap-1">
           {input && (
@@ -114,22 +119,26 @@ export function DiscoverPage() {
       {input.trim().length === 1 && <p className="-mt-3 mb-6 text-sm text-subtle">Keep typing: searches need at least two characters.</p>}
 
       {query.length < MIN_QUERY ? (
-        <section>
-          <h2 className="mb-4 font-display text-3xl font-semibold text-heading">Start with a mood</h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <section className="relative overflow-hidden rounded-[2rem] p-1">
+          <FairyLights warm className="opacity-50" />
+          <h2 className="relative mb-4 font-display text-3xl font-semibold text-heading">Start with a mood</h2>
+          <div className="relative grid grid-cols-2 gap-3 sm:grid-cols-3">
             {MOODS.map((m) => (
               <button
                 key={m.q}
                 type="button"
                 onClick={() => setParams({ q: m.q })}
-                className="powder gloss glow-soft group relative min-h-28 overflow-hidden glass-edge rounded-[1.75rem] p-4 text-left transition-all hover:-translate-y-1 sm:min-h-32 sm:p-5"
+                className="powder gloss glow-soft group relative min-h-28 overflow-hidden rounded-[1.75rem] p-4 text-left ring-1 ring-orchid-glow/30 transition-all hover:-translate-y-1 sm:min-h-32 sm:p-5"
               >
                 <div
                   aria-hidden
-                  className="absolute inset-0 bg-cover bg-center opacity-45 transition-opacity group-hover:opacity-60"
+                  className="absolute inset-0 bg-cover bg-center opacity-55 transition-opacity group-hover:opacity-70"
                   style={{ backgroundImage: `url(${m.photo})` }}
                 />
-                <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#160a1f]/90 via-[#24112e]/55 to-transparent" />
+                <div
+                  aria-hidden
+                  className="absolute inset-0 bg-gradient-to-t from-[#3a1058]/88 via-[#5a1a78]/45 to-[#ffd89a]/12"
+                />
                 <p className="relative font-display text-2xl leading-tight font-semibold text-cream drop-shadow-sm">{m.label}</p>
                 <p className="relative mt-1 text-xs font-semibold text-lavender">Search “{m.q}”</p>
                 <Play className="absolute right-4 bottom-4 size-9 translate-y-1 rounded-full bg-surface-raised p-2.5 text-accent-foreground opacity-0 shadow-whip transition-all group-hover:translate-y-0 group-hover:opacity-100" />

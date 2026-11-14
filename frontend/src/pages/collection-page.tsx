@@ -1,7 +1,8 @@
 import { Compass, Disc3, FilterX, Library, Loader2, Mic2, Play, SearchX, Tags, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { PageHeader } from "@/components/layout/app-shell";
+import { MOOD, PhotoHero } from "@/components/decor";
+import { Logo } from "@/components/layout/logo";
 import { SongRow } from "@/components/music/song-row";
 import { EmptyState, ErrorState, SongListSkeleton } from "@/components/states";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -121,24 +122,23 @@ export function CollectionPage() {
 
   return (
     <>
-      <PageHeader
-        eyebrow="Your library"
-        title="Collection"
-        description={
-          total === undefined
+      <PhotoHero src={MOOD.booksHeadphones} position="center 40%">
+        <Logo className="mb-3" />
+        <p className="font-script text-2xl text-orchid-glow">Your library</p>
+        <h1 className="mt-1 font-display text-4xl font-semibold tracking-tight text-cream sm:text-5xl">Collection</h1>
+        <p className="mt-2 max-w-xl text-sm text-lavender/95">
+          {total === undefined
             ? "Loading your saved songs…"
             : active
               ? `${plural(total, "song")} match your filters.`
-              : `${plural(total, "song")}${songs.length === total && total > 0 ? ` · ${formatTotalDuration(loadedDuration)}` : ""}. Filter by artist, album or genre.`
-        }
-        actions={
-          firstPlayable && (
-            <Button variant="cta" size="lg" onClick={() => player.play(firstPlayable, songs)}>
-              <Play data-icon="inline-start" className="fill-current" /> Play {active ? "filtered" : "all"}
-            </Button>
-          )
-        }
-      />
+              : `${plural(total, "song")}${songs.length === total && total > 0 ? ` · ${formatTotalDuration(loadedDuration)}` : ""}. Filter by artist, album or genre.`}
+        </p>
+        {firstPlayable && (
+          <Button variant="cta" size="lg" className="mt-5 w-fit" onClick={() => player.play(firstPlayable, songs)}>
+            <Play data-icon="inline-start" className="fill-current" /> Play {active ? "filtered" : "all"}
+          </Button>
+        )}
+      </PhotoHero>
 
       {collectionEmpty ? (
         <EmptyState

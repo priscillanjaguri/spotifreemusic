@@ -1,7 +1,7 @@
 import { BarChart3, Clock3, Disc3, HeartHandshake, Mic2, Sparkles, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ButterflyDrift, MOOD, MoodAccent, Petal, PhotoHero } from "@/components/decor";
+import { Butterfly, ButterflyDrift, FairyLights, MOOD, MoodAccent, Petal, PhotoHero } from "@/components/decor";
 import { Logo } from "@/components/layout/logo";
 import { CoverArt } from "@/components/music/cover-art";
 import { SongRow } from "@/components/music/song-row";
@@ -44,16 +44,31 @@ function StatTile({
   label,
   value,
   hint,
+  accent,
 }: {
   label: string;
   value: string;
   hint?: string;
+  accent?: "butterfly" | "sparkle";
 }) {
   return (
-    <div className="glass glass-inset rounded-[1.6rem] p-4 sm:p-5">
-      <p className="text-sm font-semibold text-muted-foreground">{label}</p>
-      <p className="mt-1 font-display text-3xl font-semibold text-heading sm:text-4xl">{value}</p>
-      {hint && <p className="mt-1 text-xs text-subtle">{hint}</p>}
+    <div className="glass glass-inset relative overflow-hidden rounded-[1.6rem] p-4 ring-1 ring-orchid-glow/25 sm:p-5">
+      {accent === "butterfly" && (
+        <Butterfly className="pointer-events-none absolute -right-1 top-2 size-9 animate-butterfly opacity-55" />
+      )}
+      {accent === "sparkle" && (
+        <>
+          <Sparkles className="pointer-events-none absolute right-3 top-3 size-4 text-orchid-glow opacity-80 animate-twinkle" />
+          <span
+            aria-hidden
+            className="pointer-events-none absolute bottom-3 right-5 size-1.5 rounded-full bg-[#ffd89a] animate-twinkle shadow-[0_0_8px_#ffd89a]"
+            style={{ animationDelay: "1.2s" }}
+          />
+        </>
+      )}
+      <p className="relative text-sm font-semibold text-muted-foreground">{label}</p>
+      <p className="relative mt-1 font-display text-3xl font-semibold text-heading sm:text-4xl">{value}</p>
+      {hint && <p className="relative mt-1 text-xs text-subtle">{hint}</p>}
     </div>
   );
 }
@@ -155,7 +170,7 @@ export function AnalyticsPage() {
   if (analytics.isError) {
     return (
       <>
-        <PhotoHero src={MOOD.cozy} position="center" dense>
+        <PhotoHero src={MOOD.lantern} position="center" dense>
           <Logo className="mb-3" />
           <p className="font-script text-2xl text-orchid-glow">listening insights</p>
           <h1 className="mt-1 font-display text-4xl font-semibold text-cream">Your week in purple</h1>
@@ -172,7 +187,9 @@ export function AnalyticsPage() {
 
   return (
     <>
-      <PhotoHero src={MOOD.cozy} position="center 35%" dense>
+      <PhotoHero src={MOOD.lantern} position="center 40%" dense>
+        <FairyLights warm className="opacity-70" />
+        <ButterflyDrift className="opacity-40" />
         <Logo className="mb-3" />
         <p className="font-script text-2xl text-orchid-glow">listening insights</p>
         <h1 className="mt-1 font-display text-4xl font-semibold tracking-tight text-cream sm:text-5xl">
@@ -235,17 +252,29 @@ export function AnalyticsPage() {
       ) : (
         <>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <StatTile label="Listening time" value={formatTotalDuration(data.total_listened_ms)} hint={`${data.play_count} plays`} />
-            <StatTile label="Songs" value={String(data.unique_songs)} hint={`${data.unique_artists} artists`} />
+            <StatTile
+              label="Listening time"
+              value={formatTotalDuration(data.total_listened_ms)}
+              hint={`${data.play_count} plays`}
+              accent="sparkle"
+            />
+            <StatTile
+              label="Songs"
+              value={String(data.unique_songs)}
+              hint={`${data.unique_artists} artists`}
+              accent="butterfly"
+            />
             <StatTile
               label="Completion"
               value={data.completion_rate == null ? "—" : `${Math.round(data.completion_rate * 100)}%`}
               hint="Finished plays"
+              accent="sparkle"
             />
             <StatTile
               label="Top genre"
               value={data.top_genres[0]?.name ?? "—"}
               hint={data.top_genres[0] ? formatTotalDuration(data.top_genres[0].listened_ms) : "Play to learn"}
+              accent="butterfly"
             />
           </div>
 

@@ -14,6 +14,7 @@ import {
 import { Link } from "react-router-dom";
 import {
   ButterflyDrift,
+  FairyLights,
   MOOD,
   MoodAccent,
   Petal,
@@ -200,7 +201,7 @@ export function DashboardPage() {
   if (recent.isError || facets.isError) {
     return (
       <>
-        <PhotoHero src={MOOD.heelsFull} position="center 32%" dense>
+        <PhotoHero src={MOOD.lookingUp} position="center 22%" dense>
           <Logo className="mb-3" />
           <p className="font-script text-2xl text-orchid-glow">{today}</p>
           <h1 className="font-display text-4xl font-semibold text-cream">{greeting()}, {firstName}</h1>
@@ -228,7 +229,9 @@ export function DashboardPage() {
 
   return (
     <>
-      <PhotoHero src={MOOD.heelsFull} position="center 28%" className="min-h-[20rem] sm:min-h-[24rem]">
+      <PhotoHero src={MOOD.lookingUp} position="center 20%" className="min-h-[20rem] sm:min-h-[24rem]">
+        <FairyLights warm className="opacity-80" />
+        <MoodAccent src={MOOD.lantern} side="right" className="opacity-50" />
         <Logo className="mb-4 drop-shadow-lg" />
         <p className="font-script text-2xl leading-none text-orchid-glow sm:text-[1.7rem]">{today}</p>
         <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight text-cream sm:text-5xl">
@@ -239,7 +242,7 @@ export function DashboardPage() {
             ? "Gathering your music…"
             : isNew
               ? "Your collection is empty for now. Let's find the first songs worth keeping."
-              : `You've saved ${plural(total, "song")} so far — heels-out main-character energy.`}
+              : `You've saved ${plural(total, "song")} so far — headphones on, looking up.`}
         </p>
         <Link to="/discover" className={cn(buttonVariants({ variant: "cta", size: "lg" }), "mt-5 w-fit")}>
           <Compass data-icon="inline-start" /> Discover music
@@ -290,8 +293,8 @@ export function DashboardPage() {
             icon={Mic2}
             label="Artists"
             value={facets.data?.artists.length}
-            photo={MOOD.heelsFull}
-            position="center 55%"
+            photo={MOOD.lantern}
+            position="center 40%"
             to="/collection"
           />
         </div>
