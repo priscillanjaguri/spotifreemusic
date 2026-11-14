@@ -1,8 +1,8 @@
 import { Coffee, MoonStar, Sparkles, SunMedium, Waves, Zap } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { HairWaves, Petal, Rose } from "@/components/decor";
-import { PageHeader } from "@/components/layout/app-shell";
+import { ButterflyDrift, MOOD, MoodAccent, Petal, PhotoHero } from "@/components/decor";
+import { Logo } from "@/components/layout/logo";
 import { CoverArt } from "@/components/music/cover-art";
 import { RecommendationCard } from "@/components/music/recommendation-card";
 import { EmptyState, ErrorState } from "@/components/states";
@@ -46,47 +46,59 @@ export function CompanionPage() {
   if (companion.isError) {
     return (
       <>
-        <PageHeader eyebrow="daily companion" title="A mix for right now" />
-        <ErrorState error={companion.error} onRetry={() => void companion.refetch()} />
+        <PhotoHero src={MOOD.sunset} position="center 40%" dense>
+          <Logo className="mb-3" />
+          <p className="font-script text-2xl text-orchid-glow">daily companion</p>
+          <h1 className="mt-1 font-display text-4xl font-semibold text-cream">A mix for right now</h1>
+        </PhotoHero>
+        <div className="mt-6">
+          <ErrorState error={companion.error} onRetry={() => void companion.refetch()} />
+        </div>
       </>
     );
   }
 
   const data = companion.data;
+  const titleMain = data
+    ? data.greeting.split(",")[0]
+    : "A mix for right now";
+  const titleScript = data?.greeting.includes(",")
+    ? data.greeting.split(",").slice(1).join(",").trim()
+    : data
+      ? "friend"
+      : null;
 
   return (
     <>
-      <PageHeader
-        eyebrow="daily companion"
-        title={
-          data ? (
+      <PhotoHero src={MOOD.beach} position="center 45%">
+        <Logo className="mb-3" />
+        <p className="font-script text-2xl text-orchid-glow">daily companion</p>
+        <h1 className="mt-1 font-display text-4xl font-semibold tracking-tight text-cream sm:text-5xl">
+          {titleMain}
+          {titleScript ? (
             <>
-              {data.greeting.split(",")[0]},{" "}
-              <span className="font-script text-[1.15em] font-normal text-gradient">
-                {data.greeting.includes(",") ? data.greeting.split(",").slice(1).join(",").trim() : "friend"}
-              </span>
+              , <span className="font-script text-[1.15em] font-normal text-gradient">{titleScript}</span>
             </>
-          ) : (
-            "A mix for right now"
-          )
-        }
-        description={data?.briefing ?? "Gathering today’s colours from your taste and recent listens…"}
-        actions={
-          queue.length > 0 && (
-            <Button
-              variant="cta"
-              size="lg"
-              onClick={() => player.play(queue[0]!, queue)}
-            >
-              Play today’s mix
-            </Button>
-          )
-        }
-      />
+          ) : null}
+        </h1>
+        <p className="mt-2 max-w-xl text-sm text-lavender/95">
+          {data?.briefing ?? "Gathering today’s colours from your taste and recent listens…"}
+        </p>
+        {queue.length > 0 && (
+          <Button
+            variant="cta"
+            size="lg"
+            className="mt-5 w-fit"
+            onClick={() => player.play(queue[0]!, queue)}
+          >
+            Play today’s mix
+          </Button>
+        )}
+      </PhotoHero>
 
-      <section className="powder glass-soft glass-edge relative overflow-hidden rounded-[2rem] p-5 sm:p-6">
-        <HairWaves className="absolute inset-0 opacity-40" />
-        <Rose className="absolute -right-8 top-0 size-28 opacity-70" />
+      <section className="powder glass-soft glass-edge relative mt-8 overflow-hidden rounded-[2rem] p-5 sm:p-6">
+        <MoodAccent src={MOOD.sunset} side="right" className="opacity-50" />
+        <ButterflyDrift className="opacity-45" />
         <div className="relative">
           <p className="font-script text-2xl text-highlight">how are you feeling?</p>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">

@@ -14,8 +14,8 @@ import {
   Upload,
 } from "lucide-react";
 import { useRef, useState } from "react";
-import { Petal, Rose } from "@/components/decor";
-import { PageHeader } from "@/components/layout/app-shell";
+import { Butterfly, MOOD, MoodAccent, Petal, PhotoHero } from "@/components/decor";
+import { Logo } from "@/components/layout/logo";
 import { SongRow } from "@/components/music/song-row";
 import { EmptyState, ErrorState, SongListSkeleton } from "@/components/states";
 import {
@@ -103,8 +103,8 @@ function Dropzone({
           : "border-lavender/25 bg-satin-royal hover:border-lavender/45",
       )}
     >
-      <Rose className={cn("pointer-events-none absolute -right-10 -bottom-12 opacity-80 drop-shadow-xl", compact ? "size-32" : "size-48")} />
-      <Petal className="pointer-events-none absolute top-6 left-[8%] size-6 rotate-[-20deg] opacity-60" />
+      <MoodAccent src={MOOD.legs} side="right" className={cn("opacity-55", compact && "opacity-40")} />
+      <Butterfly className="pointer-events-none absolute top-5 left-[8%] size-7 animate-butterfly opacity-70" />
       <Petal className="pointer-events-none absolute top-[40%] left-[22%] hidden size-4 rotate-[60deg] opacity-40 sm:block" />
       {!native && (
         <input
@@ -329,24 +329,25 @@ export function LibraryPage() {
 
   return (
     <div>
-      <PageHeader
-        eyebrow="your own files"
-        title="My Library"
-        description={
-          uploads.length
+      <PhotoHero src={MOOD.legs} position="center 45%">
+        <Logo className="mb-3" />
+        <p className="font-script text-2xl text-orchid-glow">your own files</p>
+        <h1 className="mt-1 font-display text-4xl font-semibold tracking-tight text-cream sm:text-5xl">My Library</h1>
+        <p className="mt-2 max-w-xl text-sm text-lavender/95">
+          {uploads.length
             ? `${plural(uploads.length, "file")} · ${formatBytes(totalBytes)}. They play here and show up in your collection.`
-            : "Upload music files you own. Spotifree reads their tags and cover art, and plays them right here."
-        }
-        actions={
-          songs.length > 0 && (
-            <Button variant="cta" onClick={() => player.play(songs[0], songs)}>
-              <Play data-icon="inline-start" className="fill-current" /> Play all
-            </Button>
-          )
-        }
-      />
+            : "Upload music files you own. Spotifree reads their tags and cover art, and plays them right here."}
+        </p>
+        {songs.length > 0 && (
+          <Button variant="cta" className="mt-5 w-fit" onClick={() => player.play(songs[0], songs)}>
+            <Play data-icon="inline-start" className="fill-current" /> Play all
+          </Button>
+        )}
+      </PhotoHero>
 
-      <Dropzone onFiles={queue.add} accept={queue.accept} limits={library.data?.limits} compact={uploads.length > 0} />
+      <div className="mt-8">
+        <Dropzone onFiles={queue.add} accept={queue.accept} limits={library.data?.limits} compact={uploads.length > 0} />
+      </div>
       {library.data && <StorageNote limits={library.data.limits} />}
 
       {queue.items.length > 0 && <UploadQueue items={queue.items} onRetry={queue.retry} onClear={queue.clearFinished} />}

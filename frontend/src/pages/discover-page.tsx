@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Loader2, Play, Search, SearchX, X } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
-import { PageHeader } from "@/components/layout/app-shell";
+import { MOOD, PhotoHero } from "@/components/decor";
+import { Logo } from "@/components/layout/logo";
 import { SongRow } from "@/components/music/song-row";
 import { EmptyState, ErrorState, ProviderNotConfigured, SongListSkeleton } from "@/components/states";
 import { Button } from "@/components/ui/button";
@@ -15,14 +16,13 @@ import { QUICK_SEARCHES } from "./dashboard-page";
 
 const MIN_QUERY = 2;
 
-// Each mood tile is a different scoop of the palette.
 const MOODS = [
-  { q: "lofi", label: "Late-night lofi", tone: "bg-satin-deep" },
-  { q: "ambient", label: "Ambient drift", tone: "bg-satin-royal" },
-  { q: "jazz", label: "Smoky jazz", tone: "bg-satin-amethyst" },
-  { q: "synthwave", label: "Neon synthwave", tone: "bg-satin-violet" },
-  { q: "piano", label: "Solo piano", tone: "bg-satin-royal" },
-  { q: "folk", label: "Campfire folk", tone: "bg-satin-amethyst" },
+  { q: "lofi", label: "Late-night lofi", photo: MOOD.headphones },
+  { q: "ambient", label: "Ambient drift", photo: MOOD.beach },
+  { q: "jazz", label: "Smoky jazz", photo: MOOD.cozy },
+  { q: "synthwave", label: "Neon synthwave", photo: MOOD.butterflyNeon },
+  { q: "piano", label: "Solo piano", photo: MOOD.tulips },
+  { q: "folk", label: "Campfire folk", photo: MOOD.sunset },
 ];
 
 function useDebounced<T>(value: T, ms: number) {
@@ -70,13 +70,16 @@ export function DiscoverPage() {
 
   return (
     <>
-      <PageHeader
-        eyebrow="Explore"
-        title="Discover"
-        description="Search Creative Commons music by song, artist or genre. Play anything, and keep what you love."
-      />
+      <PhotoHero src={MOOD.headphones} position="center 40%" dense>
+        <Logo className="mb-3" />
+        <p className="font-script text-2xl text-orchid-glow">Explore</p>
+        <h1 className="mt-1 font-display text-4xl font-semibold text-cream sm:text-5xl">Discover</h1>
+        <p className="mt-2 max-w-lg text-sm text-lavender/95">
+          Search Creative Commons music by song, artist or genre. Play anything, and keep what you love.
+        </p>
+      </PhotoHero>
 
-      <form onSubmit={onSubmit} role="search" className="relative mb-6">
+      <form onSubmit={onSubmit} role="search" className="relative mt-6 mb-6">
         <Search className="pointer-events-none absolute top-1/2 left-5 size-5 -translate-y-1/2 text-orchid-glow" />
         <Input
           value={input}
@@ -119,8 +122,14 @@ export function DiscoverPage() {
                 key={m.q}
                 type="button"
                 onClick={() => setParams({ q: m.q })}
-                className={`powder gloss glow-soft group relative min-h-28 overflow-hidden glass-edge rounded-[1.75rem] ${m.tone} p-4 text-left transition-all hover:-translate-y-1 sm:min-h-32 sm:p-5`}
+                className="powder gloss glow-soft group relative min-h-28 overflow-hidden glass-edge rounded-[1.75rem] p-4 text-left transition-all hover:-translate-y-1 sm:min-h-32 sm:p-5"
               >
+                <div
+                  aria-hidden
+                  className="absolute inset-0 bg-cover bg-center opacity-45 transition-opacity group-hover:opacity-60"
+                  style={{ backgroundImage: `url(${m.photo})` }}
+                />
+                <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#160a1f]/90 via-[#24112e]/55 to-transparent" />
                 <p className="relative font-display text-2xl leading-tight font-semibold text-cream drop-shadow-sm">{m.label}</p>
                 <p className="relative mt-1 text-xs font-semibold text-lavender">Search “{m.q}”</p>
                 <Play className="absolute right-4 bottom-4 size-9 translate-y-1 rounded-full bg-surface-raised p-2.5 text-accent-foreground opacity-0 shadow-whip transition-all group-hover:translate-y-0 group-hover:opacity-100" />

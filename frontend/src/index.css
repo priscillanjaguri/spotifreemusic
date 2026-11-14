@@ -13,9 +13,8 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Spotifree glassmorphism: deep satin eggplant / amethyst base with frosted translucent
- * panels, soft pink–purple glows, and glossy edge highlights. Darker than light-lavender
- * glass references — girly and cool, not pastel.
+ * Spotifree girly purple: deep plum base with real photo mood (beach, headphones,
+ * butterflies, fashion legs). Lilac veils over imagery — not generic glassmorphism.
  */
 @theme {
   /* Satin ribbons, darkest to lightest, each as shadow / base / sheen */
@@ -92,6 +91,19 @@
   @keyframes glow-pulse {
     0%, 100% { opacity: 0.45; }
     50% { opacity: 0.85; }
+  }
+  /* Slow photo ken-burns for hero atmosphere */
+  --animate-mood-drift: mood-drift 28s ease-in-out infinite alternate;
+  @keyframes mood-drift {
+    0% { transform: scale(1.05) translate(0, 0); }
+    100% { transform: scale(1.12) translate(-2%, 1.5%); }
+  }
+  /* Soft butterfly flight path */
+  --animate-butterfly: butterfly 12s ease-in-out infinite;
+  @keyframes butterfly {
+    0%, 100% { transform: translate(0, 0) rotate(-6deg); }
+    35% { transform: translate(12px, -18px) rotate(8deg); }
+    70% { transform: translate(-8px, -8px) rotate(-4deg); }
   }
 }
 
@@ -224,12 +236,12 @@
   body {
     @apply bg-background text-foreground min-h-dvh;
     background-color: var(--color-midnight);
+    /* Deep plum wash — photo motifs live in AmbientMood / PhotoHero */
     background-image:
-      radial-gradient(42rem 32rem at 8% -5%, rgb(255 140 200 / 0.22), transparent 58%),
-      radial-gradient(38rem 28rem at 95% 0%, rgb(170 70 230 / 0.34), transparent 55%),
-      radial-gradient(48rem 34rem at 70% 110%, rgb(120 40 180 / 0.38), transparent 58%),
-      radial-gradient(30rem 24rem at 40% 40%, rgb(90 30 130 / 0.28), transparent 60%),
-      linear-gradient(165deg, #1a0b24 0%, var(--color-midnight) 42%, #12061a 100%);
+      radial-gradient(40rem 30rem at 12% -8%, rgb(232 140 200 / 0.2), transparent 56%),
+      radial-gradient(36rem 28rem at 92% 4%, rgb(150 60 210 / 0.28), transparent 54%),
+      radial-gradient(44rem 32rem at 60% 100%, rgb(90 30 140 / 0.35), transparent 58%),
+      linear-gradient(168deg, #1c0a28 0%, var(--color-midnight) 48%, #100618 100%);
     background-attachment: fixed;
   }
   h1, h2, h3 {
@@ -261,53 +273,52 @@
   color: transparent;
 }
 
-/* ---- Glass material ----
- * Solid eggplant/amethyst fill first (unsupported browsers), then frosted blur when
- * backdrop-filter is available. Specular edge + soft pink/purple outer glow.
+/* ---- Lilac veil panels ----
+ * Soft plum films over photo atmosphere — readable chrome without glassmorphism cliché.
  */
 @utility glass {
   position: relative;
   isolation: isolate;
-  background-color: rgb(42 18 58 / 0.82);
-  border: 1px solid rgb(255 220 255 / 0.16);
+  background-color: rgb(36 14 52 / 0.78);
+  border: 1px solid rgb(255 210 245 / 0.14);
   box-shadow: var(--shadow-whip);
   background-image:
-    linear-gradient(125deg, rgb(255 240 255 / 0.16) 0%, transparent 34%, transparent 68%, rgb(255 160 220 / 0.06) 100%),
-    linear-gradient(180deg, rgb(120 55 150 / 0.22), rgb(30 10 45 / 0.35));
+    linear-gradient(145deg, rgb(255 200 235 / 0.1) 0%, transparent 42%),
+    linear-gradient(180deg, rgb(100 40 130 / 0.28), rgb(24 8 38 / 0.5));
   @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-    background-color: var(--glass-fill);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    background-color: rgb(48 22 68 / 0.38);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    backdrop-filter: blur(14px) saturate(1.2);
   }
 }
 
 @utility glass-strong {
   position: relative;
   isolation: isolate;
-  background-color: rgb(28 12 40 / 0.9);
-  border: 1px solid rgb(255 220 255 / 0.18);
+  background-color: rgb(24 10 36 / 0.88);
+  border: 1px solid rgb(255 210 245 / 0.16);
   box-shadow: var(--shadow-whip-lg);
   background-image:
-    linear-gradient(130deg, rgb(255 245 255 / 0.2) 0%, transparent 36%),
-    linear-gradient(180deg, rgb(100 45 140 / 0.28), rgb(18 6 30 / 0.5));
+    linear-gradient(140deg, rgb(255 220 245 / 0.12) 0%, transparent 40%),
+    linear-gradient(180deg, rgb(90 35 120 / 0.32), rgb(16 6 28 / 0.62));
   @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-    background-color: var(--glass-fill-strong);
-    -webkit-backdrop-filter: blur(28px) saturate(1.45);
-    backdrop-filter: blur(28px) saturate(1.45);
+    background-color: rgb(32 12 48 / 0.55);
+    -webkit-backdrop-filter: blur(18px) saturate(1.25);
+    backdrop-filter: blur(18px) saturate(1.25);
   }
 }
 
 @utility glass-soft {
   position: relative;
   isolation: isolate;
-  background-color: rgb(70 32 95 / 0.7);
-  border: 1px solid rgb(255 220 255 / 0.14);
+  background-color: rgb(62 28 88 / 0.65);
+  border: 1px solid rgb(255 210 245 / 0.12);
   box-shadow: var(--shadow-whip);
-  background-image: linear-gradient(140deg, rgb(255 200 240 / 0.14), transparent 45%);
+  background-image: linear-gradient(150deg, rgb(255 180 230 / 0.12), transparent 48%);
   @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-    background-color: var(--glass-fill-soft);
-    -webkit-backdrop-filter: blur(18px) saturate(1.3);
-    backdrop-filter: blur(18px) saturate(1.3);
+    background-color: rgb(90 40 120 / 0.28);
+    -webkit-backdrop-filter: blur(12px) saturate(1.15);
+    backdrop-filter: blur(12px) saturate(1.15);
   }
 }
 

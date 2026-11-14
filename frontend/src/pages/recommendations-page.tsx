@@ -1,8 +1,8 @@
 import { HeartHandshake, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { HairWaves, Petal, Rose } from "@/components/decor";
-import { PageHeader } from "@/components/layout/app-shell";
+import { ButterflyDrift, MOOD, MoodAccent, Petal, PhotoHero } from "@/components/decor";
+import { Logo } from "@/components/layout/logo";
 import { RecommendationCard } from "@/components/music/recommendation-card";
 import { EmptyState, ErrorState } from "@/components/states";
 import { buttonVariants } from "@/components/ui/button";
@@ -64,18 +64,26 @@ export function RecommendationsPage() {
   if (active.isError) {
     return (
       <>
-        <PageHeader eyebrow="for you" title="Picks with your name on them" />
-        <ErrorState error={active.error} onRetry={() => void active.refetch()} />
+        <PhotoHero src={MOOD.butterflySoft} position="center" dense>
+          <Logo className="mb-3" />
+          <p className="font-script text-2xl text-orchid-glow">for you</p>
+          <h1 className="mt-1 font-display text-4xl font-semibold text-cream">Picks with your name on them</h1>
+        </PhotoHero>
+        <div className="mt-6">
+          <ErrorState error={active.error} onRetry={() => void active.refetch()} />
+        </div>
       </>
     );
   }
 
   return (
     <>
-      <PageHeader
-        eyebrow="for you"
-        title={
-          similarId ? (
+      <PhotoHero src={MOOD.butterflyShadow} position="center 35%">
+        <ButterflyDrift className="opacity-60" />
+        <Logo className="mb-3" />
+        <p className="font-script text-2xl text-orchid-glow">for you</p>
+        <h1 className="mt-1 font-display text-4xl font-semibold tracking-tight text-cream sm:text-5xl">
+          {similarId ? (
             <>
               More like <span className="font-script text-[1.15em] font-normal text-gradient">this</span>
             </>
@@ -83,17 +91,17 @@ export function RecommendationsPage() {
             <>
               Picks with your <span className="font-script text-[1.15em] font-normal text-gradient">name</span> on them
             </>
-          )
-        }
-        description={
-          similarId
+          )}
+        </h1>
+        <p className="mt-2 max-w-xl text-sm text-lavender/95">
+          {similarId
             ? "Neighbours in sound and genre, pulled from your catalogue and fresh discovery seeds."
             : active.data?.cold_start
               ? "Still learning your taste — save songs, like picks, or choose a few seed genres below."
-              : `Blending your last ${active.data?.short_term_days ?? 28} days with the longer arc of who you are.`
-        }
-        actions={
-          similarId ? (
+              : `Blending your last ${active.data?.short_term_days ?? 28} days with the longer arc of who you are.`}
+        </p>
+        <div className="mt-5">
+          {similarId ? (
             <button type="button" onClick={clearSimilar} className={buttonVariants({ variant: "secondary" })}>
               Back to For You
             </button>
@@ -101,14 +109,13 @@ export function RecommendationsPage() {
             <Link to="/discover" className={buttonVariants({ variant: "cta" })}>
               <Sparkles data-icon="inline-start" /> Discover more
             </Link>
-          )
-        }
-      />
+          )}
+        </div>
+      </PhotoHero>
 
       {!similarId && (
-        <section className="powder glass-soft glass-edge relative mb-8 overflow-hidden rounded-[1.75rem] p-5 sm:p-6">
-          <HairWaves className="absolute inset-0 h-full w-full opacity-40" />
-          <Rose className="absolute -top-10 -right-8 size-28 opacity-80" />
+        <section className="powder glass-soft glass-edge relative mt-8 mb-8 overflow-hidden rounded-[1.75rem] p-5 sm:p-6">
+          <MoodAccent src={MOOD.butterflyNeon} side="right" className="opacity-50" />
           <div className="relative">
             <p className="font-script text-3xl text-cream">seed your taste</p>
             <p className="mt-1 max-w-xl text-sm text-lavender">

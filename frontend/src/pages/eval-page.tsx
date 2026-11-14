@@ -1,6 +1,6 @@
 import { Activity, FlaskConical, Loader2, Play, RefreshCw, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
-import { HairWaves, Petal, Rose } from "@/components/decor";
+import { ButterflyDrift, MOOD, MoodAccent, MoodPhoto, Petal } from "@/components/decor";
 import { Logo } from "@/components/layout/logo";
 import { EmptyState, ErrorState } from "@/components/states";
 import { Badge } from "@/components/ui/badge";
@@ -205,12 +205,11 @@ export function EvalPage() {
   return (
     <div className="relative min-h-dvh overflow-x-hidden">
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
-        <div className="absolute -left-24 top-10 size-72 animate-float rounded-full bg-amethyst/40 blur-3xl" />
-        <div className="absolute right-0 top-40 size-80 animate-glow-pulse rounded-full bg-orchid/25 blur-3xl" />
-        <div className="absolute bottom-20 left-1/3 size-64 rounded-full bg-heliotrope/20 blur-3xl" />
-        <Rose className="absolute -right-6 top-24 size-36 opacity-40" />
+        <MoodPhoto src={MOOD.beach} opacity={0.28} position="center 30%" drift className="inset-0" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0c0612]/7 via-[#160a1f]/85 to-[#0c0612]/95" />
+        <MoodAccent src={MOOD.butterflyNeon} side="right" className="top-24 h-72 opacity-40" />
+        <ButterflyDrift className="opacity-45" />
         <Petal className="absolute left-8 top-[28rem] size-16 rotate-12 opacity-30" />
-        <HairWaves className="absolute bottom-0 left-0 w-full opacity-40" />
       </div>
 
       <header className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 pb-2 pt-8 sm:px-6">
@@ -221,15 +220,19 @@ export function EvalPage() {
       </header>
 
       <main className="mx-auto max-w-5xl space-y-8 px-4 pb-20 pt-6 sm:px-6">
-        <section className="animate-in fade-in slide-in-from-bottom-2 duration-700">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-lilac">Continuous offline metrics</p>
-          <h1 className="mt-2 font-display text-4xl font-semibold leading-tight text-heading sm:text-5xl">
-            How Spotifree ranks
-          </h1>
-          <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground">
-            Hold-out precision, recall, diversity, and coverage from listening + feedback already in the
-            database. Testers stay on the APK — this page is for QH and interviewers.
-          </p>
+        <section className="relative animate-in fade-in slide-in-from-bottom-2 overflow-hidden rounded-[1.75rem] duration-700">
+          <MoodPhoto src={MOOD.sunset} opacity={0.45} position="center" className="rounded-[1.75rem]" />
+          <div className="absolute inset-0 rounded-[1.75rem] bg-gradient-to-r from-[#0c0612]/88 via-[#1a0b28]/7 to-transparent" />
+          <div className="relative p-5 sm:p-7">
+            <p className="font-script text-2xl text-orchid-glow">Continuous offline metrics</p>
+            <h1 className="mt-2 font-display text-4xl font-semibold leading-tight text-cream sm:text-5xl">
+              How <span className="font-script text-[1.1em] font-normal text-gradient">Spotifree</span> ranks
+            </h1>
+            <p className="mt-3 max-w-2xl text-base leading-relaxed text-lavender/90">
+              Hold-out precision, recall, diversity, and coverage from listening + feedback already in the
+              database. Testers stay on the APK — this page is for QH and interviewers.
+            </p>
+          </div>
         </section>
 
         {summary.isLoading ? (

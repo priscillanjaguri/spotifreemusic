@@ -1,7 +1,7 @@
 import { Menu } from "lucide-react";
 import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
-import { Petal, Rose } from "@/components/decor";
+import { AmbientMood, Butterfly, MOOD, MoodAccent, Petal } from "@/components/decor";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { usePlayer } from "@/lib/player";
 import { cn } from "@/lib/utils";
@@ -43,18 +43,17 @@ function NavList({ items, onNavigate }: { items: typeof NAV_ITEMS; onNavigate?: 
 function Sidebar() {
   return (
     <aside className="glass-strong glass-inset powder fixed inset-y-3 left-3 z-30 hidden w-64 flex-col overflow-hidden rounded-[2rem] px-4 py-6 lg:flex">
-      <div className="pointer-events-none absolute -left-10 top-24 size-40 rounded-full bg-pink-glow/20 blur-3xl animate-glow-pulse" />
-      <div className="pointer-events-none absolute -right-8 bottom-28 size-36 rounded-full bg-heliotrope/25 blur-3xl" />
-      <Rose className="pointer-events-none absolute top-[48%] -right-16 size-44 rotate-12 opacity-50" />
+      <MoodAccent src={MOOD.tulips} side="right" className="opacity-40" />
+      <Butterfly className="pointer-events-none absolute right-3 top-28 size-10 animate-butterfly opacity-70" />
       <NavLink to="/" className="relative px-2">
         <Logo />
       </NavLink>
 
       <div className="relative mt-10 flex-1 overflow-y-auto pr-1">
         <NavList items={NAV_ITEMS} />
-        <p className="mt-8 px-4 font-script text-xl text-highlight">one glassy product</p>
+        <p className="mt-8 px-4 font-script text-xl text-highlight">lilac daydream</p>
         <p className="mt-1 px-4 text-xs leading-relaxed text-muted-foreground">
-          Frosted panels, soft pink–purple glow — same deep satin thread everywhere.
+          Beach light, headphones, butterflies — Spotifree in soft-girl purple.
         </p>
       </div>
 
@@ -139,11 +138,12 @@ function MobileTabBar() {
           </span>
           More
         </SheetTrigger>
-        <SheetContent side="bottom" className="glass-strong rounded-t-[2rem] border-lavender/20 pb-8">
-          <SheetHeader>
+        <SheetContent side="bottom" className="glass-strong relative overflow-hidden rounded-t-[2rem] border-lavender/20 pb-8">
+          <MoodAccent src={MOOD.legs} side="right" className="opacity-45" />
+          <SheetHeader className="relative">
             <SheetTitle className="font-display text-2xl text-heading">More of Spotifree</SheetTitle>
           </SheetHeader>
-          <div className="mt-4 px-1">
+          <div className="relative mt-4 px-1">
             <NavList items={MOBILE_MORE} onNavigate={() => setOpen(false)} />
             <div className="mt-6 flex items-center gap-2 px-4 text-xs text-muted-foreground">
               <Petal className="size-3.5" /> Collection, Library and Analytics live here on phones.
@@ -187,11 +187,7 @@ export function AppShell() {
   const { current } = usePlayer();
   return (
     <div className="relative min-h-dvh">
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -left-24 top-10 size-[28rem] rounded-full bg-pink-glow/15 blur-[100px] animate-glow-pulse" />
-        <div className="absolute right-0 top-1/4 size-[26rem] rounded-full bg-heliotrope/20 blur-[110px]" />
-        <div className="absolute bottom-0 left-1/3 size-[30rem] rounded-full bg-amethyst/30 blur-[120px]" />
-      </div>
+      <AmbientMood />
       <Sidebar />
       <MobileTopBar />
       <main

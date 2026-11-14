@@ -12,8 +12,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { HairWaves, Petal, Rose } from "@/components/decor";
-import { PageHeader } from "@/components/layout/app-shell";
+import { ButterflyDrift, MOOD, MoodAccent, Petal, PhotoHero } from "@/components/decor";
+import { Logo } from "@/components/layout/logo";
 import { RecommendationCard } from "@/components/music/recommendation-card";
 import { SongCard } from "@/components/music/song-card";
 import { EmptyState, ErrorState } from "@/components/states";
@@ -118,8 +118,8 @@ function FacetBars({ title, facets, param, empty }: { title: string; facets: Fac
 function DiscoverCallout() {
   return (
     <section className="powder glass-soft glass-edge relative overflow-hidden rounded-[1.75rem] p-6">
-      <HairWaves className="absolute inset-0 h-full w-full opacity-50" />
-      <Rose className="absolute -top-8 -right-8 size-32 opacity-80 drop-shadow-lg" />
+      <MoodAccent src={MOOD.headphones} side="right" className="opacity-55" />
+      <ButterflyDrift className="opacity-40" />
       <div className="relative">
         <p className="font-script text-3xl text-cream">find something new</p>
         <p className="mt-1 max-w-[16rem] text-sm text-lavender">
@@ -199,14 +199,20 @@ export function DashboardPage() {
   if (recent.isError || facets.isError) {
     return (
       <>
-        <PageHeader eyebrow={today} title={`${greeting()}, ${firstName}`} />
-        <ErrorState
-          error={recent.error ?? facets.error}
-          onRetry={() => {
-            void recent.refetch();
-            void facets.refetch();
-          }}
-        />
+        <PhotoHero src={MOOD.beach} position="center 40%" dense>
+          <Logo className="mb-3" />
+          <p className="font-script text-2xl text-orchid-glow">{today}</p>
+          <h1 className="font-display text-4xl font-semibold text-cream">{greeting()}, {firstName}</h1>
+        </PhotoHero>
+        <div className="mt-6">
+          <ErrorState
+            error={recent.error ?? facets.error}
+            onRetry={() => {
+              void recent.refetch();
+              void facets.refetch();
+            }}
+          />
+        </div>
       </>
     );
   }
@@ -221,30 +227,26 @@ export function DashboardPage() {
 
   return (
     <>
-      <PageHeader
-        eyebrow={today}
-        title={
-          <>
-            {greeting()}, <span className="font-script text-[1.2em] font-normal text-gradient">{firstName}</span>
-          </>
-        }
-        description={
-          total === undefined
+      <PhotoHero src={MOOD.beach} position="center 38%">
+        <Logo className="mb-4 drop-shadow-lg" />
+        <p className="font-script text-2xl leading-none text-orchid-glow sm:text-[1.7rem]">{today}</p>
+        <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight text-cream sm:text-5xl">
+          {greeting()}, <span className="font-script text-[1.15em] font-normal text-gradient">{firstName}</span>
+        </h1>
+        <p className="mt-2 max-w-xl text-sm text-lavender/95 sm:text-base">
+          {total === undefined
             ? "Gathering your music…"
             : isNew
               ? "Your collection is empty for now. Let's find the first songs worth keeping."
-              : `You've saved ${plural(total, "song")} so far. Here's your glassy dashboard.`
-        }
-        actions={
-          <Link to="/discover" className={buttonVariants({ variant: "cta", size: "lg" })}>
-            <Compass data-icon="inline-start" /> Discover music
-          </Link>
-        }
-      />
+              : `You've saved ${plural(total, "song")} so far — lilac beach energy for the day.`}
+        </p>
+        <Link to="/discover" className={cn(buttonVariants({ variant: "cta", size: "lg" }), "mt-5 w-fit")}>
+          <Compass data-icon="inline-start" /> Discover music
+        </Link>
+      </PhotoHero>
 
-      <div className="glass-strong glass-inset relative overflow-hidden rounded-[2rem] p-4 sm:p-6">
-        <div className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-pink-glow/20 blur-3xl animate-glow-pulse" />
-        <div className="pointer-events-none absolute -left-10 bottom-0 size-48 rounded-full bg-heliotrope/20 blur-3xl" />
+      <div className="glass-strong glass-inset relative mt-8 overflow-hidden rounded-[2rem] p-4 sm:p-6">
+        <MoodAccent src={MOOD.butterflySoft} side="right" className="opacity-35" />
 
         <div className="relative grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           <StatCard
@@ -381,10 +383,11 @@ export function DashboardPage() {
           to="/companion"
           className="glass-soft glass-edge glow-soft group relative overflow-hidden rounded-[1.75rem] p-5"
         >
+          <MoodAccent src={MOOD.sunset} side="right" className="opacity-50" />
           <Sparkles className="absolute right-4 top-4 size-8 text-orchid-glow opacity-70" />
-          <p className="font-script text-3xl text-cream">daily companion</p>
-          <p className="mt-1 text-sm text-lavender">A mood-aware mix from your taste and recent listens.</p>
-          <span className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-cream group-hover:text-highlight">
+          <p className="relative font-script text-3xl text-cream">daily companion</p>
+          <p className="relative mt-1 text-sm text-lavender">A mood-aware mix from your taste and recent listens.</p>
+          <span className="relative mt-3 inline-flex items-center gap-1 text-sm font-bold text-cream group-hover:text-highlight">
             Open companion <ArrowRight className="size-4" />
           </span>
         </Link>
@@ -392,23 +395,25 @@ export function DashboardPage() {
           to="/analytics"
           className="glass glow-soft group relative overflow-hidden rounded-[1.75rem] p-5"
         >
+          <MoodAccent src={MOOD.cozy} side="right" className="opacity-40" />
           <BarChart3 className="absolute right-4 top-4 size-8 text-lilac opacity-70" />
-          <p className="font-script text-3xl text-highlight">listening insights</p>
-          <p className="mt-1 text-sm text-muted-foreground">Weekly charts, taste timeline and memory lane.</p>
-          <span className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-accent-foreground group-hover:text-highlight">
+          <p className="relative font-script text-3xl text-highlight">listening insights</p>
+          <p className="relative mt-1 text-sm text-muted-foreground">Weekly charts, taste timeline and memory lane.</p>
+          <span className="relative mt-3 inline-flex items-center gap-1 text-sm font-bold text-accent-foreground group-hover:text-highlight">
             Open analytics <ArrowRight className="size-4" />
           </span>
         </Link>
         <section className="glass-soft relative overflow-hidden rounded-[1.75rem] p-5 md:col-span-2 xl:col-span-1">
+          <MoodAccent src={MOOD.butterflyNeon} side="right" className="opacity-45" />
           <Petal className="absolute top-4 right-6 size-8 rotate-45 opacity-70" />
-          <Disc3 className="mb-2 size-5 text-orchid-glow" />
-          <p className="font-script text-3xl text-highlight">how For You listens</p>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <Disc3 className="relative mb-2 size-5 text-orchid-glow" />
+          <p className="relative font-script text-3xl text-highlight">how For You listens</p>
+          <p className="relative mt-1 text-sm text-muted-foreground">
             Likes, saves, completes and replays shape your mix. Skips stay neutral.
           </p>
           <Link
             to="/recommendations"
-            className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-accent-foreground hover:text-highlight"
+            className="relative mt-3 inline-flex items-center gap-1 text-sm font-bold text-accent-foreground hover:text-highlight"
           >
             See your picks <ArrowRight className="size-4" />
           </Link>
