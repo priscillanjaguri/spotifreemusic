@@ -103,7 +103,7 @@ function Dropzone({
           : "border-lavender/25 bg-satin-royal hover:border-lavender/45",
       )}
     >
-      <MoodAccent src={MOOD.legs} side="right" className={cn("opacity-55", compact && "opacity-40")} />
+      <MoodAccent src={MOOD.windowGirl} side="right" className={cn("opacity-55", compact && "opacity-40")} />
       <Butterfly className="pointer-events-none absolute top-5 left-[8%] size-7 animate-butterfly opacity-70" />
       <Petal className="pointer-events-none absolute top-[40%] left-[22%] hidden size-4 rotate-[60deg] opacity-40 sm:block" />
       {!native && (
@@ -329,7 +329,7 @@ export function LibraryPage() {
 
   return (
     <div>
-      <PhotoHero src={MOOD.legs} position="center 45%">
+      <PhotoHero src={MOOD.windowGirl} position="center 35%">
         <Logo className="mb-3" />
         <p className="font-script text-2xl text-orchid-glow">your own files</p>
         <h1 className="mt-1 font-display text-4xl font-semibold tracking-tight text-cream sm:text-5xl">My Library</h1>

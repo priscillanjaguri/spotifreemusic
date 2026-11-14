@@ -16,6 +16,14 @@ export const MOOD = {
   butterflyShadow: "/mood/butterfly-shadow.webp",
   tulips: "/mood/tulips.webp",
   sunset: "/mood/sunset-hearts.webp",
+  /** Round 2 — girl looking up with headphones (Home hero). */
+  lookingUp: "/mood/looking-up-headphones.webp",
+  /** Round 2 — candle lantern for warm Home accents. */
+  lantern: "/mood/lantern-candles.webp",
+  /** Round 2 — book + headphones (Collection). */
+  booksHeadphones: "/mood/books-headphones.webp",
+  /** Round 2 — window girl with headphones (My Library). */
+  windowGirl: "/mood/window-girl-headphones.webp",
 } as const;
 
 export type MoodKey = keyof typeof MOOD;
@@ -382,50 +390,76 @@ export function PhotoStatShell({
   );
 }
 
-/** App-wide ambient photo wash — heels + beach + collage + roses. */
+/** Warm fairy-light / candle shimmer — purple + gold points that twinkle. */
+export function FairyLights({ className, warm }: { className?: string; warm?: boolean }) {
+  const dots = [
+    { left: "8%", top: "18%", size: 5, delay: "0s", color: warm ? "#ffd89a" : "#f0b0e6" },
+    { left: "22%", top: "42%", size: 3, delay: "0.8s", color: "#ffe8a0" },
+    { left: "38%", top: "12%", size: 4, delay: "1.4s", color: warm ? "#ffc978" : "#e0c8f5" },
+    { left: "55%", top: "28%", size: 6, delay: "0.3s", color: "#ff9fd0" },
+    { left: "68%", top: "55%", size: 3, delay: "2.1s", color: "#ffd89a" },
+    { left: "78%", top: "16%", size: 5, delay: "1.1s", color: warm ? "#ffb84d" : "#b45eeb" },
+    { left: "88%", top: "38%", size: 4, delay: "2.6s", color: "#f0b0e6" },
+    { left: "14%", top: "68%", size: 3, delay: "1.8s", color: "#ffe8a0" },
+    { left: "46%", top: "72%", size: 5, delay: "0.5s", color: warm ? "#ffc978" : "#d492de" },
+    { left: "92%", top: "70%", size: 3, delay: "3s", color: "#ff9fd0" },
+  ];
+  return (
+    <div aria-hidden className={cn("pointer-events-none absolute inset-0 overflow-hidden animate-shimmer-drift", className)}>
+      {dots.map((d) => (
+        <span
+          key={`${d.left}-${d.top}`}
+          className="absolute rounded-full animate-twinkle"
+          style={{
+            left: d.left,
+            top: d.top,
+            width: d.size,
+            height: d.size,
+            background: d.color,
+            boxShadow: `0 0 ${d.size * 3}px ${d.color}`,
+            animationDelay: d.delay,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/** App-wide ambient photo wash — looking-up headphones + lantern + collage. */
 export function AmbientMood({ className }: { className?: string }) {
   return (
     <div aria-hidden className={cn("pointer-events-none fixed inset-0 -z-10 overflow-hidden", className)}>
       <div
-        className="absolute inset-0 opacity-[0.38] animate-mood-drift"
+        className="absolute inset-0 opacity-[0.42] animate-mood-drift"
         style={{
-          backgroundImage: `url(${MOOD.heelsFull})`,
+          backgroundImage: `url(${MOOD.lookingUp})`,
           backgroundSize: "cover",
-          backgroundPosition: "center 40%",
+          backgroundPosition: "center 28%",
         }}
       />
       <div
-        className="absolute -left-6 top-[8%] h-[38%] w-[42%] opacity-[0.4]"
+        className="absolute -right-8 top-[14%] h-[40%] w-[36%] opacity-[0.36] animate-float"
         style={{
-          backgroundImage: `url(${MOOD.beachFull})`,
+          backgroundImage: `url(${MOOD.lantern})`,
           backgroundSize: "cover",
-          backgroundPosition: "center 35%",
-          WebkitMaskImage: "radial-gradient(ellipse at center, black 25%, transparent 74%)",
-          maskImage: "radial-gradient(ellipse at center, black 25%, transparent 74%)",
-        }}
-      />
-      <div
-        className="absolute -right-8 top-[22%] h-[40%] w-[36%] opacity-[0.38] animate-float"
-        style={{
-          backgroundImage: `url(${MOOD.collageFull})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center 15%",
+          backgroundPosition: "center",
           WebkitMaskImage: "radial-gradient(ellipse at center, black 22%, transparent 72%)",
           maskImage: "radial-gradient(ellipse at center, black 22%, transparent 72%)",
         }}
       />
       <div
-        className="absolute -left-4 bottom-[8%] h-[34%] w-[40%] opacity-[0.38]"
+        className="absolute -left-6 bottom-[10%] h-[36%] w-[40%] opacity-[0.34]"
         style={{
-          backgroundImage: `url(${MOOD.rosesFull})`,
+          backgroundImage: `url(${MOOD.booksHeadphones})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           WebkitMaskImage: "radial-gradient(ellipse at center, black 28%, transparent 76%)",
           maskImage: "radial-gradient(ellipse at center, black 28%, transparent 76%)",
         }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0c0612]/58 via-[#160a1f]/68 to-[#0c0612]/85" />
-      <ButterflyDrift className="opacity-50" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0c0612]/52 via-[#1a0b28]/62 to-[#0c0612]/88" />
+      <FairyLights warm className="opacity-70" />
+      <ButterflyDrift className="opacity-45" />
     </div>
   );
 }
