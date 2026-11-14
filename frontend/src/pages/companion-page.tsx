@@ -1,7 +1,7 @@
 import { Coffee, MoonStar, Sparkles, SunMedium, Waves, Zap } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ButterflyDrift, MOOD, MoodAccent, Petal, PhotoHero } from "@/components/decor";
+import { ButterflyDrift, MOOD, MoodAccent, MoodPhoto, Petal, PhotoHero } from "@/components/decor";
 import { Logo } from "@/components/layout/logo";
 import { CoverArt } from "@/components/music/cover-art";
 import { RecommendationCard } from "@/components/music/recommendation-card";
@@ -46,7 +46,7 @@ export function CompanionPage() {
   if (companion.isError) {
     return (
       <>
-        <PhotoHero src={MOOD.sunset} position="center 40%" dense>
+        <PhotoHero src={MOOD.rosesFull} position="center 40%" dense>
           <Logo className="mb-3" />
           <p className="font-script text-2xl text-orchid-glow">daily companion</p>
           <h1 className="mt-1 font-display text-4xl font-semibold text-cream">A mix for right now</h1>
@@ -70,7 +70,7 @@ export function CompanionPage() {
 
   return (
     <>
-      <PhotoHero src={MOOD.beach} position="center 45%">
+      <PhotoHero src={MOOD.rosesFull} position="center 42%" className="min-h-[20rem] sm:min-h-[22rem]">
         <Logo className="mb-3" />
         <p className="font-script text-2xl text-orchid-glow">daily companion</p>
         <h1 className="mt-1 font-display text-4xl font-semibold tracking-tight text-cream sm:text-5xl">
@@ -96,8 +96,24 @@ export function CompanionPage() {
         )}
       </PhotoHero>
 
+      <div className="relative mt-6 overflow-hidden rounded-[1.75rem]">
+        <div className="grid grid-cols-2 gap-0.5 sm:grid-cols-4">
+          {[
+            { src: MOOD.beachFull, pos: "center 40%" },
+            { src: MOOD.heelsFull, pos: "center 35%" },
+            { src: MOOD.collageFull, pos: "center 18%" },
+            { src: MOOD.rosesFull, pos: "center 50%" },
+          ].map((t) => (
+            <div key={t.src} className="relative aspect-[4/3] overflow-hidden sm:aspect-[5/3]">
+              <MoodPhoto src={t.src} opacity={1} position={t.pos} className="inset-0" />
+              <div aria-hidden className="absolute inset-0 bg-[#160a1f]/25" />
+            </div>
+          ))}
+        </div>
+      </div>
+
       <section className="powder glass-soft glass-edge relative mt-8 overflow-hidden rounded-[2rem] p-5 sm:p-6">
-        <MoodAccent src={MOOD.sunset} side="right" className="opacity-50" />
+        <MoodAccent src={MOOD.beachFull} side="right" className="opacity-55" />
         <ButterflyDrift className="opacity-45" />
         <div className="relative">
           <p className="font-script text-2xl text-highlight">how are you feeling?</p>
@@ -168,32 +184,38 @@ export function CompanionPage() {
         </section>
 
         <aside className="space-y-5">
-          <section className="glass glass-inset rounded-[1.75rem] p-5">
-            <p className="font-script text-2xl text-highlight">today’s notes</p>
-            <ul className="mt-3 space-y-3">
-              {(data?.insights ?? []).map((insight) => (
-                <li key={insight.code} className="flex gap-2 text-sm text-muted-foreground">
-                  <Petal className="mt-0.5 size-3.5 shrink-0" />
-                  <span>{insight.label}</span>
-                </li>
-              ))}
-              {companion.isPending &&
-                Array.from({ length: 3 }, (_, i) => <Skeleton key={i} className="h-4 w-full bg-accent" />)}
-            </ul>
-            <Link
-              to="/analytics"
-              className="mt-4 inline-flex text-sm font-bold text-accent-foreground hover:text-highlight"
-            >
-              See full analytics →
-            </Link>
+          <section className="relative overflow-hidden rounded-[1.75rem] p-5 ring-1 ring-lavender/25">
+            <MoodPhoto src={MOOD.collageFull} opacity={0.45} position="center 25%" className="inset-0" />
+            <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-[#1a0b28]/75 to-[#12061c]/9" />
+            <div className="relative">
+              <p className="font-script text-2xl text-orchid-glow">today’s notes</p>
+              <ul className="mt-3 space-y-3">
+                {(data?.insights ?? []).map((insight) => (
+                  <li key={insight.code} className="flex gap-2 text-sm text-lavender/90">
+                    <Petal className="mt-0.5 size-3.5 shrink-0" />
+                    <span>{insight.label}</span>
+                  </li>
+                ))}
+                {companion.isPending &&
+                  Array.from({ length: 3 }, (_, i) => <Skeleton key={i} className="h-4 w-full bg-accent" />)}
+              </ul>
+              <Link
+                to="/analytics"
+                className="mt-4 inline-flex text-sm font-bold text-pink-glow hover:text-cream"
+              >
+                See full analytics →
+              </Link>
+            </div>
           </section>
 
           {data?.spotlight && (
-            <section className="glass glass-inset overflow-hidden rounded-[1.75rem] p-5">
-              <p className="font-script text-2xl text-cream">spotlight</p>
+            <section className="relative overflow-hidden rounded-[1.75rem] p-5 ring-1 ring-lavender/25">
+              <MoodPhoto src={MOOD.heelsFull} opacity={0.4} position="center 60%" className="inset-0" />
+              <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-[#1a0b28]/7 to-[#12061c]/88" />
+              <p className="relative font-script text-2xl text-cream">spotlight</p>
               <button
                 type="button"
-                className="mt-3 flex w-full items-center gap-3 text-left"
+                className="relative mt-3 flex w-full items-center gap-3 text-left"
                 onClick={() =>
                   data.spotlight?.song.playback &&
                   player.play(data.spotlight.song, [data.spotlight.song])

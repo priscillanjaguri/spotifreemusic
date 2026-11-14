@@ -1,8 +1,8 @@
-import { Menu } from "lucide-react";
-import { useState } from "react";
+import { Menu, X } from "lucide-react";
+import { useEffect, useId, useState } from "react";
+import { createPortal } from "react-dom";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
-import { AmbientMood, Butterfly, MOOD, MoodAccent, Petal } from "@/components/decor";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { AmbientMood, Butterfly, MOOD, MoodAccent, MoodPhoto, Petal } from "@/components/decor";
 import { usePlayer } from "@/lib/player";
 import { cn } from "@/lib/utils";
 import { Logo } from "./logo";
@@ -53,7 +53,7 @@ function Sidebar() {
         <NavList items={NAV_ITEMS} />
         <p className="mt-8 px-4 font-script text-xl text-highlight">lilac daydream</p>
         <p className="mt-1 px-4 text-xs leading-relaxed text-muted-foreground">
-          Beach light, headphones, butterflies — Spotifree in soft-girl purple.
+          Heels, beach light, headphones, roses — Spotifree in soft-girl purple.
         </p>
       </div>
 
@@ -75,6 +75,78 @@ function MobileTopBar() {
   );
 }
 
+/**
+ * Custom More drawer (not Base UI Sheet).
+ * The Sheet dialog left the page inert while the popup could stick at opacity-0,
+ * which looked like a blank screen when tapping More on phones.
+ */
+function MoreDrawer({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const titleId = useId();
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onOpenChange(false);
+    };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [open, onOpenChange]);
+
+  if (!open || typeof document === "undefined") return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[60] lg:hidden" role="presentation">
+      <button
+        type="button"
+        aria-label="Close more menu"
+        className="absolute inset-0 bg-[#0c0612]/72 backdrop-blur-[2px]"
+        onClick={() => onOpenChange(false)}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="absolute inset-x-0 bottom-0 max-h-[78dvh] overflow-y-auto rounded-t-[2rem] border border-lavender/25 border-b-0 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-whip-lg"
+      >
+        <MoodPhoto src={MOOD.heelsFull} opacity={1} position="center 30%" className="inset-0" />
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-t from-[#160a1f] via-[#24112e]/92 to-[#3a1f48]/78"
+        />
+        <div className="relative px-4 pt-3">
+          <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-lavender/40" />
+          <div className="mb-2 flex items-start justify-between gap-3">
+            <div>
+              <p className="font-script text-xl text-orchid-glow">more of</p>
+              <h2 id={titleId} className="font-display text-3xl font-semibold text-cream">
+                Spotifree
+              </h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              className="grid size-9 place-items-center rounded-full bg-white/10 text-cream ring-1 ring-white/15"
+              aria-label="Close"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+          <NavList items={MOBILE_MORE} onNavigate={() => onOpenChange(false)} />
+          <div className="mt-6 flex items-center gap-2 px-2 pb-2 text-xs text-lavender/80">
+            <Petal className="size-3.5" /> Collection, Library and Analytics live here on phones.
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
 function MobileTabBar() {
   const location = useLocation();
   const [open, setOpen] = useState(false);
@@ -82,76 +154,69 @@ function MobileTabBar() {
     (item) => location.pathname === item.to || location.pathname.startsWith(item.to + "/"),
   );
 
-  return (
-    <nav
-      aria-label="Main"
-      className="glass-strong grid h-16 shrink-0 grid-cols-5 border-t border-white/10"
-    >
-      {MOBILE_PRIMARY.map(({ to, label, icon: Icon, end, short }) => (
-        <NavLink
-          key={to}
-          to={to}
-          end={end}
-          className={({ isActive }) =>
-            cn(
-              "flex h-full flex-col items-center justify-center gap-1 text-[11px] font-bold transition-colors",
-              isActive ? "text-accent-foreground" : "text-subtle hover:text-accent-foreground",
-            )
-          }
-        >
-          {({ isActive }) => (
-            <>
-              <span
-                className={cn(
-                  "grid h-7 w-12 place-items-center rounded-full transition-all",
-                  isActive && "glass-soft shadow-glow ring-1 ring-lavender/30",
-                )}
-              >
-                <Icon className="size-5" />
-              </span>
-              {short ?? label}
-            </>
-          )}
-        </NavLink>
-      ))}
+  // Close More when route changes (e.g. deep link).
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname]);
 
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger
-          render={
-            <button
-              type="button"
-              className={cn(
+  return (
+    <>
+      <nav
+        aria-label="Main"
+        className="glass-strong grid h-16 shrink-0 grid-cols-5 border-t border-white/10"
+      >
+        {MOBILE_PRIMARY.map(({ to, label, icon: Icon, end, short }) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={end}
+            className={({ isActive }) =>
+              cn(
                 "flex h-full flex-col items-center justify-center gap-1 text-[11px] font-bold transition-colors",
-                moreActive ? "text-accent-foreground" : "text-subtle hover:text-accent-foreground",
-              )}
-              aria-label="More destinations"
-            />
-          }
+                isActive ? "text-accent-foreground" : "text-subtle hover:text-accent-foreground",
+              )
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <span
+                  className={cn(
+                    "grid h-7 w-12 place-items-center rounded-full transition-all",
+                    isActive && "glass-soft shadow-glow ring-1 ring-lavender/30",
+                  )}
+                >
+                  <Icon className="size-5" />
+                </span>
+                {short ?? label}
+              </>
+            )}
+          </NavLink>
+        ))}
+
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className={cn(
+            "flex h-full flex-col items-center justify-center gap-1 text-[11px] font-bold transition-colors",
+            moreActive || open ? "text-accent-foreground" : "text-subtle hover:text-accent-foreground",
+          )}
+          aria-label="More destinations"
+          aria-expanded={open}
+          aria-haspopup="dialog"
         >
           <span
             className={cn(
               "grid h-7 w-12 place-items-center rounded-full transition-all",
-              moreActive && "glass-soft shadow-glow ring-1 ring-lavender/30",
+              (moreActive || open) && "glass-soft shadow-glow ring-1 ring-lavender/30",
             )}
           >
             <Menu className="size-5" />
           </span>
           More
-        </SheetTrigger>
-        <SheetContent side="bottom" className="glass-strong relative overflow-hidden rounded-t-[2rem] border-lavender/20 pb-8">
-          <MoodAccent src={MOOD.legs} side="right" className="opacity-45" />
-          <SheetHeader className="relative">
-            <SheetTitle className="font-display text-2xl text-heading">More of Spotifree</SheetTitle>
-          </SheetHeader>
-          <div className="relative mt-4 px-1">
-            <NavList items={MOBILE_MORE} onNavigate={() => setOpen(false)} />
-            <div className="mt-6 flex items-center gap-2 px-4 text-xs text-muted-foreground">
-              <Petal className="size-3.5" /> Collection, Library and Analytics live here on phones.
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
-    </nav>
+        </button>
+      </nav>
+      <MoreDrawer open={open} onOpenChange={setOpen} />
+    </>
   );
 }
 

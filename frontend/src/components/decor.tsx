@@ -3,8 +3,12 @@ import { cn } from "@/lib/utils";
 
 export const MOOD = {
   beach: "/mood/beach-girl.webp",
+  beachFull: "/mood/beach-full.webp",
   legs: "/mood/fashion-legs.webp",
+  heelsFull: "/mood/heels-full.webp",
   cozy: "/mood/cozy-roses.webp",
+  rosesFull: "/mood/roses-full.webp",
+  collageFull: "/mood/collage-full.webp",
   headphones: "/mood/headphones.webp",
   headphonesClose: "/mood/headphones-close.webp",
   butterflyNeon: "/mood/butterfly-neon.webp",
@@ -76,11 +80,11 @@ export function PhotoHero({
       <MoodPhoto src={src} opacity={1} position={position} drift className="inset-0" />
       <div
         aria-hidden
-        className="absolute inset-0 bg-gradient-to-t from-[#0c0612]/92 via-[#1a0b28]/55 to-[#2a1040]/25"
+        className="absolute inset-0 bg-gradient-to-t from-[#0c0612]/88 via-[#1a0b28]/42 to-[#3a1050]/15"
       />
       <div
         aria-hidden
-        className="absolute inset-0 bg-gradient-to-r from-[#160a1f]/70 via-transparent to-[#3a1050]/35"
+        className="absolute inset-0 bg-gradient-to-r from-[#160a1f]/55 via-transparent to-[#5a1a78]/28"
       />
       <div className="relative z-10 flex h-full flex-col justify-end p-5 sm:p-7 lg:p-8">{children}</div>
     </section>
@@ -300,39 +304,127 @@ export function PetalScatter({ className }: { className?: string }) {
   );
 }
 
-/** App-wide ambient photo wash — beach + fashion legs + headphones corners. */
+/** 2×2 full-bleed collage from the four QH inspiration photos. */
+export function PhotoCollage({
+  className,
+  opacity = 0.9,
+  drift,
+}: {
+  className?: string;
+  opacity?: number;
+  drift?: boolean;
+}) {
+  const tiles = [
+    { src: MOOD.heelsFull, pos: "center 35%" },
+    { src: MOOD.beachFull, pos: "center 40%" },
+    { src: MOOD.collageFull, pos: "center 20%" },
+    { src: MOOD.rosesFull, pos: "center 45%" },
+  ];
+  return (
+    <div
+      aria-hidden
+      className={cn(
+        "pointer-events-none absolute inset-0 overflow-hidden",
+        drift && "animate-mood-drift",
+        className,
+      )}
+      style={{ opacity }}
+    >
+      <div className="absolute inset-[-2%] grid grid-cols-2 grid-rows-2 gap-0.5">
+        {tiles.map((t) => (
+          <div
+            key={t.src}
+            className="bg-cover bg-no-repeat"
+            style={{ backgroundImage: `url(${t.src})`, backgroundPosition: t.pos }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Photo-backed shell for metric tiles — saturated colour wash over real mood imagery. */
+export function PhotoStatShell({
+  src,
+  position = "center",
+  children,
+  className,
+}: {
+  src: string;
+  position?: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-[1.6rem] p-4 ring-2 ring-orchid-glow/35 sm:p-5",
+        "shadow-[0_18px_44px_-14px_rgb(180_60_200_/_0.55),inset_0_1px_0_rgb(255_232_255_/_0.45)]",
+        className,
+      )}
+    >
+      <MoodPhoto src={src} opacity={1} position={position} className="inset-0" />
+      {/* Lighter veil so the photo mood stays vivid; colour comes from orchid/heliotrope tint */}
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-br from-[#c45ee8]/45 via-[#6a2088]/55 to-[#2a0c40]/72"
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-t from-[#ff9fd0]/35 via-[#f0b0e6]/12 to-[#b45eeb]/28 mix-blend-soft-light"
+      />
+      <div
+        aria-hidden
+        className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#160a1f]/75 to-transparent"
+      />
+      <div className="relative z-10">{children}</div>
+    </div>
+  );
+}
+
+/** App-wide ambient photo wash — heels + beach + collage + roses. */
 export function AmbientMood({ className }: { className?: string }) {
   return (
     <div aria-hidden className={cn("pointer-events-none fixed inset-0 -z-10 overflow-hidden", className)}>
       <div
-        className="absolute inset-0 opacity-[0.22] animate-mood-drift"
+        className="absolute inset-0 opacity-[0.38] animate-mood-drift"
         style={{
-          backgroundImage: `url(${MOOD.beach})`,
+          backgroundImage: `url(${MOOD.heelsFull})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center 40%",
+        }}
+      />
+      <div
+        className="absolute -left-6 top-[8%] h-[38%] w-[42%] opacity-[0.4]"
+        style={{
+          backgroundImage: `url(${MOOD.beachFull})`,
           backgroundSize: "cover",
           backgroundPosition: "center 35%",
+          WebkitMaskImage: "radial-gradient(ellipse at center, black 25%, transparent 74%)",
+          maskImage: "radial-gradient(ellipse at center, black 25%, transparent 74%)",
         }}
       />
       <div
-        className="absolute -right-10 top-[18%] h-[42%] w-[38%] opacity-[0.28] animate-float"
+        className="absolute -right-8 top-[22%] h-[40%] w-[36%] opacity-[0.38] animate-float"
         style={{
-          backgroundImage: `url(${MOOD.legs})`,
+          backgroundImage: `url(${MOOD.collageFull})`,
           backgroundSize: "cover",
-          backgroundPosition: "center",
-          WebkitMaskImage: "radial-gradient(ellipse at center, black 20%, transparent 72%)",
-          maskImage: "radial-gradient(ellipse at center, black 20%, transparent 72%)",
+          backgroundPosition: "center 15%",
+          WebkitMaskImage: "radial-gradient(ellipse at center, black 22%, transparent 72%)",
+          maskImage: "radial-gradient(ellipse at center, black 22%, transparent 72%)",
         }}
       />
       <div
-        className="absolute -left-8 bottom-[12%] h-[36%] w-[34%] opacity-[0.26]"
+        className="absolute -left-4 bottom-[8%] h-[34%] w-[40%] opacity-[0.38]"
         style={{
-          backgroundImage: `url(${MOOD.headphones})`,
+          backgroundImage: `url(${MOOD.rosesFull})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          WebkitMaskImage: "radial-gradient(ellipse at center, black 25%, transparent 75%)",
-          maskImage: "radial-gradient(ellipse at center, black 25%, transparent 75%)",
+          WebkitMaskImage: "radial-gradient(ellipse at center, black 28%, transparent 76%)",
+          maskImage: "radial-gradient(ellipse at center, black 28%, transparent 76%)",
         }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0c0612]/75 via-[#160a1f]/82 to-[#0c0612]/92" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0c0612]/58 via-[#160a1f]/68 to-[#0c0612]/85" />
       <ButterflyDrift className="opacity-50" />
     </div>
   );

@@ -12,7 +12,15 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { ButterflyDrift, MOOD, MoodAccent, Petal, PhotoHero } from "@/components/decor";
+import {
+  ButterflyDrift,
+  MOOD,
+  MoodAccent,
+  Petal,
+  PhotoCollage,
+  PhotoHero,
+  PhotoStatShell,
+} from "@/components/decor";
 import { Logo } from "@/components/layout/logo";
 import { RecommendationCard } from "@/components/music/recommendation-card";
 import { SongCard } from "@/components/music/song-card";
@@ -29,51 +37,39 @@ import { cn } from "@/lib/utils";
 
 export const QUICK_SEARCHES = ["lofi", "ambient", "jazz", "synthwave", "piano", "indie rock", "folk"];
 
-const STAT_TONES = {
-  lavender: "from-violet-sheen to-violet-shadow",
-  wisteria: "from-mauve/80 to-amethyst",
-  heliotrope: "from-amethyst-sheen to-amethyst-shadow",
-  royal: "from-royal-purple-sheen to-royal-purple-shadow",
-  pink: "from-orchid-glow/80 to-heliotrope",
-};
-
 function StatCard({
   icon: Icon,
   label,
   value,
   hint,
-  tone,
+  photo,
+  position,
   to,
 }: {
   icon: LucideIcon;
   label: string;
   value: string | number | undefined;
   hint?: string;
-  tone: keyof typeof STAT_TONES;
+  photo: string;
+  position?: string;
   to: string;
 }) {
   return (
-    <Link
-      to={to}
-      className="glass glass-inset glow-soft group rounded-[1.6rem] p-4 sm:p-5"
-    >
-      <div
-        className={cn(
-          "gloss grid size-11 place-items-center rounded-2xl bg-gradient-to-br text-cream ring-1 ring-white/20 shadow-polish",
-          STAT_TONES[tone],
+    <Link to={to} className="glow-soft group block transition-transform duration-200 hover:-translate-y-0.5">
+      <PhotoStatShell src={photo} position={position}>
+        <div className="gloss grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-orchid-glow/90 to-heliotrope text-cream ring-1 ring-white/35 shadow-polish">
+          <Icon className="size-5" />
+        </div>
+        <p className="mt-4 text-sm font-bold uppercase tracking-wide text-orchid-glow">{label}</p>
+        {value === undefined ? (
+          <Skeleton className="mt-1 h-9 w-16 bg-white/20" />
+        ) : (
+          <p className="font-display text-4xl font-semibold text-cream drop-shadow-[0_2px_12px_rgb(0_0_0_/_0.45)] [font-variant-numeric:lining-nums]">
+            {typeof value === "number" ? value.toLocaleString() : value}
+          </p>
         )}
-      >
-        <Icon className="size-5" />
-      </div>
-      <p className="mt-4 text-sm font-semibold text-muted-foreground">{label}</p>
-      {value === undefined ? (
-        <Skeleton className="mt-1 h-9 w-16 bg-accent" />
-      ) : (
-        <p className="font-display text-4xl font-semibold text-heading [font-variant-numeric:lining-nums]">
-          {typeof value === "number" ? value.toLocaleString() : value}
-        </p>
-      )}
-      {hint && <p className="mt-1 text-xs font-semibold text-orchid-glow/90">{hint}</p>}
+        {hint && <p className="mt-1 text-xs font-bold text-pink-glow">{hint}</p>}
+      </PhotoStatShell>
     </Link>
   );
 }
@@ -118,7 +114,7 @@ function FacetBars({ title, facets, param, empty }: { title: string; facets: Fac
 function DiscoverCallout() {
   return (
     <section className="powder glass-soft glass-edge relative overflow-hidden rounded-[1.75rem] p-6">
-      <MoodAccent src={MOOD.headphones} side="right" className="opacity-55" />
+      <MoodAccent src={MOOD.collageFull} side="right" className="opacity-65" />
       <ButterflyDrift className="opacity-40" />
       <div className="relative">
         <p className="font-script text-3xl text-cream">find something new</p>
@@ -144,17 +140,22 @@ function DiscoverCallout() {
 function ListeningSpark({ daily }: { daily: { date: string; listened_ms: number }[] }) {
   const max = Math.max(1, ...daily.map((d) => d.listened_ms));
   return (
-    <section className="glass glass-inset rounded-[1.75rem] p-5 md:col-span-2">
-      <div className="mb-4 flex items-end justify-between gap-3">
+    <section className="relative overflow-hidden rounded-[1.75rem] p-5 ring-1 ring-lavender/25 md:col-span-2">
+      <MoodAccent src={MOOD.beachFull} side="right" className="opacity-50" />
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-r from-[#24112e]/92 via-[#31183f]/85 to-[#24112e]/55"
+      />
+      <div className="relative mb-4 flex items-end justify-between gap-3">
         <div>
-          <p className="font-script text-2xl text-highlight">this week</p>
-          <h2 className="font-display text-2xl font-semibold text-heading">Listening overview</h2>
+          <p className="font-script text-2xl text-orchid-glow">this week</p>
+          <h2 className="font-display text-2xl font-semibold text-cream">Listening overview</h2>
         </div>
-        <Link to="/analytics" className="text-sm font-bold text-accent-foreground hover:text-highlight">
+        <Link to="/analytics" className="text-sm font-bold text-pink-glow hover:text-cream">
           Full analytics →
         </Link>
       </div>
-      <div className="flex h-36 items-end gap-2">
+      <div className="relative flex h-36 items-end gap-2">
         {daily.map((d) => {
           const pct = d.listened_ms / max;
           const day = new Date(d.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "narrow" });
@@ -167,7 +168,7 @@ function ListeningSpark({ daily }: { daily: { date: string; listened_ms: number 
                   style={{ height: `${Math.max(d.listened_ms > 0 ? 10 : 3, pct * 100)}%` }}
                 />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-wide text-subtle">{day}</span>
+              <span className="text-[10px] font-bold uppercase tracking-wide text-lavender/80">{day}</span>
             </div>
           );
         })}
@@ -199,7 +200,7 @@ export function DashboardPage() {
   if (recent.isError || facets.isError) {
     return (
       <>
-        <PhotoHero src={MOOD.beach} position="center 40%" dense>
+        <PhotoHero src={MOOD.heelsFull} position="center 32%" dense>
           <Logo className="mb-3" />
           <p className="font-script text-2xl text-orchid-glow">{today}</p>
           <h1 className="font-display text-4xl font-semibold text-cream">{greeting()}, {firstName}</h1>
@@ -227,7 +228,7 @@ export function DashboardPage() {
 
   return (
     <>
-      <PhotoHero src={MOOD.beach} position="center 38%">
+      <PhotoHero src={MOOD.heelsFull} position="center 28%" className="min-h-[20rem] sm:min-h-[24rem]">
         <Logo className="mb-4 drop-shadow-lg" />
         <p className="font-script text-2xl leading-none text-orchid-glow sm:text-[1.7rem]">{today}</p>
         <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight text-cream sm:text-5xl">
@@ -238,15 +239,25 @@ export function DashboardPage() {
             ? "Gathering your music…"
             : isNew
               ? "Your collection is empty for now. Let's find the first songs worth keeping."
-              : `You've saved ${plural(total, "song")} so far — lilac beach energy for the day.`}
+              : `You've saved ${plural(total, "song")} so far — heels-out main-character energy.`}
         </p>
         <Link to="/discover" className={cn(buttonVariants({ variant: "cta", size: "lg" }), "mt-5 w-fit")}>
           <Compass data-icon="inline-start" /> Discover music
         </Link>
       </PhotoHero>
 
-      <div className="glass-strong glass-inset relative mt-8 overflow-hidden rounded-[2rem] p-4 sm:p-6">
-        <MoodAccent src={MOOD.butterflySoft} side="right" className="opacity-35" />
+      <section className="relative mt-8 overflow-hidden rounded-[2rem] p-4 ring-1 ring-orchid-glow/25 sm:p-6">
+        <PhotoCollage opacity={0.72} drift />
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-b from-[#5a1a78]/35 via-[#2a1040]/62 to-[#12061c]/88"
+        />
+        <ButterflyDrift className="opacity-40" />
+
+        <div className="relative mb-4">
+          <p className="font-script text-2xl text-orchid-glow">your week in colour</p>
+          <h2 className="font-display text-2xl font-semibold text-cream sm:text-3xl">Listening pulse</h2>
+        </div>
 
         <div className="relative grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           <StatCard
@@ -254,23 +265,33 @@ export function DashboardPage() {
             label="Listening time"
             value={week.data ? formatTotalDuration(week.data.total_listened_ms) : undefined}
             hint={listenHint}
-            tone="pink"
+            photo={MOOD.rosesFull}
+            position="center 40%"
             to="/analytics"
           />
-          <StatCard icon={Library} label="Songs saved" value={total} tone="lavender" to="/collection" />
+          <StatCard
+            icon={Library}
+            label="Songs saved"
+            value={total}
+            photo={MOOD.collageFull}
+            position="center 15%"
+            to="/collection"
+          />
           <StatCard
             icon={Tags}
             label="Top genre"
             value={week.data?.top_genres[0]?.name ?? facets.data?.genres[0]?.name}
             hint="This week"
-            tone="wisteria"
+            photo={MOOD.beachFull}
+            position="center 45%"
             to="/analytics"
           />
           <StatCard
             icon={Mic2}
             label="Artists"
             value={facets.data?.artists.length}
-            tone="heliotrope"
+            photo={MOOD.heelsFull}
+            position="center 55%"
             to="/collection"
           />
         </div>
@@ -290,7 +311,7 @@ export function DashboardPage() {
             empty="Save songs to see genre bars."
           />
         </div>
-      </div>
+      </section>
 
       <section className="mt-10">
         <SectionTitle
@@ -381,10 +402,11 @@ export function DashboardPage() {
         )}
         <Link
           to="/companion"
-          className="glass-soft glass-edge glow-soft group relative overflow-hidden rounded-[1.75rem] p-5"
+          className="glow-soft group relative overflow-hidden rounded-[1.75rem] p-5 ring-1 ring-lavender/25"
         >
-          <MoodAccent src={MOOD.sunset} side="right" className="opacity-50" />
-          <Sparkles className="absolute right-4 top-4 size-8 text-orchid-glow opacity-70" />
+          <MoodAccent src={MOOD.rosesFull} side="right" className="opacity-70" />
+          <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-[#1a0b28]/88 to-[#1a0b28]/35" />
+          <Sparkles className="absolute right-4 top-4 z-10 size-8 text-orchid-glow opacity-70" />
           <p className="relative font-script text-3xl text-cream">daily companion</p>
           <p className="relative mt-1 text-sm text-lavender">A mood-aware mix from your taste and recent listens.</p>
           <span className="relative mt-3 inline-flex items-center gap-1 text-sm font-bold text-cream group-hover:text-highlight">
@@ -393,27 +415,29 @@ export function DashboardPage() {
         </Link>
         <Link
           to="/analytics"
-          className="glass glow-soft group relative overflow-hidden rounded-[1.75rem] p-5"
+          className="glow-soft group relative overflow-hidden rounded-[1.75rem] p-5 ring-1 ring-lavender/25"
         >
-          <MoodAccent src={MOOD.cozy} side="right" className="opacity-40" />
+          <MoodAccent src={MOOD.beachFull} side="right" className="opacity-65" />
+          <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-[#1a0b28]/88 to-[#1a0b28]/35" />
           <BarChart3 className="absolute right-4 top-4 size-8 text-lilac opacity-70" />
-          <p className="relative font-script text-3xl text-highlight">listening insights</p>
-          <p className="relative mt-1 text-sm text-muted-foreground">Weekly charts, taste timeline and memory lane.</p>
-          <span className="relative mt-3 inline-flex items-center gap-1 text-sm font-bold text-accent-foreground group-hover:text-highlight">
+          <p className="relative font-script text-3xl text-orchid-glow">listening insights</p>
+          <p className="relative mt-1 text-sm text-lavender/90">Weekly charts, taste timeline and memory lane.</p>
+          <span className="relative mt-3 inline-flex items-center gap-1 text-sm font-bold text-pink-glow group-hover:text-cream">
             Open analytics <ArrowRight className="size-4" />
           </span>
         </Link>
-        <section className="glass-soft relative overflow-hidden rounded-[1.75rem] p-5 md:col-span-2 xl:col-span-1">
-          <MoodAccent src={MOOD.butterflyNeon} side="right" className="opacity-45" />
+        <section className="relative overflow-hidden rounded-[1.75rem] p-5 ring-1 ring-lavender/25 md:col-span-2 xl:col-span-1">
+          <MoodAccent src={MOOD.collageFull} side="right" className="opacity-60" />
+          <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-[#1a0b28]/9 to-[#1a0b28]/4" />
           <Petal className="absolute top-4 right-6 size-8 rotate-45 opacity-70" />
           <Disc3 className="relative mb-2 size-5 text-orchid-glow" />
-          <p className="relative font-script text-3xl text-highlight">how For You listens</p>
-          <p className="relative mt-1 text-sm text-muted-foreground">
+          <p className="relative font-script text-3xl text-orchid-glow">how For You listens</p>
+          <p className="relative mt-1 text-sm text-lavender/90">
             Likes, saves, completes and replays shape your mix. Skips stay neutral.
           </p>
           <Link
             to="/recommendations"
-            className="relative mt-3 inline-flex items-center gap-1 text-sm font-bold text-accent-foreground hover:text-highlight"
+            className="relative mt-3 inline-flex items-center gap-1 text-sm font-bold text-pink-glow hover:text-cream"
           >
             See your picks <ArrowRight className="size-4" />
           </Link>
