@@ -20,6 +20,7 @@ import { CollectionPage } from "@/pages/collection-page";
 import { CompanionPage } from "@/pages/companion-page";
 import { DashboardPage } from "@/pages/dashboard-page";
 import { DiscoverPage } from "@/pages/discover-page";
+import { EvalPage } from "@/pages/eval-page";
 import { LibraryPage } from "@/pages/library-page";
 import { RecommendationsPage } from "@/pages/recommendations-page";
 import { SettingsPage } from "@/pages/settings-page";
@@ -92,49 +93,58 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <BrowserRouter>
-          <NativeServerGate>
-            <AuthProvider>
-              <PlayerProvider>
-                <Routes>
-                  <Route path="/settings" element={<SettingsPage />} />
-                  <Route
-                    path="/login"
-                    element={
-                      <SessionGate requireAuth={false}>
-                        <AuthPage mode="login" />
-                      </SessionGate>
-                    }
-                  />
-                  <Route
-                    path="/register"
-                    element={
-                      <SessionGate requireAuth={false}>
-                        <AuthPage mode="register" />
-                      </SessionGate>
-                    }
-                  />
-                  <Route
-                    element={
-                      <SessionGate requireAuth>
-                        <AppShell />
-                      </SessionGate>
-                    }
-                  >
-                    <Route index element={<DashboardPage />} />
-                    <Route path="companion" element={<CompanionPage />} />
-                    <Route path="recommendations" element={<RecommendationsPage />} />
-                    <Route path="collection" element={<CollectionPage />} />
-                    <Route path="discover" element={<DiscoverPage />} />
-                    <Route path="library" element={<LibraryPage />} />
-                    <Route path="analytics" element={<AnalyticsPage />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Route>
-                </Routes>
-                {!Capacitor.isNativePlatform() && <InstallBanner />}
-                <Toaster position="top-center" richColors={false} />
-              </PlayerProvider>
-            </AuthProvider>
-          </NativeServerGate>
+          <Routes>
+            {/* Browser-only continuous eval — no APK chrome, auth, or player shell. */}
+            <Route path="/eval" element={<EvalPage />} />
+            <Route
+              path="*"
+              element={
+                <NativeServerGate>
+                  <AuthProvider>
+                    <PlayerProvider>
+                      <Routes>
+                        <Route path="/settings" element={<SettingsPage />} />
+                        <Route
+                          path="/login"
+                          element={
+                            <SessionGate requireAuth={false}>
+                              <AuthPage mode="login" />
+                            </SessionGate>
+                          }
+                        />
+                        <Route
+                          path="/register"
+                          element={
+                            <SessionGate requireAuth={false}>
+                              <AuthPage mode="register" />
+                            </SessionGate>
+                          }
+                        />
+                        <Route
+                          element={
+                            <SessionGate requireAuth>
+                              <AppShell />
+                            </SessionGate>
+                          }
+                        >
+                          <Route index element={<DashboardPage />} />
+                          <Route path="companion" element={<CompanionPage />} />
+                          <Route path="recommendations" element={<RecommendationsPage />} />
+                          <Route path="collection" element={<CollectionPage />} />
+                          <Route path="discover" element={<DiscoverPage />} />
+                          <Route path="library" element={<LibraryPage />} />
+                          <Route path="analytics" element={<AnalyticsPage />} />
+                          <Route path="*" element={<NotFound />} />
+                        </Route>
+                      </Routes>
+                      {!Capacitor.isNativePlatform() && <InstallBanner />}
+                      <Toaster position="top-center" richColors={false} />
+                    </PlayerProvider>
+                  </AuthProvider>
+                </NativeServerGate>
+              }
+            />
+          </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

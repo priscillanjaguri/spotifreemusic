@@ -62,6 +62,8 @@ class Settings(BaseSettings):
     # Development only: serve an invented catalogue (labelled 'mock_dev') with generated
     # tones when no real provider is configured. Ignored outside ENVIRONMENT=development.
     dev_mock_provider: bool = False
+    # Shared secret for POST /api/v1/eval/run (public GET summary/snapshots stay open).
+    eval_run_secret: str | None = None
 
     # My Library: music files the user owns and uploads.
     library_storage_dir: Path = REPO_ROOT / "var" / "library"

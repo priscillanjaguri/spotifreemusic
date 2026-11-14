@@ -3,6 +3,9 @@
 Builds a synthetic catalogue + hold-out likes, ranks with the pure ml/ stack, and
 prints aggregate metrics. No database or network required.
 
+The continuous dashboard reuses `run_synthetic_eval()` when live data is sparse;
+prefer `app.services.eval_job.run_eval` against the real DB in production.
+
 Usage:
     cd backend && python -m scripts.eval_recommender
 """
@@ -20,32 +23,36 @@ from app.ml.taste import Signal, blend_profiles, build_taste_profile
 
 GENRES = ["lofi", "ambient", "jazz", "rock", "electronic", "folk", "pop", "hiphop", "piano", "house"]
 NOW = datetime(2026, 11, 1, tzinfo=timezone.utc)
-RNG = np.random.default_rng(7)
 
 
-def _synthetic_catalogue(n: int = 120) -> list[dict]:
+def _synthetic_catalogue(rng: np.random.Generator, n: int = 120) -> list[dict]:
     rows = []
     for i in range(1, n + 1):
-        g = list(RNG.choice(GENRES, size=RNG.integers(1, 3), replace=False))
+        g = list(rng.choice(GENRES, size=rng.integers(1, 3), replace=False))
         rows.append({
             "id": i,
             "genres": g,
-            "tempo": float(RNG.uniform(60, 180)),
-            "energy": float(RNG.uniform(0.1, 0.95)),
-            "loudness_db": float(RNG.uniform(-20, -4)),
-            "spectral_centroid_hz": float(RNG.uniform(800, 5000)),
-            "spectral_rolloff_hz": float(RNG.uniform(2000, 10000)),
-            "zero_crossing_rate": float(RNG.uniform(0.02, 0.2)),
-            "key": int(RNG.integers(0, 12)),
-            "mode": int(RNG.integers(0, 2)),
+            "tempo": float(rng.uniform(60, 180)),
+            "energy": float(rng.uniform(0.1, 0.95)),
+            "loudness_db": float(rng.uniform(-20, -4)),
+            "spectral_centroid_hz": float(rng.uniform(800, 5000)),
+            "spectral_rolloff_hz": float(rng.uniform(2000, 10000)),
+            "zero_crossing_rate": float(rng.uniform(0.02, 0.2)),
+            "key": int(rng.integers(0, 12)),
+            "mode": int(rng.integers(0, 2)),
         })
     return rows
 
 
-def _user_signals(catalogue: list[dict], liked_genres: list[str], n_train: int = 8) -> tuple[list[Signal], set[int]]:
+def _user_signals(
+    rng: np.random.Generator,
+    catalogue: list[dict],
+    liked_genres: list[str],
+    n_train: int = 8,
+) -> tuple[list[Signal], set[int]]:
     """Train signals + held-out relevant set sharing the preferred genres."""
     pool = [r for r in catalogue if set(r["genres"]) & set(liked_genres)]
-    RNG.shuffle(pool)
+    rng.shuffle(pool)
     train = pool[:n_train]
     holdout = pool[n_train: n_train + 6]
     signals = [
@@ -59,8 +66,10 @@ def _user_signals(catalogue: list[dict], liked_genres: list[str], n_train: int =
     return signals, {r["id"] for r in holdout}
 
 
-def main() -> dict:
-    catalogue = _synthetic_catalogue()
+def run_synthetic_eval(*, k: int = 10) -> dict:
+    """Hold-out metrics on a fixed synthetic catalogue (no DB). Deterministic seed."""
+    rng = np.random.default_rng(7)
+    catalogue = _synthetic_catalogue(rng)
     features = build_feature_matrix(catalogue)
     user_prefs = [
         ["lofi", "ambient"],
@@ -74,9 +83,8 @@ def main() -> dict:
     ]
     lists: list[list[int]] = []
     relevant_sets: list[set[int]] = []
-    k = 10
     for prefs in user_prefs:
-        signals, relevant = _user_signals(catalogue, prefs)
+        signals, relevant = _user_signals(rng, catalogue, prefs)
         if len(relevant) < 2:
             continue
         short = build_taste_profile(features, signals, now=NOW, window_days=28)
@@ -96,7 +104,13 @@ def main() -> dict:
 
     metrics = summarise_run(features, lists, relevant_sets, k=k)
     metrics["users"] = float(len(lists))
+    metrics["users_evaluated"] = float(len(lists))
     metrics["catalogue_size"] = float(len(catalogue))
+    return metrics
+
+
+def main() -> dict:
+    metrics = run_synthetic_eval()
     print(json.dumps(metrics, indent=2))
     return metrics
 

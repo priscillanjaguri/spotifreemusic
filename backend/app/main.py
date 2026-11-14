@@ -8,6 +8,7 @@ from app.api import (
     collection,
     companion,
     dev,
+    eval as eval_api,
     health,
     library,
     listening,
@@ -46,6 +47,7 @@ def create_app() -> FastAPI:
         listening.router,
         analytics.router,
         companion.router,
+        eval_api.router,
     ):
         app.include_router(router, prefix="/api/v1")
     if settings.mock_provider_enabled:
