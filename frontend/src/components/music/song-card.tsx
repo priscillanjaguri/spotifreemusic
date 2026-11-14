@@ -3,6 +3,7 @@ import { artistNames } from "@/lib/format";
 import { usePlayer } from "@/lib/player";
 import type { Song } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { songArtUrl } from "@/lib/song-art";
 import { CoverArt } from "./cover-art";
 import { MockBadge, onSurfaceClick } from "./song-row";
 
@@ -24,7 +25,7 @@ export function SongCard({ song, queue, meta }: { song: Song; queue: Song[]; met
       )}
     >
       <div className="relative">
-        <CoverArt src={song.cover_url} seed={song.id} title={song.title} className="aspect-square w-full rounded-2xl" iconClassName="size-1/4" />
+        <CoverArt src={songArtUrl(song)} seed={song.id} title={song.title} className="aspect-square w-full rounded-2xl" iconClassName="size-1/4" />
         <button
           type="button"
           onClick={onPlay}

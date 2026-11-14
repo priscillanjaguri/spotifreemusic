@@ -5,6 +5,7 @@ import { Butterfly, ButterflyDrift, FairyLights, MOOD, MoodAccent, Petal, PhotoH
 import { Logo } from "@/components/layout/logo";
 import { CoverArt } from "@/components/music/cover-art";
 import { SongRow } from "@/components/music/song-row";
+import { songArtUrl } from "@/lib/song-art";
 import { EmptyState, ErrorState } from "@/components/states";
 import {
   AlertDialog,
@@ -139,7 +140,7 @@ function MemoryCard({ item }: { item: MemoryLaneItem }) {
       onClick={() => playable && player.play(item.song, [item.song])}
       className="glass glass-inset glow-soft group flex gap-3 rounded-[1.5rem] p-3 text-left transition-all hover:-translate-y-0.5 disabled:opacity-60"
     >
-      <CoverArt src={item.song.cover_url} seed={item.song.id} title={item.song.title} className="size-16 shrink-0" />
+      <CoverArt src={songArtUrl(item.song)} seed={item.song.id} title={item.song.title} className="size-16 shrink-0" />
       <div className="min-w-0">
         <Badge variant="genre" className="mb-1 capitalize">
           {item.kind.replaceAll("_", " ")}

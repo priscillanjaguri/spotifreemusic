@@ -7,7 +7,7 @@ export type User = {
   access_token?: string | null;
 };
 
-export type Artist = { id: number; name: string };
+export type Artist = { id: number; name: string; image_url?: string | null };
 export type Album = { id: number; title: string };
 
 export type Playback = {

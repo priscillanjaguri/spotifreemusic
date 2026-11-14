@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, Pause, Play, Scale, ScrollText, SkipBack, SkipForward, Volume1, Volume2, VolumeX, X } from "lucide-react";
 import { CoverArt } from "@/components/music/cover-art";
+import { songArtUrl } from "@/lib/song-art";
 import { MockBadge } from "@/components/music/song-row";
 import { Button } from "@/components/ui/button";
 import {
@@ -102,7 +103,7 @@ export function PlayerBar() {
         </div>
         <div className="flex items-center gap-2 p-2.5 sm:gap-3 lg:grid lg:grid-cols-[1fr_minmax(0,1.4fr)_1fr] lg:gap-6 lg:px-4">
           <div className="flex min-w-0 flex-1 items-center gap-2.5 sm:gap-3">
-            <CoverArt src={song.cover_url} seed={song.id} title={song.title} className="size-11 shrink-0" />
+            <CoverArt src={songArtUrl(song)} seed={song.id} title={song.title} className="size-11 shrink-0" />
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <p className="truncate text-sm font-bold text-white">{song.title}</p>

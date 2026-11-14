@@ -7,6 +7,7 @@ import { usePlayer } from "@/lib/player";
 import { useFeedback } from "@/lib/recommendations";
 import type { RecommendationItem, Song } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { songArtUrl } from "@/lib/song-art";
 import { CoverArt } from "./cover-art";
 import { MockBadge, onSurfaceClick } from "./song-row";
 
@@ -39,7 +40,7 @@ export function RecommendationCard({
     >
       <div className="relative">
         <CoverArt
-          src={song.cover_url}
+          src={songArtUrl(song)}
           seed={song.id}
           title={song.title}
           className="aspect-square w-full rounded-2xl"

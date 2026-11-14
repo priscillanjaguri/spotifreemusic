@@ -8,6 +8,7 @@ import { artistNames, formatDuration } from "@/lib/format";
 import { usePlayer } from "@/lib/player";
 import type { Song } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { songArtUrl } from "@/lib/song-art";
 import { CoverArt } from "./cover-art";
 import { Equalizer } from "./equalizer";
 
@@ -80,7 +81,7 @@ export function SongRow({ song, queue, index, meta, action, linkFacets, badges }
         )}
 
         <div className="relative">
-          <CoverArt src={song.cover_url} seed={song.id} title={song.title} className="size-11 @md:size-12" />
+          <CoverArt src={songArtUrl(song)} seed={song.id} title={song.title} className="size-11 @md:size-12" />
           <button
             type="button"
             onClick={onPlay}
