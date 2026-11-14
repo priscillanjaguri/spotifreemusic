@@ -1,7 +1,7 @@
 import { AlertCircle, ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { HairWaves, Petal, PetalScatter, Rose } from "@/components/decor";
+import { AmbientMood, ButterflyDrift, MOOD, MoodPhoto, Petal, PetalScatter } from "@/components/decor";
 import { Logo } from "@/components/layout/logo";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -73,27 +73,27 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
   };
 
   return (
-    <div className="grid min-h-dvh lg:grid-cols-[1.1fr_1fr]">
+    <div className="relative grid min-h-dvh lg:grid-cols-[1.1fr_1fr]">
+      <AmbientMood className="lg:hidden" />
       <section className="powder glass-strong glass-inset relative m-3 hidden overflow-hidden rounded-[2.5rem] lg:flex lg:flex-col lg:justify-between lg:p-12">
-        <HairWaves className="absolute inset-x-0 top-[18%] h-64 w-full" />
-        <HairWaves className="absolute inset-x-0 bottom-[8%] h-56 w-full scale-x-[-1] opacity-70" />
-        <Rose className="absolute -right-16 -bottom-16 size-80 drop-shadow-2xl" />
-        <Rose className="absolute right-44 -bottom-10 size-36 rotate-45 opacity-80 drop-shadow-xl" />
-        <Rose className="absolute top-10 right-24 size-20 opacity-60" />
+        <MoodPhoto src={MOOD.beach} opacity={0.55} position="center 40%" drift />
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#0c0612]/88 via-[#160a1f]/55 to-[#2a1040]/3" />
+        <ButterflyDrift className="opacity-55" />
         <PetalScatter />
         <Logo className="relative" />
         <div className="relative max-w-lg">
-          <h2 className="font-display text-6xl leading-[1.02] font-semibold tracking-tight text-heading">
-            Understand your music.
-            <span className="mt-2 block font-script text-7xl font-normal text-gradient">discover beyond it</span>
+          <h2 className="font-display text-6xl leading-[1.02] font-semibold tracking-tight text-cream">
+            <span className="font-script text-7xl font-normal text-gradient">Spotifree</span>
+            <span className="mt-3 block text-5xl">Understand your music.</span>
           </h2>
+          <p className="mt-3 text-base text-lavender/90">discover beyond it — lilac beach mood included.</p>
           <ul className="mt-10 space-y-5">
             {HIGHLIGHTS.map((h) => (
               <li key={h.title} className="flex gap-4">
                 <Petal className="mt-0.5 size-7 shrink-0 drop-shadow-sm" />
                 <div>
-                  <p className="font-bold text-heading">{h.title}</p>
-                  <p className="text-sm text-muted-foreground">{h.text}</p>
+                  <p className="font-bold text-cream">{h.title}</p>
+                  <p className="text-sm text-lavender/85">{h.text}</p>
                 </div>
               </li>
             ))}
@@ -103,13 +103,13 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
       </section>
 
       <section className="relative flex items-center justify-center overflow-hidden px-5 py-12 sm:px-8">
-        <Rose className="absolute -top-14 -right-14 size-44 opacity-70 lg:hidden" />
+        <MoodPhoto src={MOOD.headphones} opacity={0.2} position="center" className="lg:hidden" />
         <div className="relative w-full max-w-sm">
           <div className="mb-10 lg:hidden">
             <Logo />
             <p className="mt-5 font-display text-4xl leading-tight font-semibold text-heading">
-              Understand your music.
-              <span className="block font-script text-5xl font-normal text-gradient">discover beyond it</span>
+              <span className="font-script text-5xl font-normal text-gradient">Spotifree</span>
+              <span className="mt-2 block">Understand your music.</span>
             </p>
           </div>
 

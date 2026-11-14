@@ -1,8 +1,8 @@
 import { BarChart3, Clock3, Disc3, HeartHandshake, Mic2, Sparkles, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { HairWaves, Petal, Rose } from "@/components/decor";
-import { PageHeader } from "@/components/layout/app-shell";
+import { ButterflyDrift, MOOD, MoodAccent, Petal, PhotoHero } from "@/components/decor";
+import { Logo } from "@/components/layout/logo";
 import { CoverArt } from "@/components/music/cover-art";
 import { SongRow } from "@/components/music/song-row";
 import { EmptyState, ErrorState } from "@/components/states";
@@ -155,8 +155,14 @@ export function AnalyticsPage() {
   if (analytics.isError) {
     return (
       <>
-        <PageHeader eyebrow="listening insights" title="Your week in purple" />
-        <ErrorState error={analytics.error} onRetry={() => void analytics.refetch()} />
+        <PhotoHero src={MOOD.cozy} position="center" dense>
+          <Logo className="mb-3" />
+          <p className="font-script text-2xl text-orchid-glow">listening insights</p>
+          <h1 className="mt-1 font-display text-4xl font-semibold text-cream">Your week in purple</h1>
+        </PhotoHero>
+        <div className="mt-6">
+          <ErrorState error={analytics.error} onRetry={() => void analytics.refetch()} />
+        </div>
       </>
     );
   }
@@ -166,34 +172,33 @@ export function AnalyticsPage() {
 
   return (
     <>
-      <PageHeader
-        eyebrow="listening insights"
-        title={
-          <>
-            Your <span className="font-script text-[1.15em] font-normal text-gradient">taste</span> in numbers
-          </>
-        }
-        description="Weekly and monthly listening, a taste timeline, and a memory lane of songs that stuck."
-        actions={
-          <div className="flex flex-wrap gap-2">
-            {(["week", "month"] as const).map((p) => (
-              <Button
-                key={p}
-                variant={period === p ? "cta" : "secondary"}
-                size="sm"
-                onClick={() => {
-                  setPeriod(p);
-                  setOffset(0);
-                }}
-              >
-                {p === "week" ? "This week" : "This month"}
-              </Button>
-            ))}
-          </div>
-        }
-      />
+      <PhotoHero src={MOOD.cozy} position="center 35%" dense>
+        <Logo className="mb-3" />
+        <p className="font-script text-2xl text-orchid-glow">listening insights</p>
+        <h1 className="mt-1 font-display text-4xl font-semibold tracking-tight text-cream sm:text-5xl">
+          Your <span className="font-script text-[1.15em] font-normal text-gradient">taste</span> in numbers
+        </h1>
+        <p className="mt-2 max-w-xl text-sm text-lavender/95">
+          Weekly and monthly listening, a taste timeline, and a memory lane of songs that stuck.
+        </p>
+        <div className="mt-5 flex flex-wrap gap-2">
+          {(["week", "month"] as const).map((p) => (
+            <Button
+              key={p}
+              variant={period === p ? "cta" : "secondary"}
+              size="sm"
+              onClick={() => {
+                setPeriod(p);
+                setOffset(0);
+              }}
+            >
+              {p === "week" ? "This week" : "This month"}
+            </Button>
+          ))}
+        </div>
+      </PhotoHero>
 
-      <div className="mb-6 flex flex-wrap items-center gap-2">
+      <div className="mt-6 mb-6 flex flex-wrap items-center gap-2">
         <Button
           size="sm"
           variant="secondary"
@@ -353,8 +358,8 @@ export function AnalyticsPage() {
       </section>
 
       <section className="powder glass-soft glass-edge relative mt-12 overflow-hidden rounded-[2rem] p-6">
-        <HairWaves className="absolute inset-0 h-full w-full opacity-50" />
-        <Rose className="absolute -right-10 -top-8 size-36 opacity-80" />
+        <MoodAccent src={MOOD.tulips} side="right" className="opacity-45" />
+        <ButterflyDrift className="opacity-40" />
         <Petal className="absolute bottom-4 left-8 size-8 rotate-12 opacity-70" />
         <div className="relative max-w-xl">
           <p className="font-script text-3xl text-cream">privacy</p>
