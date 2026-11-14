@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createContext, useContext, type ReactNode } from "react";
 import { toast } from "sonner";
 import { ApiError, api } from "./api";
+import { setAccessToken } from "./config";
+import { clearOfflineUser, loadOfflineUser, saveOfflineUser } from "./offline-library";
 import type { User } from "./types";
 
 type AuthContextValue = {
@@ -20,9 +22,25 @@ const ME_KEY = ["auth", "me"] as const;
 
 async function fetchMe(): Promise<User | null> {
   try {
-    return await api.me();
+    const user = await api.me();
+    if (user) {
+      void saveOfflineUser({
+        id: user.id,
+        email: user.email,
+        display_name: user.display_name,
+        created_at: user.created_at,
+      });
+    }
+    return user;
   } catch (err) {
-    if (err instanceof ApiError && err.status === 401) return null;
+    if (err instanceof ApiError && err.status === 401) {
+      void clearOfflineUser();
+      return null;
+    }
+    if (err instanceof ApiError && err.isNetworkError) {
+      const cached = await loadOfflineUser();
+      if (cached) return cached;
+    }
     throw err;
   }
 }
@@ -35,6 +53,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     toast.dismiss();
     queryClient.clear();
     queryClient.setQueryData(ME_KEY, user);
+    void saveOfflineUser({
+      id: user.id,
+      email: user.email,
+      display_name: user.display_name,
+      created_at: user.created_at,
+    });
   };
 
   const loginMutation = useMutation({
@@ -49,6 +73,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logoutMutation = useMutation({
     mutationFn: api.logout,
     onSettled: () => {
+      setAccessToken(null);
+      void clearOfflineUser();
       queryClient.clear();
       queryClient.setQueryData(ME_KEY, null);
     },

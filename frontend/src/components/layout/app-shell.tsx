@@ -7,6 +7,7 @@ import { usePlayer } from "@/lib/player";
 import { cn } from "@/lib/utils";
 import { Logo } from "./logo";
 import { MOBILE_MORE, MOBILE_PRIMARY, NAV_ITEMS } from "./nav-items";
+import { OfflineBanner } from "./offline-banner";
 import { PlayerBar } from "./player-bar";
 import { UserMenu } from "./user-menu";
 
@@ -253,6 +254,7 @@ export function AppShell() {
   return (
     <div className="relative min-h-dvh">
       <AmbientMood />
+      <OfflineBanner />
       <Sidebar />
       <MobileTopBar />
       <main

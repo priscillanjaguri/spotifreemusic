@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ApiError, api, uploadToLibrary } from "./api";
 import { collectionKeys } from "./collection";
+import { loadLibraryCache, removeCachedUpload, syncLibraryOffline } from "./offline-library";
 import type { LibraryPage, LibraryUpload } from "./types";
 
 export const libraryKeys = { all: ["library"] as const };
@@ -12,10 +13,24 @@ const CONCURRENCY = 2;
 
 const analysing = (u: LibraryUpload) => u.analysis_status === "pending" || u.analysis_status === "running";
 
+async function fetchLibraryWithOfflineFallback(): Promise<LibraryPage> {
+  try {
+    const page = await api.library();
+    void syncLibraryOffline(page);
+    return page;
+  } catch (err) {
+    if (err instanceof ApiError && err.isNetworkError) {
+      const cached = await loadLibraryCache();
+      if (cached) return cached;
+    }
+    throw err;
+  }
+}
+
 export function useLibrary() {
   return useQuery({
     queryKey: libraryKeys.all,
-    queryFn: api.library,
+    queryFn: fetchLibraryWithOfflineFallback,
     // Analysis runs in the background after upload; poll until every file has a result.
     refetchInterval: (query) => ((query.state.data as LibraryPage | undefined)?.items.some(analysing) ? 2500 : false),
   });
@@ -37,7 +52,10 @@ export function useDeleteUpload() {
       }
       return { previous };
     },
-    onSuccess: (_d, upload) => toast.success(`Deleted “${upload.song?.title ?? upload.original_filename}” from your library`),
+    onSuccess: (_d, upload) => {
+      void removeCachedUpload(upload.id);
+      toast.success(`Deleted “${upload.song?.title ?? upload.original_filename}” from your library`);
+    },
     onError: (err, _u, ctx) => {
       if (ctx?.previous) queryClient.setQueryData(libraryKeys.all, ctx.previous);
       toast.error(err instanceof ApiError ? err.message : "Couldn't delete that file.");

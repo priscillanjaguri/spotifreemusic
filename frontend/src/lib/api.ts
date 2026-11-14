@@ -37,6 +37,11 @@ export class ApiError extends Error {
   get isProviderNotConfigured() {
     return this.status === 503 && this.code === "provider_not_configured";
   }
+
+  /** Fetch failed before an HTTP response (offline / DNS / CORS block). */
+  get isNetworkError() {
+    return this.status === 0;
+  }
 }
 
 type ValidationIssue = { loc?: (string | number)[]; msg?: string };

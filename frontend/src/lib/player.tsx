@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { api } from "./api";
-import { resolveMediaUrl } from "./config";
+import { resolvePlaybackSrc } from "./offline-library";
 import type { Song } from "./types";
 
 type PlayerState = {
@@ -108,12 +108,17 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       const audio = audioRef.current;
       if (!audio || !song.playback) return;
       void flushSegment(false);
-      audio.src = resolveMediaUrl(song.playback.stream_url) ?? song.playback.stream_url;
       setState((s) => ({ ...s, current: song, queue, position: 0, duration: song.duration_ms / 1000, isLoading: true }));
       beginSegment(song);
-      audio.play().catch(() => {
-        /* surfaced via the audio "error" event, or blocked autoplay which needs a click */
-      });
+      void (async () => {
+        // Prefer Filesystem cache when present (offline + saves data online).
+        const src = await resolvePlaybackSrc(song, true);
+        if (!audioRef.current) return;
+        audioRef.current.src = src ?? song.playback!.stream_url;
+        audioRef.current.play().catch(() => {
+          /* surfaced via the audio "error" event, or blocked autoplay which needs a click */
+        });
+      })();
     },
     [beginSegment, flushSegment],
   );
