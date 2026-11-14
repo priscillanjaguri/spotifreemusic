@@ -6,6 +6,7 @@ Looks for `frontend/dist` (or FRONTEND_DIST). API routers stay authoritative for
 from __future__ import annotations
 
 import logging
+import mimetypes
 import os
 from pathlib import Path
 
@@ -16,6 +17,9 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import REPO_ROOT
 
 log = logging.getLogger(__name__)
+
+# Ensure webp is recognized even if the host mime db is thin.
+mimetypes.add_type("image/webp", ".webp")
 
 _PUBLIC = (
     "manifest.webmanifest",
@@ -36,6 +40,19 @@ def resolve_dist() -> Path | None:
     return None
 
 
+def _safe_file(root: Path, relative: str) -> Path | None:
+    """Return an existing file under root, or None (blocks path traversal)."""
+    name = relative.strip("/")
+    if not name or ".." in Path(name).parts:
+        return None
+    candidate = (root / name).resolve()
+    try:
+        candidate.relative_to(root.resolve())
+    except ValueError:
+        return None
+    return candidate if candidate.is_file() else None
+
+
 def mount_spa(app: FastAPI) -> bool:
     root = resolve_dist()
     if root is None:
@@ -45,6 +62,12 @@ def mount_spa(app: FastAPI) -> bool:
     assets = root / "assets"
     if assets.is_dir():
         app.mount("/assets", StaticFiles(directory=assets), name="spa-assets")
+
+    # Inspiration / mood photos live in public/mood → dist/mood. Mount explicitly
+    # so /mood/*.webp is never swallowed by the SPA HTML fallback.
+    mood = root / "mood"
+    if mood.is_dir():
+        app.mount("/mood", StaticFiles(directory=mood), name="spa-mood")
 
     _html_headers = {
         "Cache-Control": "no-cache, no-store, must-revalidate",
@@ -63,18 +86,21 @@ def mount_spa(app: FastAPI) -> bool:
         if full_path.startswith("api/") or full_path in {"docs", "redoc", "openapi.json"}:
             raise HTTPException(404, "Not found")
         name = full_path.strip("/")
-        if name in _PUBLIC:
-            candidate = root / name
-            if candidate.is_file():
-                headers = {}
+        # Missing hashed asset → 404 (don't return HTML as JS).
+        if name.startswith("assets/") or name.startswith("mood/"):
+            raise HTTPException(404, "Not found")
+
+        # Root-level public files (icons, SW, manifest) and any other real dist file.
+        if name in _PUBLIC or "." in Path(name).name:
+            candidate = _safe_file(root, name)
+            if candidate is not None:
+                headers: dict[str, str] = {}
                 if name == "sw.js":
                     headers["Cache-Control"] = "no-cache"
                     headers["Service-Worker-Allowed"] = "/"
                 return FileResponse(candidate, headers=headers)
-        # Missing hashed asset → 404 (don't return HTML as JS).
-        if name.startswith("assets/"):
-            raise HTTPException(404, "Not found")
+
         return FileResponse(root / "index.html", headers=_html_headers)
 
-    log.info("Serving SPA from %s", root)
+    log.info("Serving SPA from %s (mood=%s)", root, mood.is_dir())
     return True
