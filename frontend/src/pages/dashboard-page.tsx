@@ -17,6 +17,7 @@ import {
   FairyLights,
   MOOD,
   MoodAccent,
+  MoodPhoto,
   Petal,
   PhotoCollage,
   PhotoHero,
@@ -38,6 +39,46 @@ import { cn } from "@/lib/utils";
 
 export const QUICK_SEARCHES = ["lofi", "ambient", "jazz", "synthwave", "piano", "indie rock", "folk"];
 
+/** Tiny music-note + sparkle layer for Listening pulse cards only. */
+function PulseCardAccents({ variant }: { variant: 0 | 1 | 2 | 3 }) {
+  const notes =
+    variant % 2 === 0
+      ? [
+          { d: "M10 4v14a3 3 0 1 1-2-2.83V8.5l10-2V16a3 3 0 1 1-2-2.83V4z", left: "72%", top: "14%", size: 18, rot: 12 },
+          { d: "M8 6v12a2.5 2.5 0 1 1-1.7-2.36V9l8-1.6V14a2.5 2.5 0 1 1-1.7-2.36V6z", left: "8%", top: "62%", size: 14, rot: -18 },
+        ]
+      : [
+          { d: "M12 3v15a3 3 0 1 1-2-2.83V7l9-2v10.2a3 3 0 1 1-2-2.83V3z", left: "78%", top: "58%", size: 16, rot: 8 },
+          { d: "M9 5v13a2.5 2.5 0 1 1-1.6-2.33V8.2L18 6v9.5a2.5 2.5 0 1 1-1.6-2.33V5z", left: "12%", top: "18%", size: 15, rot: -10 },
+        ];
+  const sparks = [
+    { left: "86%", top: "22%", delay: "0s" },
+    { left: "18%", top: "78%", delay: "1.1s" },
+    { left: "64%", top: "70%", delay: "2s" },
+  ];
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 z-[5] overflow-hidden">
+      {notes.map((n) => (
+        <svg
+          key={`${n.left}-${n.top}`}
+          viewBox="0 0 24 24"
+          className="absolute opacity-55 animate-float"
+          style={{ left: n.left, top: n.top, width: n.size, height: n.size, rotate: `${n.rot}deg` }}
+        >
+          <path d={n.d} fill="currentColor" className="text-cream/80" />
+        </svg>
+      ))}
+      {sparks.map((s) => (
+        <span
+          key={`${s.left}-${s.top}`}
+          className="absolute size-1 rounded-full bg-cream animate-twinkle shadow-[0_0_8px_#ffe8ff]"
+          style={{ left: s.left, top: s.top, animationDelay: s.delay }}
+        />
+      ))}
+    </div>
+  );
+}
+
 function StatCard({
   icon: Icon,
   label,
@@ -46,6 +87,7 @@ function StatCard({
   photo,
   position,
   to,
+  accent,
 }: {
   icon: LucideIcon;
   label: string;
@@ -54,22 +96,24 @@ function StatCard({
   photo: string;
   position?: string;
   to: string;
+  accent?: 0 | 1 | 2 | 3;
 }) {
   return (
-    <Link to={to} className="glow-soft group block transition-transform duration-200 hover:-translate-y-0.5">
+    <Link to={to} className="glow-soft group relative block transition-transform duration-200 hover:-translate-y-0.5">
       <PhotoStatShell src={photo} position={position}>
-        <div className="gloss grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-orchid-glow/90 to-heliotrope text-cream ring-1 ring-white/35 shadow-polish">
+        {accent !== undefined && <PulseCardAccents variant={accent} />}
+        <div className="relative z-10 gloss grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-orchid-glow/90 to-heliotrope text-cream ring-1 ring-white/35 shadow-polish">
           <Icon className="size-5" />
         </div>
-        <p className="mt-4 text-sm font-bold uppercase tracking-wide text-orchid-glow">{label}</p>
+        <p className="relative z-10 mt-4 text-sm font-bold uppercase tracking-wide text-orchid-glow">{label}</p>
         {value === undefined ? (
-          <Skeleton className="mt-1 h-9 w-16 bg-white/20" />
+          <Skeleton className="relative z-10 mt-1 h-9 w-16 bg-white/20" />
         ) : (
-          <p className="font-display text-4xl font-semibold text-cream drop-shadow-[0_2px_12px_rgb(0_0_0_/_0.45)] [font-variant-numeric:lining-nums]">
+          <p className="relative z-10 font-display text-4xl font-semibold text-cream drop-shadow-[0_2px_12px_rgb(0_0_0_/_0.45)] [font-variant-numeric:lining-nums]">
             {typeof value === "number" ? value.toLocaleString() : value}
           </p>
         )}
-        {hint && <p className="mt-1 text-xs font-bold text-pink-glow">{hint}</p>}
+        {hint && <p className="relative z-10 mt-1 text-xs font-bold text-pink-glow">{hint}</p>}
       </PhotoStatShell>
     </Link>
   );
@@ -251,10 +295,24 @@ export function DashboardPage() {
 
       <section className="relative mt-8 overflow-hidden rounded-[2rem] p-4 ring-1 ring-orchid-glow/25 sm:p-6">
         <PhotoCollage opacity={0.72} drift />
+        {/* Round 3 accents — behind pulse cards only; existing collage kept */}
+        <MoodPhoto
+          src={MOOD.musicNotesSmoke}
+          opacity={0.38}
+          position="right center"
+          className="inset-y-0 right-0 left-auto w-[58%] sm:w-[48%]"
+        />
+        <MoodPhoto
+          src={MOOD.starryHeadphones}
+          opacity={0.32}
+          position="center 40%"
+          className="inset-y-0 left-0 right-auto w-[52%] sm:w-[42%]"
+        />
         <div
           aria-hidden
           className="absolute inset-0 bg-gradient-to-b from-[#5a1a78]/35 via-[#2a1040]/62 to-[#12061c]/88"
         />
+        <FairyLights className="opacity-55" />
         <ButterflyDrift className="opacity-40" />
 
         <div className="relative mb-4">
@@ -271,6 +329,7 @@ export function DashboardPage() {
             photo={MOOD.rosesFull}
             position="center 40%"
             to="/analytics"
+            accent={0}
           />
           <StatCard
             icon={Library}
@@ -279,6 +338,7 @@ export function DashboardPage() {
             photo={MOOD.collageFull}
             position="center 15%"
             to="/collection"
+            accent={1}
           />
           <StatCard
             icon={Tags}
@@ -288,6 +348,7 @@ export function DashboardPage() {
             photo={MOOD.beachFull}
             position="center 45%"
             to="/analytics"
+            accent={2}
           />
           <StatCard
             icon={Mic2}
@@ -296,6 +357,7 @@ export function DashboardPage() {
             photo={MOOD.lantern}
             position="center 40%"
             to="/collection"
+            accent={3}
           />
         </div>
 
