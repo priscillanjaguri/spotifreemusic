@@ -3,7 +3,7 @@
 Spotifree is **one Docker image**: Vite SPA served by FastAPI, plus **Postgres**.
 Optional: Jamendo (`JAMENDO_CLIENT_ID`), Cloudflare R2 (`R2_*`), and Spotify Client
 Credentials (`SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET`) for **metadata-only** ML
-enrichment (genres / popularity / audio-features — never playback).
+enrichment (genres / popularity / audio-features / album + artist images — never playback).
 
 **Chosen host: [Render](https://render.com)** free Blueprint (`render.yaml`).
 [Railway](https://railway.app) remains documented as an alternative.
@@ -49,8 +49,9 @@ Do **not** split the SPA to Vercel and the API elsewhere; the production app is 
 2. Render → **New** → **Blueprint** → select the repo (uses `render.yaml`).
 3. Fill blueprint prompts for optional secrets (`CORS_ORIGINS`, Jamendo, R2, Spotify).
 4. After the first URL is known, set `CORS_ORIGINS` to include `https://<service>.onrender.com` plus Capacitor origins.
-5. Set `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` in the Render dashboard (or Cursor app secrets) to enable library / Jamendo metadata enrichment for recommendations. Leave unset to skip gracefully.
-6. Plain lyrics use **LRCLIB** (no API key) via `GET /api/v1/lyrics/{song_id}`. Genius env vars are optional/unused for lyric bodies.
+5. Set `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` in the Render dashboard (or Cursor app secrets) to enable library / Jamendo metadata enrichment for recommendations (including album covers + artist photos when missing). Leave unset to skip gracefully.
+6. Backfill existing My Library covers/artist images (auth cookie or Bearer): `POST /api/v1/library/spotify-enrich?limit=200`.
+7. Plain lyrics use **LRCLIB** (no API key) via `GET /api/v1/lyrics/{song_id}`. Genius env vars are optional/unused for lyric bodies.
 7. Same APK Server URL steps as Railway.
 
 ## Local Docker (smoke test)

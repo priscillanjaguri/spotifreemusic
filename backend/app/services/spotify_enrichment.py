@@ -2,7 +2,8 @@
 
 When SPOTIFY_CLIENT_ID + SPOTIFY_CLIENT_SECRET are set, we match a song by
 title + primary artist, store a non-playback SongProviderLink (key=spotify),
-merge artist genres, and fill missing song_features from Spotify audio-features.
+merge artist genres, fill missing cover/artist images, and fill missing
+song_features from Spotify audio-features.
 """
 from __future__ import annotations
 
@@ -15,9 +16,10 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.config import Settings, get_settings
-from app.models import Genre, MusicProvider, Song, SongArtist, SongFeatures, SongProviderLink
+from app.models import Artist, Genre, MusicProvider, Song, SongArtist, SongFeatures, SongProviderLink
 from app.providers.base import ProviderError
 from app.providers.spotify_metadata import (
+    SpotifyArtistRef,
     SpotifyMetadataClient,
     SpotifyTrackMatch,
     build_spotify_client,
@@ -134,6 +136,30 @@ def _merge_features(row: SongFeatures, *, from_spotify: dict, feature_source: st
         row.feature_source = feature_source
 
 
+def _apply_album_cover(song: Song, album_image_url: str | None) -> None:
+    """Fill missing song cover from Spotify album art; never overwrite existing art."""
+    if album_image_url and not song.cover_url:
+        song.cover_url = album_image_url
+
+
+def _apply_artist_images(
+    song: Song,
+    *,
+    spotify_artists: list[SpotifyArtistRef],
+) -> None:
+    """Fill missing Artist.image_url from Spotify artist photos (match by name)."""
+    by_name = {_norm(a.name): a.image_url for a in spotify_artists if a.name and a.image_url}
+    if not by_name:
+        return
+    for link in song.artist_links or []:
+        artist: Artist | None = link.artist
+        if artist is None or artist.image_url:
+            continue
+        url = by_name.get(_norm(artist.name))
+        if url:
+            artist.image_url = url
+
+
 def enrich_song_with_spotify(
     db: Session,
     song: Song,
@@ -168,6 +194,7 @@ def enrich_song_with_spotify(
             None,
         )
         primary = _primary_artist_name(song)
+        matched: SpotifyTrackMatch | None = None
         if existing is None:
             query = f"track:{song.title}"
             if primary:
@@ -177,26 +204,26 @@ def enrich_song_with_spotify(
             except ProviderError as exc:
                 log.info("Spotify search failed for song %s: %s", song.id, exc)
                 return False
-            match = _pick_best(song, primary, candidates)
-            if match is None:
+            matched = _pick_best(song, primary, candidates)
+            if matched is None:
                 return False
             link = SongProviderLink(
                 song_id=song.id,
                 provider_id=provider.id,
-                provider_track_id=match.id,
+                provider_track_id=matched.id,
                 playback_uri=None,  # metadata only — never a stream URL
                 license_url=None,
                 download_allowed=False,
             )
             db.add(link)
             db.flush()
-            if match.isrc and not song.isrc:
+            if matched.isrc and not song.isrc:
                 # Avoid unique conflicts: only set when free.
-                clash = db.scalar(select(Song).where(Song.isrc == match.isrc, Song.id != song.id))
+                clash = db.scalar(select(Song).where(Song.isrc == matched.isrc, Song.id != song.id))
                 if clash is None:
-                    song.isrc = match.isrc
-            track_id = match.id
-            artist_ids = [a.id for a in match.artists if a.id]
+                    song.isrc = matched.isrc
+            track_id = matched.id
+            artist_ids = [a.id for a in matched.artists if a.id]
         else:
             track_id = existing.provider_track_id
             try:
@@ -205,18 +232,34 @@ def enrich_song_with_spotify(
                 matched = None
             artist_ids = [a.id for a in matched.artists if a.id] if matched else []
 
-        # Genres from Spotify artists.
+        # Album cover from the matched track (only when song has no cover yet).
+        if matched is not None:
+            _apply_album_cover(song, matched.album_image_url)
+
+        # Genres + artist photos from one Spotify /artists call.
+        spotify_artists: list[SpotifyArtistRef] = []
         try:
-            genres = client.artist_genres(artist_ids) if artist_ids else []
+            spotify_artists = client.get_artists(artist_ids) if artist_ids else []
         except ProviderError as exc:
-            log.info("Spotify artist genres failed for song %s: %s", song.id, exc)
-            genres = []
-        if genres:
-            existing_names = {g.name for g in (song.genres or [])}
-            for name in genres:
-                if name not in existing_names:
-                    song.genres.append(_genre(db, name))
-                    existing_names.add(name)
+            log.info("Spotify artists fetch failed for song %s: %s", song.id, exc)
+            spotify_artists = []
+
+        if spotify_artists:
+            _apply_artist_images(song, spotify_artists=spotify_artists)
+            genre_names = sorted({g for a in spotify_artists for g in a.genres})
+            if genre_names:
+                existing_names = {g.name for g in (song.genres or [])}
+                for name in genre_names:
+                    if name not in existing_names:
+                        song.genres.append(_genre(db, name))
+                        existing_names.add(name)
+
+        # If still no cover, fall back to the primary artist's Spotify photo.
+        if not song.cover_url:
+            for link in sorted(song.artist_links or [], key=lambda l: l.position):
+                if link.artist and link.artist.image_url:
+                    song.cover_url = link.artist.image_url
+                    break
 
         # Audio features (may be restricted by Spotify for some apps — skip quietly).
         try:
@@ -271,3 +314,74 @@ def enrich_songs_best_effort(db: Session, songs: list[Song], *, settings: Settin
     finally:
         client.close()
     return applied
+
+
+def enrich_library_songs_for_user(
+    db: Session,
+    user_id,
+    *,
+    settings: Settings | None = None,
+    limit: int = 200,
+) -> dict[str, int]:
+    """Re-enrich the user's My Library songs (backfill covers / artist images).
+
+    Returns counts: scanned, matched, covers_filled, artist_images_filled.
+    """
+    from uuid import UUID
+
+    from app.models import LibraryUpload
+
+    settings = settings or get_settings()
+    if not settings.spotify_enabled:
+        return {"scanned": 0, "matched": 0, "covers_filled": 0, "artist_images_filled": 0, "spotify_enabled": 0}
+
+    uid = user_id if isinstance(user_id, UUID) else UUID(str(user_id))
+    uploads = db.scalars(
+        select(LibraryUpload)
+        .where(LibraryUpload.user_id == uid, LibraryUpload.song_id.is_not(None))
+        .order_by(LibraryUpload.id.desc())
+        .limit(max(1, min(limit, 500)))
+    ).all()
+    song_ids = [u.song_id for u in uploads if u.song_id]
+    if not song_ids:
+        return {"scanned": 0, "matched": 0, "covers_filled": 0, "artist_images_filled": 0, "spotify_enabled": 1}
+
+    songs = list(
+        db.scalars(
+            select(Song)
+            .where(Song.id.in_(song_ids))
+            .options(
+                selectinload(Song.artist_links).selectinload(SongArtist.artist),
+                selectinload(Song.genres),
+                selectinload(Song.features),
+                selectinload(Song.provider_links).selectinload(SongProviderLink.provider),
+            )
+        ).all()
+    )
+
+    before_cover = {s.id: s.cover_url for s in songs}
+    before_artist = {
+        a.id: a.image_url
+        for s in songs
+        for a in (link.artist for link in (s.artist_links or []) if link.artist)
+    }
+
+    matched = enrich_songs_best_effort(db, songs, settings=settings)
+    db.flush()
+
+    covers_filled = sum(1 for s in songs if not before_cover.get(s.id) and s.cover_url)
+    artist_images_filled = sum(
+        1
+        for s in songs
+        for link in (s.artist_links or [])
+        if link.artist
+        and not before_artist.get(link.artist.id)
+        and link.artist.image_url
+    )
+    return {
+        "scanned": len(songs),
+        "matched": matched,
+        "covers_filled": covers_filled,
+        "artist_images_filled": artist_images_filled,
+        "spotify_enabled": 1,
+    }

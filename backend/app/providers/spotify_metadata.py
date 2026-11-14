@@ -23,6 +23,8 @@ API_BASE = "https://api.spotify.com/v1"
 class SpotifyArtistRef:
     id: str
     name: str
+    image_url: str | None = None
+    genres: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -32,8 +34,23 @@ class SpotifyTrackMatch:
     duration_ms: int
     artists: list[SpotifyArtistRef]
     album_name: str | None = None
+    album_image_url: str | None = None
     popularity: int | None = None
     isrc: str | None = None
+
+
+def _best_image_url(images: object, *, max_len: int = 1000) -> str | None:
+    """Pick the largest Spotify image URL that fits our String(1000) columns."""
+    if not isinstance(images, list):
+        return None
+    # Spotify returns images largest-first.
+    for img in images:
+        if not isinstance(img, dict):
+            continue
+        url = str(img.get("url") or "").strip()
+        if url and len(url) <= max_len:
+            return url
+    return None
 
 
 @dataclass(frozen=True)
@@ -119,14 +136,15 @@ class SpotifyMetadataClient:
                 if isinstance(a, dict) and a.get("name")
             ]
             ext = item.get("external_ids") or {}
-            album = item.get("album") or {}
+            album = item.get("album") if isinstance(item.get("album"), dict) else {}
             out.append(
                 SpotifyTrackMatch(
                     id=str(item["id"]),
                     name=str(item.get("name") or ""),
                     duration_ms=int(item.get("duration_ms") or 0),
                     artists=artists,
-                    album_name=(album.get("name") if isinstance(album, dict) else None),
+                    album_name=album.get("name") if album else None,
+                    album_image_url=_best_image_url(album.get("images") if album else None),
                     popularity=int(item["popularity"]) if item.get("popularity") is not None else None,
                     isrc=str(ext["isrc"]) if isinstance(ext, dict) and ext.get("isrc") else None,
                 )
@@ -143,13 +161,14 @@ class SpotifyMetadataClient:
             if isinstance(a, dict) and a.get("name")
         ]
         ext = data.get("external_ids") or {}
-        album = data.get("album") or {}
+        album = data.get("album") if isinstance(data.get("album"), dict) else {}
         return SpotifyTrackMatch(
             id=str(data["id"]),
             name=str(data.get("name") or ""),
             duration_ms=int(data.get("duration_ms") or 0),
             artists=artists,
-            album_name=(album.get("name") if isinstance(album, dict) else None),
+            album_name=album.get("name") if album else None,
+            album_image_url=_best_image_url(album.get("images") if album else None),
             popularity=int(data["popularity"]) if data.get("popularity") is not None else None,
             isrc=str(ext["isrc"]) if isinstance(ext, dict) and ext.get("isrc") else None,
         )
@@ -201,19 +220,39 @@ class SpotifyMetadataClient:
             mode=mode,
         )
 
-    def artist_genres(self, artist_ids: list[str]) -> list[str]:
+    def get_artists(self, artist_ids: list[str]) -> list[SpotifyArtistRef]:
+        """Fetch artist profiles (name, image, genres). Missing/null entries are skipped."""
         ids = [i for i in artist_ids if i][:20]
         if not ids:
             return []
         data = self._get("/artists", params={"ids": ",".join(ids)})
-        genres: set[str] = set()
+        out: list[SpotifyArtistRef] = []
         for artist in (data or {}).get("artists") or []:
-            if not isinstance(artist, dict):
+            if not isinstance(artist, dict) or not artist.get("id") or not artist.get("name"):
                 continue
-            for g in artist.get("genres") or []:
-                cleaned = str(g).strip().lower()
-                if cleaned:
-                    genres.add(cleaned)
+            genres = tuple(
+                sorted(
+                    {
+                        cleaned
+                        for g in (artist.get("genres") or [])
+                        if (cleaned := str(g).strip().lower())
+                    }
+                )
+            )
+            out.append(
+                SpotifyArtistRef(
+                    id=str(artist["id"]),
+                    name=str(artist.get("name") or "").strip(),
+                    image_url=_best_image_url(artist.get("images")),
+                    genres=genres,
+                )
+            )
+        return out
+
+    def artist_genres(self, artist_ids: list[str]) -> list[str]:
+        genres: set[str] = set()
+        for artist in self.get_artists(artist_ids):
+            genres.update(artist.genres)
         return sorted(genres)
 
 

@@ -5,6 +5,7 @@ import { ButterflyDrift, MOOD, MoodAccent, MoodPhoto, Petal, PhotoHero } from "@
 import { Logo } from "@/components/layout/logo";
 import { CoverArt } from "@/components/music/cover-art";
 import { RecommendationCard } from "@/components/music/recommendation-card";
+import { songArtUrl } from "@/lib/song-art";
 import { EmptyState, ErrorState } from "@/components/states";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -222,7 +223,7 @@ export function CompanionPage() {
                 }
               >
                 <CoverArt
-                  src={data.spotlight.song.cover_url}
+                  src={songArtUrl(data.spotlight.song)}
                   seed={data.spotlight.song.id}
                   title={data.spotlight.song.title}
                   className="size-16"

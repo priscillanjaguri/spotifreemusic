@@ -10,9 +10,17 @@ from app.api.deps import get_current_user
 from app.core.config import Settings, get_settings
 from app.core.db import SessionLocal, get_db
 from app.models import LibraryUpload, User
-from app.schemas.music import LibraryLimits, LibraryPage, LibraryUploadOut, UploadResponse, UploadResultOut
+from app.schemas.music import (
+    LibraryLimits,
+    LibraryPage,
+    LibraryUploadOut,
+    SpotifyEnrichResult,
+    UploadResponse,
+    UploadResultOut,
+)
 from app.services import library as svc
 from app.services.audio_tags import ACCEPTED_EXTENSIONS
+from app.services.spotify_enrichment import enrich_library_songs_for_user
 from app.storage import ObjectStorage, StorageError, get_storage
 
 router = APIRouter(prefix="/library", tags=["my library"])
@@ -78,6 +86,41 @@ def upload_files(
             upload=LibraryUploadOut.from_upload(r.upload) if r.upload else None,
         ))
     return UploadResponse(results=results)
+
+
+@router.post(
+    "/spotify-enrich",
+    response_model=SpotifyEnrichResult,
+    summary="Re-enrich My Library with Spotify metadata (covers + artist photos)",
+)
+def spotify_enrich_library(
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    settings: Settings = Depends(get_settings),
+    limit: int = 200,
+) -> SpotifyEnrichResult:
+    """Best-effort Spotify match for uploaded songs. Metadata only — never streaming.
+
+    Fills missing `cover_url` (album art, else artist photo) and `artist.image_url`.
+    Safe to re-run; does not overwrite existing covers or artist images.
+    """
+    if not settings.spotify_enabled:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "spotify_not_configured",
+                "message": "SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET are not set.",
+            },
+        )
+    counts = enrich_library_songs_for_user(db, user.id, settings=settings, limit=limit)
+    db.commit()
+    return SpotifyEnrichResult(
+        scanned=counts["scanned"],
+        matched=counts["matched"],
+        covers_filled=counts["covers_filled"],
+        artist_images_filled=counts["artist_images_filled"],
+        spotify_enabled=bool(counts.get("spotify_enabled", 1)),
+    )
 
 
 @router.get("/{upload_id}", response_model=LibraryUploadOut)

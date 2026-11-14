@@ -9,6 +9,7 @@ from app.models import Song
 class ArtistOut(BaseModel):
     id: int
     name: str
+    image_url: str | None = None
 
 
 class AlbumOut(BaseModel):
@@ -49,7 +50,10 @@ class SongOut(BaseModel):
             id=song.id,
             title=song.title,
             duration_ms=song.duration_ms,
-            artists=[ArtistOut(id=l.artist.id, name=l.artist.name) for l in song.artist_links],
+            artists=[
+                ArtistOut(id=l.artist.id, name=l.artist.name, image_url=l.artist.image_url)
+                for l in song.artist_links
+            ],
             album=AlbumOut(id=song.album.id, title=song.album.title) if song.album else None,
             genres=sorted(g.name for g in song.genres),
             cover_url=song.cover_url,
@@ -161,3 +165,13 @@ class UploadResultOut(BaseModel):
 
 class UploadResponse(BaseModel):
     results: list[UploadResultOut]
+
+
+class SpotifyEnrichResult(BaseModel):
+    """Counts from a My Library Spotify metadata backfill (images + genres + features)."""
+
+    scanned: int
+    matched: int
+    covers_filled: int
+    artist_images_filled: int
+    spotify_enabled: bool
