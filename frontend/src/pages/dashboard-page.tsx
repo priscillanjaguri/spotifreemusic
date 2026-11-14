@@ -19,7 +19,6 @@ import {
   MoodAccent,
   MoodPhoto,
   Petal,
-  PhotoCollage,
   PhotoHero,
   PhotoStatShell,
 } from "@/components/decor";
@@ -88,6 +87,7 @@ function StatCard({
   position,
   to,
   accent,
+  notesAccent,
 }: {
   icon: LucideIcon;
   label: string;
@@ -97,23 +97,33 @@ function StatCard({
   position?: string;
   to: string;
   accent?: 0 | 1 | 2 | 3;
+  /** Soft music-notes-smoke photo accent in a card corner. */
+  notesAccent?: boolean;
 }) {
   return (
     <Link to={to} className="glow-soft group relative block transition-transform duration-200 hover:-translate-y-0.5">
-      <PhotoStatShell src={photo} position={position}>
+      <PhotoStatShell src={photo} position={position} clearPhoto>
+        {notesAccent && (
+          <MoodPhoto
+            src={MOOD.musicNotesSmoke}
+            opacity={0.55}
+            position="center 30%"
+            className="inset-auto -right-2 -top-2 h-[58%] w-[62%] opacity-90"
+          />
+        )}
         {accent !== undefined && <PulseCardAccents variant={accent} />}
         <div className="relative z-10 gloss grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-orchid-glow/90 to-heliotrope text-cream ring-1 ring-white/35 shadow-polish">
           <Icon className="size-5" />
         </div>
-        <p className="relative z-10 mt-4 text-sm font-bold uppercase tracking-wide text-orchid-glow">{label}</p>
+        <p className="relative z-10 mt-4 text-sm font-bold uppercase tracking-wide text-orchid-glow drop-shadow-md">{label}</p>
         {value === undefined ? (
           <Skeleton className="relative z-10 mt-1 h-9 w-16 bg-white/20" />
         ) : (
-          <p className="relative z-10 font-display text-4xl font-semibold text-cream drop-shadow-[0_2px_12px_rgb(0_0_0_/_0.45)] [font-variant-numeric:lining-nums]">
+          <p className="relative z-10 font-display text-4xl font-semibold text-cream drop-shadow-[0_2px_12px_rgb(0_0_0_/_0.55)] [font-variant-numeric:lining-nums]">
             {typeof value === "number" ? value.toLocaleString() : value}
           </p>
         )}
-        {hint && <p className="relative z-10 mt-1 text-xs font-bold text-pink-glow">{hint}</p>}
+        {hint && <p className="relative z-10 mt-1 text-xs font-bold text-pink-glow drop-shadow-sm">{hint}</p>}
       </PhotoStatShell>
     </Link>
   );
@@ -294,26 +304,27 @@ export function DashboardPage() {
       </PhotoHero>
 
       <section className="relative mt-8 overflow-hidden rounded-[2rem] p-4 ring-1 ring-orchid-glow/25 sm:p-6">
-        <PhotoCollage opacity={0.72} drift />
-        {/* Round 3 accents — behind pulse cards only; existing collage kept */}
-        <MoodPhoto
-          src={MOOD.musicNotesSmoke}
-          opacity={0.38}
-          position="right center"
-          className="inset-y-0 right-0 left-auto w-[58%] sm:w-[48%]"
-        />
+        {/* Clear starry-headphones well — moon / Saturn / headphones readable */}
         <MoodPhoto
           src={MOOD.starryHeadphones}
-          opacity={0.32}
-          position="center 40%"
-          className="inset-y-0 left-0 right-auto w-[52%] sm:w-[42%]"
+          opacity={0.92}
+          position="center 35%"
+          drift
+          className="inset-0"
+        />
+        {/* music-notes-smoke kept as visible accent wash (not the primary layer) */}
+        <MoodPhoto
+          src={MOOD.musicNotesSmoke}
+          opacity={0.42}
+          position="right center"
+          className="inset-y-0 right-0 left-auto w-[55%] sm:w-[46%]"
         />
         <div
           aria-hidden
-          className="absolute inset-0 bg-gradient-to-b from-[#5a1a78]/35 via-[#2a1040]/62 to-[#12061c]/88"
+          className="absolute inset-0 bg-gradient-to-b from-[#1a0b28]/45 via-[#160a1f]/55 to-[#0c0612]/78"
         />
-        <FairyLights className="opacity-55" />
-        <ButterflyDrift className="opacity-40" />
+        <FairyLights className="opacity-60" />
+        <ButterflyDrift className="opacity-35" />
 
         <div className="relative mb-4">
           <p className="font-script text-2xl text-orchid-glow">your week in colour</p>
@@ -326,38 +337,42 @@ export function DashboardPage() {
             label="Listening time"
             value={week.data ? formatTotalDuration(week.data.total_listened_ms) : undefined}
             hint={listenHint}
-            photo={MOOD.rosesFull}
-            position="center 40%"
+            photo={MOOD.starryHeadphones}
+            position="center 22%"
             to="/analytics"
             accent={0}
+            notesAccent
           />
           <StatCard
             icon={Library}
             label="Songs saved"
             value={total}
-            photo={MOOD.collageFull}
-            position="center 15%"
+            photo={MOOD.starryHeadphones}
+            position="center 48%"
             to="/collection"
             accent={1}
+            notesAccent
           />
           <StatCard
             icon={Tags}
             label="Top genre"
             value={week.data?.top_genres[0]?.name ?? facets.data?.genres[0]?.name}
             hint="This week"
-            photo={MOOD.beachFull}
-            position="center 45%"
+            photo={MOOD.starryHeadphones}
+            position="center 68%"
             to="/analytics"
             accent={2}
+            notesAccent
           />
           <StatCard
             icon={Mic2}
             label="Artists"
             value={facets.data?.artists.length}
-            photo={MOOD.lantern}
-            position="center 40%"
+            photo={MOOD.starryHeadphones}
+            position="center 35%"
             to="/collection"
             accent={3}
+            notesAccent
           />
         </div>
 

@@ -361,11 +361,14 @@ export function PhotoStatShell({
   position = "center",
   children,
   className,
+  /** Keep the photo readable (moon/stars/headphones) instead of heavy purple wash. */
+  clearPhoto,
 }: {
   src: string;
   position?: string;
   children: React.ReactNode;
   className?: string;
+  clearPhoto?: boolean;
 }) {
   return (
     <div
@@ -376,19 +379,33 @@ export function PhotoStatShell({
       )}
     >
       <MoodPhoto src={src} opacity={1} position={position} className="inset-0" />
-      {/* Lighter veil so the photo mood stays vivid; colour comes from orchid/heliotrope tint */}
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-gradient-to-br from-[#c45ee8]/45 via-[#6a2088]/55 to-[#2a0c40]/72"
-      />
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-gradient-to-t from-[#ff9fd0]/35 via-[#f0b0e6]/12 to-[#b45eeb]/28 mix-blend-soft-light"
-      />
-      <div
-        aria-hidden
-        className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#160a1f]/75 to-transparent"
-      />
+      {clearPhoto ? (
+        <>
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-br from-[#3a1058]/25 via-transparent to-[#160a1f]/35"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-[#12061c]/88 via-[#1a0b28]/45 to-transparent"
+          />
+        </>
+      ) : (
+        <>
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-br from-[#c45ee8]/45 via-[#6a2088]/55 to-[#2a0c40]/72"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-t from-[#ff9fd0]/35 via-[#f0b0e6]/12 to-[#b45eeb]/28 mix-blend-soft-light"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#160a1f]/75 to-transparent"
+          />
+        </>
+      )}
       <div className="relative z-10">{children}</div>
     </div>
   );
