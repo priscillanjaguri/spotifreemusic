@@ -220,33 +220,45 @@ class SpotifyMetadataClient:
             mode=mode,
         )
 
+    def _parse_artist(self, artist: dict) -> SpotifyArtistRef | None:
+        if not isinstance(artist, dict) or not artist.get("id") or not artist.get("name"):
+            return None
+        genres = tuple(
+            sorted(
+                {
+                    cleaned
+                    for g in (artist.get("genres") or [])
+                    if (cleaned := str(g).strip().lower())
+                }
+            )
+        )
+        return SpotifyArtistRef(
+            id=str(artist["id"]),
+            name=str(artist.get("name") or "").strip(),
+            image_url=_best_image_url(artist.get("images")),
+            genres=genres,
+        )
+
     def get_artists(self, artist_ids: list[str]) -> list[SpotifyArtistRef]:
-        """Fetch artist profiles (name, image, genres). Missing/null entries are skipped."""
+        """Fetch artist profiles (name, image, genres). Missing/null entries are skipped.
+
+        Uses per-id ``GET /artists/{id}`` because some Client Credentials apps get
+        HTTP 403 on the batch ``GET /artists?ids=…`` endpoint (same class of
+        restriction as ``/audio-features``).
+        """
         ids = [i for i in artist_ids if i][:20]
         if not ids:
             return []
-        data = self._get("/artists", params={"ids": ",".join(ids)})
         out: list[SpotifyArtistRef] = []
-        for artist in (data or {}).get("artists") or []:
-            if not isinstance(artist, dict) or not artist.get("id") or not artist.get("name"):
+        for artist_id in ids:
+            try:
+                data = self._get(f"/artists/{artist_id}")
+            except ProviderError as exc:
+                log.info("Spotify artist %s unavailable: %s", artist_id, exc)
                 continue
-            genres = tuple(
-                sorted(
-                    {
-                        cleaned
-                        for g in (artist.get("genres") or [])
-                        if (cleaned := str(g).strip().lower())
-                    }
-                )
-            )
-            out.append(
-                SpotifyArtistRef(
-                    id=str(artist["id"]),
-                    name=str(artist.get("name") or "").strip(),
-                    image_url=_best_image_url(artist.get("images")),
-                    genres=genres,
-                )
-            )
+            parsed = self._parse_artist(data if isinstance(data, dict) else {})
+            if parsed is not None:
+                out.append(parsed)
         return out
 
     def artist_genres(self, artist_ids: list[str]) -> list[str]:

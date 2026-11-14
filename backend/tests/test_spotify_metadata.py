@@ -73,23 +73,22 @@ def _handler(request: httpx.Request) -> httpx.Response:
                 "mode": 1,
             },
         )
-    if request.url.path.endswith("/artists"):
+    if "/artists/" in request.url.path:
+        # Per-id endpoint (batch ?ids= is 403 for some Client Credentials apps).
         return httpx.Response(
             200,
             json={
-                "artists": [
-                    {
-                        "id": "spart1",
-                        "name": "Violet Sheen",
-                        "genres": ["lofi", "chillout"],
-                        "images": [
-                            {"url": ARTIST_IMG, "height": 640, "width": 640},
-                            {"url": "https://i.scdn.co/image/tiny", "height": 160, "width": 160},
-                        ],
-                    }
-                ]
+                "id": "spart1",
+                "name": "Violet Sheen",
+                "genres": ["lofi", "chillout"],
+                "images": [
+                    {"url": ARTIST_IMG, "height": 640, "width": 640},
+                    {"url": "https://i.scdn.co/image/tiny", "height": 160, "width": 160},
+                ],
             },
         )
+    if request.url.path.endswith("/artists"):
+        return httpx.Response(403, json={"error": {"status": 403, "message": "Forbidden"}})
     return httpx.Response(404, json={"error": "not found"})
 
 
@@ -186,18 +185,14 @@ def test_enrich_falls_back_to_artist_image_when_no_album_art(db):
                     }
                 },
             )
-        if request.url.path.endswith("/artists"):
+        if "/artists/" in request.url.path:
             return httpx.Response(
                 200,
                 json={
-                    "artists": [
-                        {
-                            "id": "spart1",
-                            "name": "Violet Sheen",
-                            "genres": [],
-                            "images": [{"url": ARTIST_IMG, "height": 640, "width": 640}],
-                        }
-                    ]
+                    "id": "spart1",
+                    "name": "Violet Sheen",
+                    "genres": [],
+                    "images": [{"url": ARTIST_IMG, "height": 640, "width": 640}],
                 },
             )
         if "/audio-features/" in request.url.path:
