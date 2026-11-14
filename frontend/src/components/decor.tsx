@@ -24,6 +24,10 @@ export const MOOD = {
   booksHeadphones: "/mood/books-headphones.webp",
   /** Round 2 — window girl with headphones (My Library). */
   windowGirl: "/mood/window-girl-headphones.webp",
+  /** Round 3 — starry headphones sparkles (Home Listening pulse). */
+  starryHeadphones: "/mood/starry-headphones.webp",
+  /** Round 3 — music notes in smoke (Home Listening pulse). */
+  musicNotesSmoke: "/mood/music-notes-smoke.webp",
 } as const;
 
 export type MoodKey = keyof typeof MOOD;
