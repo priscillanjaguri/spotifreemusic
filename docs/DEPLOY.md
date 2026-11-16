@@ -41,7 +41,8 @@ Do **not** split the SPA to Vercel and the API elsewhere; the production app is 
 | `AUDIUS_APP_NAME` | No | Default `spotifree` (sent on every Audius request) |
 | `AUDIUS_API_KEY` | No | Optional free key from https://api.audius.co/plans (higher rate limits) |
 | `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` | No | Spotify Client Credentials; metadata for ML only (no streaming) |
-| `GENIUS_ACCESS_TOKEN` / `GENIUS_CLIENT_*` | No | Unused for lyrics (LRCLIB is keyless). Kept optional for future Genius metadata. |
+| `GENIUS_ACCESS_TOKEN` / `GENIUS_CLIENT_*` | No | Unused for lyric bodies (Cloudflare blocked from Render). Optional future metadata only. |
+| `MUSIXMATCH_API_KEY` | No | Official Musixmatch Lyrics API — second source after LRCLIB. Free key from https://developer.musixmatch.com/ . Without it, only a tiny local mock allowlist backs LRCLIB misses. |
 | `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET` | No | My Library object storage |
 | `LIBRARY_ANALYSIS_ENABLED` | No | Prefer `false` on free tiers (CPU) |
 
@@ -57,7 +58,7 @@ Do **not** split the SPA to Vercel and the API elsewhere; the production app is 
 5. Audius defaults ship in `render.yaml` (`AUDIUS_ENABLED=true`, host + app name). Optional: set `AUDIUS_API_KEY` from https://api.audius.co/plans for higher limits. Set `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` for library / catalogue metadata enrichment (covers + artist photos). Leave Spotify unset to skip gracefully.
 6. After merging Audius (or any catalogue change), use **Manual Deploy** on the Render web service if auto-deploy is off.
 7. Backfill existing My Library covers/artist images (auth cookie or Bearer): `POST /api/v1/library/spotify-enrich?limit=200`.
-8. Plain lyrics use **LRCLIB** (no API key) via `GET /api/v1/lyrics/{song_id}`. Genius env vars are optional/unused for lyric bodies.
+8. Plain lyrics: **LRCLIB** first (no API key), then **Musixmatch** when `MUSIXMATCH_API_KEY` is set on Render (`GET /api/v1/lyrics/{song_id}`). Genius env vars are optional/unused for lyric bodies. Without a Musixmatch key, a tiny local mock allowlist is the only LRCLIB miss fallback.
 9. Same APK Server URL steps as Railway.
 
 ## Local Docker (smoke test)

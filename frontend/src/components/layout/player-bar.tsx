@@ -263,7 +263,9 @@ export function PlayerBar() {
             <SheetDescription className="text-lavender/80">
               {song.title}
               {artistNames(song.artists) ? ` · ${artistNames(song.artists)}` : ""}
-              <span className="mt-1 block text-xs text-lavender/55">Plain lyrics from LRCLIB for the current track.</span>
+              <span className="mt-1 block text-xs text-lavender/55">
+                Plain lyrics for the current track (LRCLIB first, then Musixmatch when configured).
+              </span>
             </SheetDescription>
           </SheetHeader>
           <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-2">
@@ -285,7 +287,14 @@ export function PlayerBar() {
                   {lyrics.lyrics}
                 </pre>
                 <p className="text-xs text-lavender/60">
-                  Source: {lyrics.source === "lrclib" ? "LRCLIB" : lyrics.source}
+                  Source:{" "}
+                  {lyrics.source === "lrclib"
+                    ? "LRCLIB"
+                    : lyrics.source === "musixmatch"
+                      ? "Musixmatch"
+                      : lyrics.source === "mock_local"
+                        ? "Local mock"
+                        : lyrics.source}
                   {lyrics.genius_url ? (
                     <>
                       {" · "}

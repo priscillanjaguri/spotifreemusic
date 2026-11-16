@@ -59,13 +59,15 @@ class Settings(BaseSettings):
     # never used for playback URLs. Both id + secret required to enable.
     spotify_client_id: str | None = None
     spotify_client_secret: str | None = None
-    # Optional Genius lyrics (server-side only — never exposed to the SPA/APK).
-    # Prefer Client Access Token as Bearer. When the token alone is rejected, set
-    # GENIUS_CLIENT_SECRET and use the token (or GENIUS_CLIENT_ID) for OAuth
-    # client-credentials. Plain lyrics only; no karaoke / Musixmatch.
+    # Optional Genius credentials (unused for lyric bodies — Cloudflare blocked
+    # page fetches from Render). Kept for possible future metadata only.
     genius_access_token: str | None = None
     genius_client_id: str | None = None
     genius_client_secret: str | None = None
+    # Optional Musixmatch Lyrics API key (official API; second source after LRCLIB).
+    # Free key: https://developer.musixmatch.com/ — set on Render as MUSIXMATCH_API_KEY.
+    # When unset, a tiny local mock allowlist is used so the fallback path is testable.
+    musixmatch_api_key: str | None = None
     # Development only: serve an invented catalogue (labelled 'mock_dev') with generated
     # tones when no real provider is configured. Ignored outside ENVIRONMENT=development.
     dev_mock_provider: bool = False
@@ -106,6 +108,10 @@ class Settings(BaseSettings):
         if self.genius_access_token:
             return True
         return bool(self.genius_client_id and self.genius_client_secret)
+
+    @property
+    def musixmatch_enabled(self) -> bool:
+        return bool(self.musixmatch_api_key and self.musixmatch_api_key.strip())
 
     @property
     def audius_configured(self) -> bool:

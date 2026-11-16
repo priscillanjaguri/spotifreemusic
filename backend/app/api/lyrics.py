@@ -20,7 +20,11 @@ class LyricsOut(BaseModel):
     genius_url: str | None
 
 
-@router.get("/lyrics/{song_id}", response_model=LyricsOut, summary="Plain lyrics for a song (LRCLIB)")
+@router.get(
+    "/lyrics/{song_id}",
+    response_model=LyricsOut,
+    summary="Plain lyrics for a song (LRCLIB, then Musixmatch / local mock)",
+)
 def get_lyrics(
     song_id: int,
     db: Session = Depends(get_db),
