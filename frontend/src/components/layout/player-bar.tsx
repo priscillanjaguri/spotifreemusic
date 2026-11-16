@@ -1,5 +1,20 @@
 import { useEffect, useState } from "react";
-import { Loader2, Pause, Play, Scale, ScrollText, SkipBack, SkipForward, Volume1, Volume2, VolumeX, X } from "lucide-react";
+import {
+  Loader2,
+  Pause,
+  Play,
+  Repeat,
+  Repeat1,
+  Scale,
+  ScrollText,
+  Shuffle,
+  SkipBack,
+  SkipForward,
+  Volume1,
+  Volume2,
+  VolumeX,
+  X,
+} from "lucide-react";
 import { CoverArt } from "@/components/music/cover-art";
 import { songArtUrl } from "@/lib/song-art";
 import { MockBadge, ProviderBadge } from "@/components/music/song-row";
@@ -131,21 +146,65 @@ export function PlayerBar() {
             </div>
           </div>
 
-          <div className="flex shrink-0 items-center gap-1 lg:flex-col lg:gap-1.5">
-            <div className="flex items-center gap-1 lg:gap-2">
-              <Button size="icon-sm" variant="ghost" className="hidden text-lavender hover:bg-white/10 hover:text-white sm:inline-flex" onClick={p.previous} aria-label="Previous">
+          <div className="flex shrink-0 items-center gap-0.5 sm:gap-1 lg:flex-col lg:gap-1.5">
+            <div className="flex items-center gap-0.5 sm:gap-1 lg:gap-2">
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                className={cn(
+                  "hover:bg-white/10 hover:text-white",
+                  p.shuffle ? "text-lilac" : "text-lavender",
+                )}
+                onClick={p.toggleShuffle}
+                aria-label={p.shuffle ? "Disable shuffle" : "Enable shuffle"}
+                aria-pressed={p.shuffle}
+              >
+                <Shuffle className="size-3.5" />
+              </Button>
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                className="text-lavender hover:bg-white/10 hover:text-white"
+                onClick={p.previous}
+                aria-label="Previous"
+              >
                 <SkipBack className="fill-current" />
               </Button>
               <Button
                 size="icon"
-                className="gloss size-10 rounded-full bg-cream text-deep-purple hover:scale-105 hover:bg-cream"
+                className="gloss size-9 rounded-full bg-cream text-deep-purple hover:scale-105 hover:bg-cream sm:size-10"
                 onClick={p.toggle}
                 aria-label={p.isPlaying ? "Pause" : "Play"}
               >
                 <PlayIcon className={cn("fill-current", p.isLoading && "animate-spin fill-none")} />
               </Button>
-              <Button size="icon-sm" variant="ghost" className="text-lavender hover:bg-white/10 hover:text-white" onClick={p.next} aria-label="Next">
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                className="text-lavender hover:bg-white/10 hover:text-white"
+                onClick={p.next}
+                aria-label="Next"
+              >
                 <SkipForward className="fill-current" />
+              </Button>
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                className={cn(
+                  "hover:bg-white/10 hover:text-white",
+                  p.repeat === "off" ? "text-lavender" : "text-lilac",
+                )}
+                onClick={p.cycleRepeat}
+                aria-label={
+                  p.repeat === "off"
+                    ? "Enable repeat all"
+                    : p.repeat === "all"
+                      ? "Enable repeat one"
+                      : "Disable repeat"
+                }
+                aria-pressed={p.repeat !== "off"}
+              >
+                {p.repeat === "one" ? <Repeat1 className="size-3.5" /> : <Repeat className="size-3.5" />}
               </Button>
             </div>
             <div className="hidden w-full items-center gap-2 text-[11px] tabular-nums text-lavender/70 lg:flex">
@@ -155,16 +214,16 @@ export function PlayerBar() {
             </div>
           </div>
 
-          <div className="flex shrink-0 items-center justify-end gap-1.5 lg:gap-2">
+          <div className="flex shrink-0 items-center justify-end gap-1 lg:gap-2">
             <Button
               size="sm"
               variant="secondary"
-              className="glass-soft h-8 shrink-0 gap-1.5 border-lavender/25 bg-white/10 px-2.5 text-cream hover:bg-white/15 hover:text-white"
+              className="glass-soft h-8 shrink-0 gap-1.5 border-lavender/25 bg-white/10 px-2 text-cream hover:bg-white/15 hover:text-white sm:px-2.5"
               onClick={() => setLyricsOpen(true)}
               aria-label="Show lyrics"
             >
               <ScrollText className="size-3.5" />
-              <span className="text-xs font-bold">Lyrics</span>
+              <span className="hidden text-xs font-bold sm:inline">Lyrics</span>
             </Button>
             <div className="hidden items-center gap-2 lg:flex">
               <Button
