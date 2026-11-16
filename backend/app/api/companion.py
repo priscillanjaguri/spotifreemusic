@@ -5,7 +5,7 @@ from app.api.deps import get_current_user
 from app.core.db import get_db
 from app.models import User
 from app.providers.base import MusicProviderAdapter
-from app.providers.registry import get_music_provider
+from app.providers.registry import get_music_providers
 from app.schemas.analytics import (
     CompanionInsightOut,
     CompanionMoodIn,
@@ -61,11 +61,11 @@ def get_daily_companion(
     limit: int = Query(12, ge=1, le=30),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
-    provider: MusicProviderAdapter | None = Depends(get_music_provider),
+    providers: list[MusicProviderAdapter] = Depends(get_music_providers),
 ) -> DailyCompanionOut:
     try:
         result = companion_svc.build_daily_companion(
-            db, user, mood=mood, limit=limit, provider=provider
+            db, user, mood=mood, limit=limit, providers=providers
         )
     except ValueError as exc:
         raise HTTPException(422, str(exc))
@@ -79,10 +79,10 @@ def post_daily_mood(
     limit: int = Query(12, ge=1, le=30),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
-    provider: MusicProviderAdapter | None = Depends(get_music_provider),
+    providers: list[MusicProviderAdapter] = Depends(get_music_providers),
 ) -> DailyCompanionOut:
     result = companion_svc.build_daily_companion(
-        db, user, mood=body.mood, limit=limit, provider=provider
+        db, user, mood=body.mood, limit=limit, providers=providers
     )
     db.commit()
     return _pack(result)

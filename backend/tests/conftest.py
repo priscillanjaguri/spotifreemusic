@@ -100,10 +100,11 @@ def provider():
 def client(db, provider):
     from app.core.db import get_db
     from app.main import app
-    from app.providers.registry import get_music_provider
+    from app.providers.registry import get_music_provider, get_music_providers
 
     app.dependency_overrides[get_db] = lambda: db
     app.dependency_overrides[get_music_provider] = lambda: provider
+    app.dependency_overrides[get_music_providers] = lambda: [provider]
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()

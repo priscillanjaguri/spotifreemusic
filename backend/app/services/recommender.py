@@ -110,25 +110,37 @@ def _load_candidate_songs(
     return songs
 
 
+def _normalize_providers(
+    provider: MusicProviderAdapter | None = None,
+    providers: list[MusicProviderAdapter] | None = None,
+) -> list[MusicProviderAdapter]:
+    if providers:
+        return list(providers)
+    if provider is not None:
+        return [provider]
+    return []
+
+
 def _seed_provider_candidates(
     db: Session,
-    provider: MusicProviderAdapter | None,
+    providers: list[MusicProviderAdapter],
     genres: list[str],
     *,
     limit_per_tag: int = 12,
 ) -> list[Song]:
     """Fresh tag-seeded searches to widen the candidate pool beyond the local cache."""
-    if provider is None or not genres:
+    if not providers or not genres:
         return []
     imported: list[Song] = []
-    for tag in genres[:6]:
-        try:
-            tracks = provider.search_tracks(tag, limit=limit_per_tag)
-        except ProviderError as exc:
-            log.info("Provider seed search failed for %r: %s", tag, exc)
-            continue
-        if tracks:
-            imported.extend(import_tracks(db, provider, tracks))
+    for adapter in providers:
+        for tag in genres[:6]:
+            try:
+                tracks = adapter.search_tracks(tag, limit=limit_per_tag)
+            except ProviderError as exc:
+                log.info("Provider seed search failed for %s/%r: %s", adapter.key, tag, exc)
+                continue
+            if tracks:
+                imported.extend(import_tracks(db, adapter, tracks))
     db.flush()
     return imported
 
@@ -319,11 +331,13 @@ def recommend_for_user(
     *,
     limit: int = 20,
     provider: MusicProviderAdapter | None = None,
+    providers: list[MusicProviderAdapter] | None = None,
     now: datetime | None = None,
 ) -> RecommendationResult:
     now = now or datetime.now(timezone.utc)
     prefs = user.preferences
     exclude = latest_not_interested_ids(db, user.id)
+    catalogue = _normalize_providers(provider, providers)
 
     # Seed genres: preferred (onboarding) else top genres from the user's collection.
     seed_genres = list(prefs.preferred_genres or [])
@@ -333,7 +347,7 @@ def recommend_for_user(
         facets = collection_facets(db, user.id)
         seed_genres = [name for _id, name, _count in facets["genres"][:8]]
 
-    _seed_provider_candidates(db, provider, seed_genres or ["lofi", "pop", "electronic", "jazz"])
+    _seed_provider_candidates(db, catalogue, seed_genres or ["lofi", "pop", "electronic", "jazz"])
 
     songs = _load_candidate_songs(db, user)
     rows = [_song_row(s) for s in songs]
@@ -433,13 +447,15 @@ def similar_songs(
     *,
     limit: int = 12,
     provider: MusicProviderAdapter | None = None,
+    providers: list[MusicProviderAdapter] | None = None,
 ) -> RecommendationResult:
     song = db.get(Song, song_id, options=[*SONG_LOAD, selectinload(Song.features)])
     if song is None or (song.owner_user_id is not None and song.owner_user_id != user.id):
         raise LookupError("song")
 
     seed_genres = [g.name for g in song.genres]
-    _seed_provider_candidates(db, provider, seed_genres or ["pop"], limit_per_tag=10)
+    catalogue = _normalize_providers(provider, providers)
+    _seed_provider_candidates(db, catalogue, seed_genres or ["pop"], limit_per_tag=10)
 
     exclude = latest_not_interested_ids(db, user.id)
     songs = _load_candidate_songs(db, user, extra_ids={song_id})

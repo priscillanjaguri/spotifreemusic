@@ -99,7 +99,9 @@ export function AuthPage({ mode }: { mode: "login" | "register" }) {
             ))}
           </ul>
         </div>
-        <p className="relative text-xs text-muted-foreground">Music from Jamendo’s Creative Commons catalogue.</p>
+        <p className="relative text-xs text-muted-foreground">
+          Music from Jamendo and Audius — full legal streams, plus your own Library uploads.
+        </p>
       </section>
 
       <section className="relative flex items-center justify-center overflow-hidden px-5 py-12 sm:px-8">

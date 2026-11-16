@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Loader2, Pause, Play, Scale, ScrollText, SkipBack, SkipForward, Volume1, Volume2, VolumeX, X } from "lucide-react";
 import { CoverArt } from "@/components/music/cover-art";
 import { songArtUrl } from "@/lib/song-art";
-import { MockBadge } from "@/components/music/song-row";
+import { MockBadge, ProviderBadge } from "@/components/music/song-row";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -108,9 +108,11 @@ export function PlayerBar() {
               <div className="flex items-center gap-2">
                 <p className="truncate text-sm font-bold text-white">{song.title}</p>
                 {song.data_source === "mock_dev" && <MockBadge />}
+                {song.playback?.provider && <ProviderBadge provider={song.playback.provider} />}
               </div>
               <p className="truncate text-xs text-lavender/80">
                 {artistNames(song.artists)}
+                {song.playback?.provider === "audius" && " · via Audius"}
                 {license && (
                   <>
                     {" · "}
@@ -120,7 +122,8 @@ export function PlayerBar() {
                       rel="noreferrer"
                       className="inline-flex items-center gap-1 text-lilac hover:text-white hover:underline"
                     >
-                      <Scale className="size-3" /> Licence
+                      <Scale className="size-3" />{" "}
+                      {song.playback?.provider === "audius" ? "Audius" : "Licence"}
                     </a>
                   </>
                 )}

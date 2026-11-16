@@ -73,7 +73,8 @@ export function ProviderNotConfigured({ message, className }: { message: string;
         <>
           <p>{message}</p>
           <p className="mt-3 text-xs text-subtle">
-            Get a free client ID at{" "}
+            Audius is enabled by default (<code className="rounded-md bg-accent px-1.5 py-0.5 text-accent-foreground">AUDIUS_ENABLED=true</code>).
+            For Jamendo, get a free client ID at{" "}
             <a
               className="font-semibold text-accent-foreground underline-offset-4 hover:underline"
               href="https://developer.jamendo.com"

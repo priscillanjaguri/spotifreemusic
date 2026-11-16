@@ -70,6 +70,7 @@ def build_daily_companion(
     mood: str | None = None,
     limit: int = 12,
     provider: MusicProviderAdapter | None = None,
+    providers: list[MusicProviderAdapter] | None = None,
     now: datetime | None = None,
 ) -> DailyCompanion:
     now = now or datetime.now(timezone.utc)
@@ -88,7 +89,9 @@ def build_daily_companion(
         prefs.preferred_genres = list(dict.fromkeys([*seeds, *original]))[:20]
 
     try:
-        playlist = reco_svc.recommend_for_user(db, user, limit=limit, provider=provider, now=now)
+        playlist = reco_svc.recommend_for_user(
+            db, user, limit=limit, provider=provider, providers=providers, now=now
+        )
     finally:
         prefs.preferred_genres = original
 

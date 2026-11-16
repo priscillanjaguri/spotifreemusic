@@ -13,8 +13,8 @@ export function OfflineBanner() {
     >
       <WifiOff className="size-3.5 shrink-0 text-orchid-glow" aria-hidden />
       <span>
-        Offline{local ? " · local shell" : ""}. My Library plays from cache. Discover, lyrics, and Jamendo need
-        network.
+        Offline{local ? " · local shell" : ""}. My Library plays from cache. Discover, lyrics, Jamendo, and Audius
+        need network.
       </span>
     </div>
   );

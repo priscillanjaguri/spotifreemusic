@@ -13,7 +13,7 @@ spotifree/
 │   │   └── api/               # HTTP layer only: validate in, call service, shape out
 │   │   ├── schemas/           # Pydantic request/response models
 │   │   ├── services/          # business logic (catalogue import, collection queries)
-│   │   ├── providers/         # adapter interface, Jamendo + My Library adapters, registry
+│   │   ├── providers/         # adapter interface, Jamendo + Audius + My Library adapters, registry
 │   │   ├── storage/           # object storage: local filesystem (default) or Cloudflare R2
 │   │   ├── analysis/          # Librosa audio features -- pure, no web/DB/storage imports
 │   │   ├── ml/                # recommender -- pure Python, no web/DB imports
@@ -91,8 +91,9 @@ and replaced without touching the web layer or UI.
   provider that exists only in the test suite.
 - **Known simplification:** artists are matched by case-insensitive name (two different artists with
   the same name would merge). Revisit when we store provider artist ids.
-- **Jamendo gives genre tags but no energy/valence/tempo.** Those will come from Librosa in Stage 4,
-  only for tracks whose stored licence permits analysis.
+- **Jamendo / Audius give genre tags but not full ML audio features.** Librosa (library /
+  download-allowed Jamendo) and Spotify metadata fill gaps where allowed. Energy/valence/tempo
+  come from analysis only for tracks whose stored licence permits it — never from scraping streams.
 
 ## Stage 3 decisions
 - **Server state lives in TanStack Query**; there is no global store. Auth (`/auth/me`) and the audio
@@ -109,8 +110,10 @@ and replaced without touching the web layer or UI.
   linked and survive reloads; artist/album/genre names in rows link into them.
 - **Dev mock provider** (`DEV_MOCK_PROVIDER=true`, development only): an invented catalogue labelled
   `mock_dev` (shown as a **Sample** badge, per decision 8) with generated tones. It exists so the UI can be
-  exercised without a Jamendo key; it is never selected when a real provider is configured or outside
-  development. Tests still use their own fake provider.
+  exercised without Jamendo/Audius; it is never selected when a real catalogue provider is configured
+  or outside development. Tests still use their own fake provider.
+- **Multi-catalogue search:** Discover fans out to configured adapters (Jamendo and/or Audius),
+  imports each batch into `song_provider_links`, then interleaves results.
 
 ## My Library decisions
 - **A provider like any other.** `my_library` is a `MusicProviderAdapter` (never searched). Each upload

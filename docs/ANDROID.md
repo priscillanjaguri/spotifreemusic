@@ -5,14 +5,14 @@ The Vite/React UI is packaged with **Capacitor** into a native Android WebView a
 
 ## Online vs offline
 
-| Mode | UI | My Library | Discover / Jamendo / lyrics / eval / companion cloud |
+| Mode | UI | My Library | Discover / Jamendo+Audius / lyrics / eval / companion cloud |
 | --- | --- | --- | --- |
 | **Online** | Live SPA from Render (`server.url`) — UI updates without APK reinstall | Sync metadata + download audio into device cache | Need network |
 | **Offline** | Bundled `dist/` shell (`MainActivity` skips `server.url`; `errorPath` safety net) | Cached list + local Filesystem playback | Unavailable |
 
 **Offline works for:** opening the app, signing in with a previously cached session, browsing **My Library** from Preferences cache, playing uploads already downloaded to Filesystem.
 
-**Still need network for:** first login, uploads, Jamendo/Discover, recommendations, analytics refresh, companion, lyrics, `/eval`, Spotify enrichment.
+**Still need network for:** first login, uploads, Jamendo/Audius Discover, recommendations, analytics refresh, companion, lyrics, `/eval`, Spotify enrichment.
 
 Cache stack: `@capacitor/preferences` (library JSON + user), `@capacitor/filesystem` (audio under `library-audio/`), `@capacitor/network` (banner + status).
 
@@ -24,6 +24,7 @@ Cache stack: `@capacitor/preferences` (library JSON + user), `@capacitor/filesys
 | PostgreSQL behind that API | Yes (server-side) |
 | Cloudflare R2 | Only if library files are stored in R2 |
 | Jamendo client ID | Optional (Discover / CC catalogue) |
+| Audius | On by default (no key); optional `AUDIUS_API_KEY` |
 
 Production / sideload APKs prefer the **live web UI** from
 **`https://spotifree-rw0a.onrender.com`** when the device has network. Override in-app

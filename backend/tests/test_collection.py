@@ -41,9 +41,10 @@ def test_search_validates_input(client):
 
 def test_unconfigured_provider_is_reported_clearly(client):
     from app.main import app
-    from app.providers.registry import get_music_provider
+    from app.providers.registry import get_music_provider, get_music_providers
     register(client)
     app.dependency_overrides[get_music_provider] = lambda: None
+    app.dependency_overrides[get_music_providers] = lambda: []
     res = search(client)
     assert res.status_code == 503 and res.json()["detail"]["code"] == "provider_not_configured"
 

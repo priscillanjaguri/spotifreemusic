@@ -176,17 +176,22 @@ alembic downgrade -1
 Production never calls `create_all()`; the schema only changes through migrations.
 
 ## Music data & playback (important)
-Real music comes from **Jamendo** (Creative Commons catalogue). Get a free client ID at
-https://developer.jamendo.com and set `JAMENDO_CLIENT_ID` in `.env`. Without it the app still runs,
-but search/playback report "provider not configured" (HTTP 503) rather than faking anything.
+Discover streams come from **Jamendo** (Creative Commons) and/or **Audius** (Open Music License
+full tracks). Audius is enabled by default (`AUDIUS_ENABLED=true`, host `https://api.audius.co`,
+app name `spotifree`) and needs **no API key** for read search/stream. Optional free key:
+https://api.audius.co/plans → `AUDIUS_API_KEY`. Jamendo: get a client ID at
+https://developer.jamendo.com and set `JAMENDO_CLIENT_ID`. Spotify is metadata-only (never
+playback). Without any catalogue provider (Jamendo unset + Audius disabled) and without the
+dev mock, search returns HTTP 503.
 
-Verify the live connection (needs internet):
+Verify live connections (needs internet):
 ```bash
 cd backend && python -m scripts.check_jamendo chill
+cd backend && python -m scripts.check_audius lofi
 ```
-The app only uses Jamendo's stream URLs for playback; it never downloads audio for streaming.
-Licence URLs are stored so analysis only runs when permitted. Spotify is deliberately NOT used for
-audio features (terms forbid feeding its content to ML models).
+The app uses provider stream URLs for playback only; it never rehosts catalogue audio.
+Licence / permalink URLs are stored for attribution. Spotify is deliberately NOT used for
+streaming (terms forbid using it as a listening product here).
 
 ## My Library (your own music files)
 Upload files you own (MP3, M4A/AAC, FLAC, OGG, WAV) on the **My Library** page. Each file is

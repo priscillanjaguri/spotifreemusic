@@ -5,7 +5,7 @@ from app.api.deps import get_current_user
 from app.core.db import get_db
 from app.models import User
 from app.providers.base import MusicProviderAdapter
-from app.providers.registry import get_music_provider
+from app.providers.registry import get_music_providers
 from app.schemas.music import SongOut
 from app.schemas.recommend import (
     ExplanationOut,
@@ -45,9 +45,9 @@ def get_recommendations(
     limit: int = Query(20, ge=1, le=50),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
-    provider: MusicProviderAdapter | None = Depends(get_music_provider),
+    providers: list[MusicProviderAdapter] = Depends(get_music_providers),
 ) -> RecommendationsOut:
-    result = reco_svc.recommend_for_user(db, user, limit=limit, provider=provider)
+    result = reco_svc.recommend_for_user(db, user, limit=limit, providers=providers)
     db.commit()
     return _pack(result)
 
