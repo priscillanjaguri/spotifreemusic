@@ -35,6 +35,8 @@ def _pack(result: reco_svc.RecommendationResult) -> RecommendationsOut:
         mode=result.mode,
         short_term_days=result.short_term_days,
         long_term_days=result.long_term_days,
+        scorer_applied=result.scorer_applied,
+        sequential_applied=result.sequential_applied,
     )
 
 

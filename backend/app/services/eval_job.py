@@ -1,8 +1,10 @@
-"""Continuous recommender evaluation: hold-out ranking → metrics → snapshot.
+"""Continuous recommender evaluation: hold-out ranking + online engage rates → snapshot.
 
 Reuses the pure ml/ stack (features → cosine → MMR → exploration) against
-listening + feedback already in the database. Falls back to the synthetic
-catalogue from scripts.eval_recommender when too few real users qualify.
+listening + feedback already in the database. Prefer live hold-out when enough
+user history exists; fall back to the synthetic catalogue from
+scripts.eval_recommender (clearly labeled). Online engage/skip/like/play rates
+come from recommendation impressions labeled by listening and feedback.
 """
 from __future__ import annotations
 
@@ -14,6 +16,7 @@ import numpy as np
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
+from app.core.config import get_settings
 from app.ml.eval import summarise_run
 from app.ml.features import build_feature_matrix
 from app.ml.rank import inject_exploration, mmr_select, rank_by_cosine
@@ -26,12 +29,13 @@ from app.models import (
     UserCollection,
     UserInteraction,
 )
+from app.services import online_eval
 from app.services.recommender import _song_row
 
 log = logging.getLogger(__name__)
 
 DEFAULT_K = 10
-# Minimum positive song signals (likes/saves) before a user enters a hold-out fold.
+# Minimum positive song signals (likes/saves/completed listens) before a user enters a hold-out fold.
 MIN_POSITIVES = 4
 # Auto-schedule: enough new listening+feedback rows since last snapshot, or daily.
 NEW_EVENTS_THRESHOLD = 40
@@ -44,8 +48,21 @@ METRIC_BLURBS = {
     "coverage": "Share of the catalogue that appeared in at least one recommendation list.",
 }
 
+SOURCE_LABELS = {
+    "holdout": "Live hold-out (real listening history)",
+    "synthetic": "Synthetic fallback (not enough user history yet)",
+}
+
+RANKING_BLURB = (
+    "Spotifree builds a taste vector from your likes, saves, and listens, "
+    "optionally unions Markov next-track candidates, re-ranks with a learned "
+    "P(engage) scorer when trained, then MMR (diversity) and a light exploration nudge. "
+    "Online metrics come from recommendation impressions labeled by play/skip/like."
+)
+
 
 def collect_data_volume(db: Session) -> dict[str, int]:
+    impressions = online_eval.collect_impression_volume(db)
     return {
         "listening_events": int(db.scalar(select(func.count()).select_from(ListeningEvent)) or 0),
         "interactions": int(db.scalar(select(func.count()).select_from(UserInteraction)) or 0),
@@ -54,6 +71,9 @@ def collect_data_volume(db: Session) -> dict[str, int]:
             db.scalar(select(func.count()).select_from(Song).where(Song.owner_user_id.is_(None))) or 0
         ),
         "collection_saves": int(db.scalar(select(func.count()).select_from(UserCollection)) or 0),
+        "impressions_shown": impressions["impressions_shown"],
+        "impressions_labeled": impressions["impressions_labeled"],
+        "impressions_pending": impressions["impressions_pending"],
     }
 
 
@@ -72,7 +92,7 @@ def collect_feedback_counts(db: Session) -> dict[str, int]:
 
 
 def _user_positive_ids(db: Session, user_id) -> list[tuple[int, datetime]]:
-    """Liked / saved song ids with timestamps (newest first)."""
+    """Liked / saved / completed-listen song ids with timestamps (newest first)."""
     out: list[tuple[int, datetime]] = []
     seen: set[int] = set()
     interactions = db.scalars(
@@ -102,7 +122,43 @@ def _user_positive_ids(db: Session, user_id) -> list[tuple[int, datetime]]:
             continue
         seen.add(row.song_id)
         out.append((row.song_id, row.added_at))
+    # Strong listens count toward real-data hold-out eligibility (portfolio single-user).
+    completed = db.scalars(
+        select(ListeningEvent)
+        .where(
+            ListeningEvent.user_id == user_id,
+            ListeningEvent.completed.is_(True),
+        )
+        .order_by(ListeningEvent.started_at.desc())
+        .limit(500)
+    ).all()
+    for ev in completed:
+        if ev.song_id in seen:
+            continue
+        seen.add(ev.song_id)
+        out.append((ev.song_id, ev.started_at))
+    out.sort(key=lambda pair: pair[1], reverse=True)
     return out
+
+
+def holdout_ready(db: Session) -> dict[str, Any]:
+    """Whether live hold-out can run (enough catalogue + at least one qualifying user)."""
+    songs = _load_public_catalogue(db)
+    catalogue_ok = len(songs) >= 20
+    catalogue_ids = {s.id for s in songs} if catalogue_ok else set()
+    qualifying = 0
+    if catalogue_ok:
+        for user in db.scalars(select(User)).all():
+            positives = [sid for sid, _ in _user_positive_ids(db, user.id) if sid in catalogue_ids]
+            if len(positives) >= MIN_POSITIVES:
+                qualifying += 1
+    return {
+        "ready": catalogue_ok and qualifying >= 1,
+        "min_positives": MIN_POSITIVES,
+        "catalogue_songs": len(songs),
+        "qualifying_users": qualifying,
+        "preferred_source": "holdout" if (catalogue_ok and qualifying >= 1) else "synthetic",
+    }
 
 
 def _user_play_signals(db: Session, user_id, *, exclude: set[int]) -> list[Signal]:
@@ -264,24 +320,45 @@ def is_due(db: Session, *, now: datetime | None = None) -> dict[str, Any]:
 
 
 def run_eval(db: Session, *, k: int = DEFAULT_K, force_synthetic: bool = False) -> EvalSnapshot:
-    """Compute metrics, persist a snapshot, return it (caller commits)."""
+    """Compute offline + online metrics, persist a snapshot, return it (caller commits)."""
     volume = collect_data_volume(db)
     feedback = collect_feedback_counts(db)
+    online_metrics = online_eval.collect_online_metrics(db)
+    # Fold online rates into the metrics blob (dashboard splits offline vs online keys).
+    online_into_metrics = {
+        key: float(val)
+        for key, val in online_metrics.items()
+        if key
+        in (
+            "engage_rate",
+            "skip_rate",
+            "like_rate",
+            "play_rate",
+            "hide_rate",
+            "impressions_shown",
+            "impressions_labeled",
+            "impressions_pending",
+        )
+    }
 
     source = "synthetic"
     if force_synthetic:
         metrics = _synthetic_eval(k=k)
+        log.info("Forced synthetic offline eval; online rates still from live impressions")
     else:
         result = _holdout_eval_from_db(db, k=k)
         if result is None:
-            log.info("Not enough real signals for hold-out; using synthetic eval")
+            log.info("Not enough real signals for hold-out; using synthetic offline eval")
             metrics = _synthetic_eval(k=k)
             source = "synthetic"
         else:
             metrics, source = result
 
+    merged = {key: float(val) for key, val in metrics.items()}
+    merged.update(online_into_metrics)
+
     snap = EvalSnapshot(
-        metrics={key: float(val) for key, val in metrics.items()},
+        metrics=merged,
         data_volume=volume,
         feedback_counts=feedback,
         source=source,
@@ -300,31 +377,49 @@ def snapshot_to_dict(snap: EvalSnapshot) -> dict[str, Any]:
         "data_volume": snap.data_volume,
         "feedback_counts": snap.feedback_counts,
         "source": snap.source,
+        "source_label": SOURCE_LABELS.get(snap.source, SOURCE_LABELS["synthetic"]),
         "k": snap.k,
+    }
+
+
+def build_status(db: Session) -> dict[str, Any]:
+    """Public readiness: hold-out vs synthetic, online rates, schedule (EVAL_RUN_SECRET for /run)."""
+    snap = latest_snapshot(db)
+    due = is_due(db)
+    holdout = holdout_ready(db)
+    online = online_eval.build_online_block(db)
+    return {
+        "latest_id": snap.id if snap else None,
+        "latest_source": snap.source if snap else None,
+        "latest_source_label": (
+            SOURCE_LABELS.get(snap.source, SOURCE_LABELS["synthetic"]) if snap else None
+        ),
+        "holdout": holdout,
+        "online": {
+            "ready": online["ready"],
+            "min_labeled_required": online["min_labeled_required"],
+            "metrics": online["metrics"],
+            "label_sources": online["label_sources"],
+        },
+        "schedule": due,
+        "run_secret_configured": bool((get_settings().eval_run_secret or "").strip()),
     }
 
 
 def build_summary(db: Session) -> dict[str, Any]:
     snap = latest_snapshot(db)
     due = is_due(db)
-    if snap is None:
-        return {
-            "latest": None,
-            "metric_blurbs": METRIC_BLURBS,
-            "ranking_blurb": (
-                "Spotifree builds a taste vector from your likes, saves, and listens, "
-                "ranks the catalogue by cosine similarity, then reorders with MMR "
-                "(diversity) and a light exploration nudge."
-            ),
-            "schedule": due,
-        }
-    return {
-        "latest": snapshot_to_dict(snap),
-        "metric_blurbs": METRIC_BLURBS,
-        "ranking_blurb": (
-            "Spotifree builds a taste vector from your likes, saves, and listens, "
-            "ranks the catalogue by cosine similarity, then reorders with MMR "
-            "(diversity) and a light exploration nudge."
-        ),
+    online = online_eval.build_online_block(db)
+    holdout = holdout_ready(db)
+    blurbs = {**METRIC_BLURBS, **online_eval.ONLINE_METRIC_BLURBS}
+    base = {
+        "metric_blurbs": blurbs,
+        "ranking_blurb": RANKING_BLURB,
         "schedule": due,
+        "online": online,
+        "holdout": holdout,
+        "source_labels": SOURCE_LABELS,
     }
+    if snap is None:
+        return {**base, "latest": None}
+    return {**base, "latest": snapshot_to_dict(snap)}

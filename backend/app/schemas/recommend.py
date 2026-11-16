@@ -23,6 +23,10 @@ class RecommendationsOut(BaseModel):
     mode: Literal["taste", "similar", "popular", "genre_seed"]
     short_term_days: int
     long_term_days: int
+    # True when cosine candidates were re-ranked by the learned engagement scorer.
+    scorer_applied: bool = False
+    # True when sequential next-track candidates were merged into the cosine pool.
+    sequential_applied: bool = False
 
 
 class FeedbackIn(BaseModel):

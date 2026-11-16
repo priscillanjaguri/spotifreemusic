@@ -7,10 +7,13 @@ from app.models.interactions import UserInteraction
 from app.models.library import LibraryUpload
 from app.models.listening import ListeningEvent, PlaybackSession
 from app.models.providers import MusicProvider, SongProviderLink
+from app.models.scorer import RecommendationImpression, ScorerModel
+from app.models.sequential import SequentialModelRow
 from app.models.user import User, UserPreferences
 
 __all__ = [
     "Base", "Album", "Artist", "Genre", "Song", "SongArtist", "SongFeatures", "SongGenre",
     "UserCollection", "EvalSnapshot", "UserInteraction", "LibraryUpload", "ListeningEvent",
-    "PlaybackSession", "MusicProvider", "SongProviderLink", "User", "UserPreferences",
+    "PlaybackSession", "MusicProvider", "SongProviderLink", "RecommendationImpression",
+    "ScorerModel", "SequentialModelRow", "User", "UserPreferences",
 ]

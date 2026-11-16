@@ -1,4 +1,4 @@
-import { Activity, FlaskConical, Loader2, Play, RefreshCw, Sparkles } from "lucide-react";
+import { Activity, FlaskConical, Loader2, Play, Radio, RefreshCw, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ButterflyDrift, MOOD, MoodAccent, MoodPhoto, Petal } from "@/components/decor";
 import { Logo } from "@/components/layout/logo";
@@ -8,14 +8,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  METRIC_ORDER,
+  OFFLINE_METRIC_ORDER,
+  ONLINE_METRIC_ORDER,
   formatMetric,
   formatWhen,
   metricLabel,
   useEvalSnapshots,
+  useEvalStatus,
   useEvalSummary,
   useRunEval,
   type EvalSnapshot,
+  type OnlineSeriesPoint,
 } from "@/lib/eval";
 import { cn } from "@/lib/utils";
 
@@ -54,6 +57,8 @@ function TrendChart({ snapshots }: { snapshots: EvalSnapshot[] }) {
       recall: s.metrics.recall_at_k ?? 0,
       diversity: s.metrics.diversity ?? 0,
       coverage: s.metrics.coverage ?? 0,
+      engage: s.metrics.engage_rate ?? 0,
+      skip: s.metrics.skip_rate ?? 0,
     }));
   }, [snapshots]);
 
@@ -68,19 +73,24 @@ function TrendChart({ snapshots }: { snapshots: EvalSnapshot[] }) {
   const pad = { t: 16, r: 12, b: 28, l: 36 };
   const innerW = w - pad.l - pad.r;
   const innerH = h - pad.t - pad.b;
-  const maxY = Math.max(0.05, ...series.flatMap((p) => [p.precision, p.recall, p.diversity, p.coverage]));
+  const maxY = Math.max(
+    0.05,
+    ...series.flatMap((p) => [p.precision, p.recall, p.diversity, p.coverage, p.engage, p.skip]),
+  );
 
   const xAt = (i: number) => pad.l + (series.length === 1 ? innerW / 2 : (i / (series.length - 1)) * innerW);
   const yAt = (v: number) => pad.t + innerH - (v / maxY) * innerH;
 
-  const line = (key: "precision" | "recall" | "diversity" | "coverage") =>
+  const line = (key: "precision" | "recall" | "diversity" | "coverage" | "engage" | "skip") =>
     series.map((p, i) => `${i === 0 ? "M" : "L"} ${xAt(i).toFixed(1)} ${yAt(p[key]).toFixed(1)}`).join(" ");
 
   const lines = [
-    { key: "precision" as const, stroke: "var(--color-orchid-glow)", label: "Precision" },
-    { key: "recall" as const, stroke: "var(--color-wisteria)", label: "Recall" },
-    { key: "diversity" as const, stroke: "var(--color-lavender)", label: "Diversity" },
-    { key: "coverage" as const, stroke: "var(--color-heliotrope)", label: "Coverage" },
+    { key: "engage" as const, stroke: "var(--color-orchid-glow)", label: "Engage" },
+    { key: "skip" as const, stroke: "var(--color-heliotrope)", label: "Skip" },
+    { key: "precision" as const, stroke: "var(--color-wisteria)", label: "Precision" },
+    { key: "recall" as const, stroke: "var(--color-lavender)", label: "Recall" },
+    { key: "diversity" as const, stroke: "rgb(196 168 230 / 0.85)", label: "Diversity" },
+    { key: "coverage" as const, stroke: "rgb(255 220 255 / 0.55)", label: "Coverage" },
   ];
 
   return (
@@ -107,7 +117,7 @@ function TrendChart({ snapshots }: { snapshots: EvalSnapshot[] }) {
             strokeLinecap="round"
             strokeLinejoin="round"
             className="animate-in fade-in"
-            style={{ animationDelay: `${idx * 120}ms`, animationDuration: "700ms" }}
+            style={{ animationDelay: `${idx * 100}ms`, animationDuration: "700ms" }}
           />
         ))}
         {series.map((p, i) => (
@@ -128,13 +138,71 @@ function TrendChart({ snapshots }: { snapshots: EvalSnapshot[] }) {
   );
 }
 
+function OnlineDailyChart({ series }: { series: OnlineSeriesPoint[] }) {
+  const points = useMemo(() => series.filter((p) => p.labeled > 0), [series]);
+  if (points.length === 0) {
+    return (
+      <p className="text-sm text-subtle">
+        No labeled impressions yet — play, skip, or like recommendations to start the daily engage curve.
+      </p>
+    );
+  }
+
+  const w = 640;
+  const h = 180;
+  const pad = { t: 16, r: 12, b: 28, l: 36 };
+  const innerW = w - pad.l - pad.r;
+  const innerH = h - pad.t - pad.b;
+  const maxY = Math.max(0.05, ...points.flatMap((p) => [p.engage_rate, p.skip_rate]));
+
+  const xAt = (i: number) => pad.l + (points.length === 1 ? innerW / 2 : (i / (points.length - 1)) * innerW);
+  const yAt = (v: number) => pad.t + innerH - (v / maxY) * innerH;
+  const path = (key: "engage_rate" | "skip_rate") =>
+    points.map((p, i) => `${i === 0 ? "M" : "L"} ${xAt(i).toFixed(1)} ${yAt(p[key]).toFixed(1)}`).join(" ");
+
+  return (
+    <div>
+      <svg viewBox={`0 0 ${w} ${h}`} className="h-auto w-full overflow-visible" role="img" aria-label="Daily online engage rates">
+        {[0, 0.5, 1].map((t) => {
+          const y = pad.t + innerH * (1 - t);
+          return (
+            <g key={t}>
+              <line x1={pad.l} x2={w - pad.r} y1={y} y2={y} stroke="rgb(255 220 255 / 0.12)" strokeWidth={1} />
+              <text x={pad.l - 8} y={y + 3} textAnchor="end" fill="rgb(201 192 212 / 0.7)" fontSize={10}>
+                {Math.round(maxY * t * 100)}%
+              </text>
+            </g>
+          );
+        })}
+        <path d={path("engage_rate")} fill="none" stroke="var(--color-orchid-glow)" strokeWidth={2.5} strokeLinecap="round" />
+        <path d={path("skip_rate")} fill="none" stroke="var(--color-heliotrope)" strokeWidth={2.5} strokeLinecap="round" />
+        {points.map((p, i) => (
+          <text key={p.date} x={xAt(i)} y={h - 6} textAnchor="middle" fill="rgb(201 192 212 / 0.75)" fontSize={10}>
+            {new Date(p.date + "T12:00:00Z").toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+          </text>
+        ))}
+      </svg>
+      <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs font-semibold text-muted-foreground">
+        <li className="inline-flex items-center gap-1.5">
+          <span className="size-2.5 rounded-full" style={{ background: "var(--color-orchid-glow)" }} />
+          Engage / day
+        </li>
+        <li className="inline-flex items-center gap-1.5">
+          <span className="size-2.5 rounded-full" style={{ background: "var(--color-heliotrope)" }} />
+          Skip / day
+        </li>
+      </ul>
+    </div>
+  );
+}
+
 function VolumeRow({ volume }: { volume: Record<string, number> }) {
   const items = [
     { key: "listening_events", label: "Listens" },
+    { key: "impressions_shown", label: "Impressions" },
+    { key: "impressions_labeled", label: "Labeled" },
     { key: "interactions", label: "Feedback" },
-    { key: "users", label: "Users" },
     { key: "catalogue_songs", label: "Catalogue" },
-    { key: "collection_saves", label: "Saves" },
   ];
   return (
     <dl className="grid grid-cols-2 gap-3 sm:grid-cols-5">
@@ -185,6 +253,7 @@ function FeedbackCounts({ counts }: { counts: Record<string, number> }) {
 
 export function EvalPage() {
   const summary = useEvalSummary();
+  const status = useEvalStatus();
   const snapshots = useEvalSnapshots();
   const run = useRunEval();
   const [secret, setSecret] = useState("");
@@ -193,6 +262,9 @@ export function EvalPage() {
   const latest = summary.data?.latest ?? null;
   const blurbs = summary.data?.metric_blurbs ?? {};
   const schedule = summary.data?.schedule;
+  const online = summary.data?.online;
+  const holdout = summary.data?.holdout;
+  const onlineMetrics = online?.metrics ?? {};
 
   const onRun = () => {
     if (!secret.trim()) {
@@ -201,6 +273,13 @@ export function EvalPage() {
     }
     run.mutate({ secret: secret.trim() });
   };
+
+  const sourceBadge =
+    latest?.source === "holdout"
+      ? latest.source_label || "Live hold-out (real listening history)"
+      : latest
+        ? latest.source_label || "Synthetic fallback (not enough user history yet)"
+        : null;
 
   return (
     <div className="relative min-h-dvh overflow-x-hidden">
@@ -224,13 +303,14 @@ export function EvalPage() {
           <MoodPhoto src={MOOD.sunset} opacity={0.45} position="center" className="rounded-[1.75rem]" />
           <div className="absolute inset-0 rounded-[1.75rem] bg-gradient-to-r from-[#0c0612]/88 via-[#1a0b28]/7 to-transparent" />
           <div className="relative p-5 sm:p-7">
-            <p className="font-script text-2xl text-orchid-glow">Continuous offline metrics</p>
+            <p className="font-script text-2xl text-orchid-glow">Online + offline metrics</p>
             <h1 className="mt-2 font-display text-4xl font-semibold leading-tight text-cream sm:text-5xl">
               How <span className="font-script text-[1.1em] font-normal text-gradient">Spotifree</span> ranks
             </h1>
             <p className="mt-3 max-w-2xl text-base leading-relaxed text-lavender/90">
-              Hold-out precision, recall, diversity, and coverage from listening + feedback already in the
-              database. Testers stay on the APK — this page is for QH and interviewers.
+              Live engage / skip / like rates from recommendation impressions, plus hold-out precision and
+              recall when there is enough listening history. Synthetic offline folds are labeled clearly as
+              fallback. Testers stay on the APK — this page is for QH and interviewers.
             </p>
           </div>
         </section>
@@ -251,8 +331,14 @@ export function EvalPage() {
                     <Activity className="size-4 text-orchid-glow" aria-hidden />
                     <h2 className="font-display text-2xl font-semibold text-heading">Last run</h2>
                     {latest && (
-                      <Badge variant="outline" className="border-lilac/40 text-lilac">
-                        {latest.source === "holdout" ? "Live hold-out" : "Synthetic fallback"}
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "border-lilac/40 text-lilac",
+                          latest.source === "synthetic" && "border-amber-300/40 text-amber-100",
+                        )}
+                      >
+                        {sourceBadge}
                       </Badge>
                     )}
                   </div>
@@ -261,6 +347,19 @@ export function EvalPage() {
                     {latest ? ` · k=${latest.k}` : ""}
                     {schedule?.due ? " · due for another run" : ""}
                   </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Badge variant="secondary" className="border-0 bg-accent/50 text-xs">
+                      Hold-out {holdout?.ready ? "ready" : "needs more history"}
+                    </Badge>
+                    <Badge variant="secondary" className="border-0 bg-accent/50 text-xs">
+                      Online {online?.ready ? "ready" : `needs ${online?.min_labeled_required ?? 5}+ labels`}
+                    </Badge>
+                    {status.data && (
+                      <Badge variant="secondary" className="border-0 bg-accent/50 text-xs">
+                        EVAL_RUN_SECRET {status.data.run_secret_configured ? "set" : "missing"}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <Button
@@ -270,6 +369,7 @@ export function EvalPage() {
                     onClick={() => {
                       void summary.refetch();
                       void snapshots.refetch();
+                      void status.refetch();
                     }}
                   >
                     <RefreshCw className={cn("size-3.5", summary.isFetching && "animate-spin")} />
@@ -285,8 +385,9 @@ export function EvalPage() {
               {showSecret && (
                 <div className="mt-4 space-y-3 rounded-2xl border border-glass-edge/20 bg-midnight/30 p-4">
                   <p className="text-sm text-muted-foreground">
-                    Enter the server <code className="text-lilac">EVAL_RUN_SECRET</code>, then run. The secret
-                    is sent only to the API and is not stored in this page.
+                    Enter the server <code className="text-lilac">EVAL_RUN_SECRET</code> (same secret as scorer /
+                    sequential retrain), then run. Prefer live hold-out when ready; synthetic offline is only a
+                    labeled fallback. Online rates always use real impressions.
                   </p>
                   <div className="flex flex-col gap-2 sm:flex-row">
                     <Input
@@ -320,23 +421,73 @@ export function EvalPage() {
               </div>
             </section>
 
-            {latest && (
-              <section className="grid gap-4 sm:grid-cols-2">
-                {METRIC_ORDER.map((key, i) => (
+            <section className="space-y-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <Radio className="size-4 text-orchid-glow" aria-hidden />
+                <h2 className="font-display text-2xl font-semibold text-heading">Online listening</h2>
+                <Badge variant="outline" className="border-lilac/40 text-lilac">
+                  Live impressions
+                </Badge>
+              </div>
+              <p className="text-sm text-subtle">
+                Engage rates from For You impressions labeled by play, skip, like, and hide — updated live, not
+                only at snapshot time.
+              </p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {ONLINE_METRIC_ORDER.map((key, i) => (
                   <MetricCard
                     key={key}
                     name={metricLabel(key)}
-                    value={latest.metrics[key]}
-                    blurb={blurbs[key] ?? ""}
-                    delay={80 + i * 70}
+                    value={onlineMetrics[key]}
+                    blurb={online?.metric_blurbs?.[key] ?? blurbs[key] ?? ""}
+                    delay={60 + i * 60}
                   />
                 ))}
+              </div>
+              <div className="glass glass-inset rounded-[1.75rem] p-5 sm:p-6">
+                <h3 className="font-display text-xl font-semibold text-heading">Daily engage curve</h3>
+                <p className="mt-1 text-sm text-subtle">Labeled impression outcomes by UTC day.</p>
+                <div className="mt-4">
+                  <OnlineDailyChart series={online?.series ?? []} />
+                </div>
+              </div>
+            </section>
+
+            {latest && (
+              <section className="space-y-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <FlaskConical className="size-4 text-orchid-glow" aria-hidden />
+                  <h2 className="font-display text-2xl font-semibold text-heading">Offline hold-out</h2>
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "border-lilac/40 text-lilac",
+                      latest.source === "synthetic" && "border-amber-300/40 text-amber-100",
+                    )}
+                  >
+                    {latest.source === "holdout" ? "Real history" : "Synthetic fallback"}
+                  </Badge>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {OFFLINE_METRIC_ORDER.map((key, i) => (
+                    <MetricCard
+                      key={key}
+                      name={metricLabel(key)}
+                      value={latest.metrics[key]}
+                      blurb={blurbs[key] ?? ""}
+                      delay={80 + i * 70}
+                    />
+                  ))}
+                </div>
               </section>
             )}
 
             <section className="glass glass-inset rounded-[1.75rem] p-5 sm:p-6">
               <h2 className="font-display text-2xl font-semibold text-heading">Trend over time</h2>
-              <p className="mt-1 text-sm text-subtle">Snapshots newest on the right after each successful run.</p>
+              <p className="mt-1 text-sm text-subtle">
+                Snapshot metrics newest on the right — engage/skip from live impressions, precision/recall from
+                the offline fold used that run.
+              </p>
               <div className="mt-5">
                 {snapshots.isLoading ? (
                   <Skeleton className="h-48 w-full rounded-2xl" />
@@ -363,12 +514,16 @@ export function EvalPage() {
                     song vector.
                   </li>
                   <li>
-                    <span className="font-semibold text-lilac">2. Cosine</span> — rank by similarity to the blended
-                    short/long taste profile.
+                    <span className="font-semibold text-lilac">2. Cosine ∪ sequential</span> — rank by taste, union
+                    Markov next-track when trained.
                   </li>
                   <li>
-                    <span className="font-semibold text-lilac">3. MMR</span> — re-order for diversity, then a light
-                    exploration nudge.
+                    <span className="font-semibold text-lilac">3. Scorer → MMR</span> — optional P(engage), then
+                    diversity + exploration.
+                  </li>
+                  <li>
+                    <span className="font-semibold text-lilac">4. Online labels</span> — impressions get engage/skip
+                    from listening and feedback.
                   </li>
                 </ol>
               </article>

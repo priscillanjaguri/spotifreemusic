@@ -137,13 +137,17 @@ FastAPI generates it automatically: **http://localhost:8000/docs** (Swagger UI) 
 
 ## Recommendations
 Content-based picks live in `backend/app/ml/` (NumPy / Pandas / scikit-learn, no web or DB imports).
+Serve path: **cosine candidates → learned engagement scorer (P(engage)) → MMR + exploration**.
+Falls back to cosine order when no model is trained yet (cold start). Not collaborative filtering.
 
-- `GET /api/v1/recommendations`
+- `GET /api/v1/recommendations` (logs impressions for training)
 - `GET /api/v1/songs/{id}/similar`
-- `POST /api/v1/feedback` (`like` | `not_interested`)
-- `POST /api/v1/listening/events`
+- `POST /api/v1/feedback` (`like` | `not_interested`) — also labels impressions
+- `POST /api/v1/listening/events` — play/complete/skip labels impressions
+- `GET /api/v1/scorer/status` · `POST /api/v1/scorer/retrain` (same `EVAL_RUN_SECRET` as `/eval/run`)
 
-Offline metrics: `cd backend && python -m scripts.eval_recommender`
+Offline metrics: `cd backend && python -m scripts.eval_recommender`  
+Retrain scorer: `cd backend && python -m scripts.train_engagement_scorer`
 
 ## Listening analytics & companion
 - `GET /api/v1/analytics?period=week|month&offset=0` — listening time, tops, completion, daily series
@@ -203,5 +207,6 @@ are all set. See below for R2 setup. Regenerate tone fixtures with `python -m sc
 `collection` (GET/POST) · `collection/facets` · `collection/{song_id}` (DELETE) ·
 `library` · `library/uploads` · `library/{id}` · `library/{id}/stream` · `library/{id}/cover` ·
 `recommendations` · `feedback` · `listening/events` · `listening/history` (DELETE) ·
+`scorer/status` · `scorer/retrain` ·
 `analytics` · `analytics/taste-timeline` · `analytics/memory-lane` ·
 `companion/daily` (GET/POST).

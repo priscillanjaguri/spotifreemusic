@@ -6,9 +6,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models import Song, UserInteraction
+from app.services import impressions as impressions_svc
 
 # Map the public API verbs onto the schema's interaction_type values.
 ACTION_TO_TYPE = {"like": "interested", "not_interested": "not_interested"}
+# Engagement labels for the learned scorer (1 = engage, 0 = not).
+ACTION_TO_LABEL = {"like": (1, "like"), "not_interested": (0, "hide")}
 
 
 def record_feedback(
@@ -24,15 +27,18 @@ def record_feedback(
     song = db.get(Song, song_id)
     if song is None or (song.owner_user_id is not None and song.owner_user_id != user_id):
         raise LookupError("song")
+    now = datetime.now(timezone.utc)
     row = UserInteraction(
         user_id=user_id,
         song_id=song_id,
         interaction_type=ACTION_TO_TYPE[action],
         context=(context or "recommendations")[:30],
-        created_at=datetime.now(timezone.utc),
+        created_at=now,
     )
     db.add(row)
     db.flush()
+    label, source = ACTION_TO_LABEL[action]
+    impressions_svc.label_impression(db, user_id, song_id, label=label, source=source, at=now)
     return row
 
 

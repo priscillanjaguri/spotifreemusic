@@ -9,6 +9,11 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models import ListeningEvent, PlaybackSession, Song, User, UserPreferences
+from app.services import impressions as impressions_svc
+
+# Audible share of the track used to decide engage vs skip-ish for impression labels.
+ENGAGE_LISTEN_FRAC = 0.50
+SKIP_LISTEN_FRAC = 0.15
 
 
 class ListeningRejected(Exception):
@@ -106,4 +111,16 @@ def record_event(
     except Exception as exc:
         # Exclusion constraint (overlapping events) surfaces as IntegrityError.
         raise ListeningRejected("listening event overlaps an existing one") from exc
+
+    # Attach an engagement label to a recent recommendation impression when possible.
+    frac = listened_ms / float(song_duration_ms) if song_duration_ms else 0.0
+    if completed or frac >= ENGAGE_LISTEN_FRAC:
+        source = "complete" if completed or frac >= 0.9 else "play"
+        impressions_svc.label_impression(
+            db, user.id, song_id, label=1, source=source, at=ended_at,
+        )
+    elif frac <= SKIP_LISTEN_FRAC:
+        impressions_svc.label_impression(
+            db, user.id, song_id, label=0, source="skip", at=ended_at,
+        )
     return event

@@ -11,6 +11,7 @@ class EvalSnapshotOut(BaseModel):
     data_volume: dict[str, int]
     feedback_counts: dict[str, int]
     source: Literal["holdout", "synthetic"]
+    source_label: str | None = None
     k: int
 
 
@@ -23,11 +24,40 @@ class EvalScheduleOut(BaseModel):
     daily_hours: float | None = None
 
 
+class OnlineSeriesPointOut(BaseModel):
+    date: str
+    labeled: int = 0
+    engage_rate: float = 0.0
+    skip_rate: float = 0.0
+    like_rate: float = 0.0
+    play_rate: float = 0.0
+
+
+class OnlineMetricsOut(BaseModel):
+    ready: bool
+    min_labeled_required: int
+    metrics: dict[str, float]
+    label_sources: dict[str, int] = Field(default_factory=dict)
+    series: list[OnlineSeriesPointOut] = Field(default_factory=list)
+    metric_blurbs: dict[str, str] = Field(default_factory=dict)
+
+
+class HoldoutReadyOut(BaseModel):
+    ready: bool
+    min_positives: int
+    catalogue_songs: int
+    qualifying_users: int
+    preferred_source: Literal["holdout", "synthetic"]
+
+
 class EvalSummaryOut(BaseModel):
     latest: EvalSnapshotOut | None
     metric_blurbs: dict[str, str]
     ranking_blurb: str
     schedule: EvalScheduleOut
+    online: OnlineMetricsOut | None = None
+    holdout: HoldoutReadyOut | None = None
+    source_labels: dict[str, str] = Field(default_factory=dict)
 
 
 class EvalSnapshotsOut(BaseModel):
@@ -44,3 +74,22 @@ class EvalRunIn(BaseModel):
 class EvalRunOut(BaseModel):
     snapshot: EvalSnapshotOut
     message: str
+
+
+class EvalOnlineStatusOut(BaseModel):
+    ready: bool
+    min_labeled_required: int
+    metrics: dict[str, float]
+    label_sources: dict[str, int] = Field(default_factory=dict)
+
+
+class EvalStatusOut(BaseModel):
+    """Public readiness alongside scorer/sequential; POST /eval/run still needs EVAL_RUN_SECRET."""
+
+    latest_id: int | None
+    latest_source: Literal["holdout", "synthetic"] | None = None
+    latest_source_label: str | None = None
+    holdout: HoldoutReadyOut
+    online: EvalOnlineStatusOut
+    schedule: EvalScheduleOut
+    run_secret_configured: bool
