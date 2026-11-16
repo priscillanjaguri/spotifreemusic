@@ -9,7 +9,34 @@ export type EvalSnapshot = {
   data_volume: Record<string, number>;
   feedback_counts: Record<string, number>;
   source: "holdout" | "synthetic";
+  source_label?: string | null;
   k: number;
+};
+
+export type OnlineSeriesPoint = {
+  date: string;
+  labeled: number;
+  engage_rate: number;
+  skip_rate: number;
+  like_rate: number;
+  play_rate: number;
+};
+
+export type OnlineMetrics = {
+  ready: boolean;
+  min_labeled_required: number;
+  metrics: Record<string, number>;
+  label_sources: Record<string, number>;
+  series: OnlineSeriesPoint[];
+  metric_blurbs: Record<string, string>;
+};
+
+export type HoldoutReady = {
+  ready: boolean;
+  min_positives: number;
+  catalogue_songs: number;
+  qualifying_users: number;
+  preferred_source: "holdout" | "synthetic";
 };
 
 export type EvalSummary = {
@@ -24,6 +51,24 @@ export type EvalSummary = {
     threshold_events?: number | null;
     daily_hours?: number | null;
   };
+  online?: OnlineMetrics | null;
+  holdout?: HoldoutReady | null;
+  source_labels?: Record<string, string>;
+};
+
+export type EvalStatus = {
+  latest_id: number | null;
+  latest_source: "holdout" | "synthetic" | null;
+  latest_source_label: string | null;
+  holdout: HoldoutReady;
+  online: {
+    ready: boolean;
+    min_labeled_required: number;
+    metrics: Record<string, number>;
+    label_sources: Record<string, number>;
+  };
+  schedule: EvalSummary["schedule"];
+  run_secret_configured: boolean;
 };
 
 export type EvalSnapshotsResponse = {
@@ -61,6 +106,10 @@ export function fetchEvalSummary() {
   return evalRequest<EvalSummary>("/eval/summary");
 }
 
+export function fetchEvalStatus() {
+  return evalRequest<EvalStatus>("/eval/status");
+}
+
 export function fetchEvalSnapshots(limit = 30) {
   return evalRequest<EvalSnapshotsResponse>(`/eval/snapshots?${new URLSearchParams({ limit: String(limit) })}`);
 }
@@ -80,6 +129,10 @@ export function useEvalSummary() {
   return useQuery({ queryKey: ["eval", "summary"], queryFn: fetchEvalSummary, staleTime: 30_000 });
 }
 
+export function useEvalStatus() {
+  return useQuery({ queryKey: ["eval", "status"], queryFn: fetchEvalStatus, staleTime: 30_000 });
+}
+
 export function useEvalSnapshots() {
   return useQuery({ queryKey: ["eval", "snapshots"], queryFn: () => fetchEvalSnapshots(40), staleTime: 30_000 });
 }
@@ -95,7 +148,14 @@ export function useRunEval() {
   });
 }
 
-export const METRIC_ORDER = ["precision_at_k", "recall_at_k", "diversity", "coverage"] as const;
+/** Offline hold-out ranking metrics (precision/recall/…). */
+export const OFFLINE_METRIC_ORDER = ["precision_at_k", "recall_at_k", "diversity", "coverage"] as const;
+
+/** Live impression outcome rates. */
+export const ONLINE_METRIC_ORDER = ["engage_rate", "skip_rate", "like_rate", "play_rate"] as const;
+
+/** @deprecated Prefer OFFLINE_METRIC_ORDER — kept for older imports. */
+export const METRIC_ORDER = OFFLINE_METRIC_ORDER;
 
 export function metricLabel(key: string): string {
   switch (key) {
@@ -107,6 +167,14 @@ export function metricLabel(key: string): string {
       return "Diversity";
     case "coverage":
       return "Coverage";
+    case "engage_rate":
+      return "Engage rate";
+    case "skip_rate":
+      return "Skip rate";
+    case "like_rate":
+      return "Like rate";
+    case "play_rate":
+      return "Play rate";
     default:
       return key.replace(/_/g, " ");
   }

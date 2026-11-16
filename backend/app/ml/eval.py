@@ -1,11 +1,50 @@
-"""Offline recommender metrics: precision@k, recall@k, coverage, diversity."""
+"""Recommender metrics: offline hold-out (precision/recall/…) + online engage rates."""
 from __future__ import annotations
 
-from typing import Sequence
+from typing import Mapping, Sequence
 
 import numpy as np
 
 from app.ml.features import FeatureMatrix
+
+
+def engage_rate(labeled: int, positives: int) -> float:
+    """Share of labeled impressions that engaged (like / substantial play)."""
+    if labeled <= 0:
+        return 0.0
+    return positives / labeled
+
+
+def rate_for_source(labeled: int, source_counts: Mapping[str, int], *sources: str) -> float:
+    """Share of labeled impressions whose outcome came from one of `sources`."""
+    if labeled <= 0:
+        return 0.0
+    hits = sum(int(source_counts.get(s, 0)) for s in sources)
+    return hits / labeled
+
+
+def summarise_online(
+    *,
+    impressions_shown: int,
+    impressions_labeled: int,
+    positives: int,
+    source_counts: Mapping[str, int] | None = None,
+) -> dict[str, float]:
+    """Aggregate live engage / skip / like / play rates from impression outcomes."""
+    sources = dict(source_counts or {})
+    labeled = max(0, int(impressions_labeled))
+    pos = max(0, int(positives))
+    pending = max(0, int(impressions_shown) - labeled)
+    return {
+        "impressions_shown": float(impressions_shown),
+        "impressions_labeled": float(labeled),
+        "impressions_pending": float(pending),
+        "engage_rate": engage_rate(labeled, pos),
+        "skip_rate": rate_for_source(labeled, sources, "skip"),
+        "like_rate": rate_for_source(labeled, sources, "like"),
+        "play_rate": rate_for_source(labeled, sources, "play", "complete"),
+        "hide_rate": rate_for_source(labeled, sources, "hide"),
+    }
 
 
 def precision_at_k(recommended: Sequence[int], relevant: set[int], k: int) -> float:
