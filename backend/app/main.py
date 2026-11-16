@@ -15,6 +15,7 @@ from app.api import (
     lyrics,
     profile,
     recommendations,
+    scorer as scorer_api,
     songs,
 )
 from app.core.config import get_settings
@@ -48,6 +49,7 @@ def create_app() -> FastAPI:
         analytics.router,
         companion.router,
         eval_api.router,
+        scorer_api.router,
     ):
         app.include_router(router, prefix="/api/v1")
     if settings.mock_provider_enabled:

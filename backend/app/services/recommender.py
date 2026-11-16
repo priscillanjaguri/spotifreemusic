@@ -23,7 +23,8 @@ from app.ml.rank import (
     rank_by_cosine,
     similar_to_seed,
 )
-from app.ml.taste import Signal, blend_profiles, build_taste_profile, cold_start_from_genres
+from app.ml.scorer import build_song_features
+from app.ml.taste import Signal, TasteProfile, blend_profiles, build_taste_profile, cold_start_from_genres
 from app.models import (
     ListeningEvent,
     Song,
@@ -37,6 +38,8 @@ from app.providers.base import MusicProviderAdapter, ProviderError
 from app.services.catalog import import_tracks
 from app.services.collection import SONG_LOAD
 from app.services.feedback import latest_not_interested_ids
+from app.services import impressions as impressions_svc
+from app.services import scorer_job
 
 log = logging.getLogger(__name__)
 
@@ -50,6 +53,8 @@ class RecommendationResult:
     mode: Mode
     short_term_days: int
     long_term_days: int
+    scorer_applied: bool = False
+    request_id: uuid.UUID | None = None
 
 
 def _song_row(song: Song) -> dict:
@@ -194,6 +199,118 @@ def _popular_fallback(features: FeatureMatrix, exclude: set[int], limit: int) ->
     return out
 
 
+def _top_profile_genre_names(features: FeatureMatrix, profile: TasteProfile, n: int = 8) -> list[str]:
+    if profile.is_empty or not features.genre_vocab:
+        return []
+    gdim = len(features.genre_vocab)
+    weights = profile.vector[:gdim]
+    order = np.argsort(-weights)[:n]
+    return [features.genre_vocab[i] for i in order if weights[i] > 0]
+
+
+def _user_listen_stats(
+    db: Session, user_id, now: datetime
+) -> tuple[dict[int, int], dict[int, float]]:
+    """Return (play_counts, days_since_last_play) for the user."""
+    events = db.scalars(
+        select(ListeningEvent)
+        .where(ListeningEvent.user_id == user_id)
+        .order_by(ListeningEvent.started_at.desc())
+        .limit(5000)
+    ).all()
+    counts: dict[int, int] = {}
+    last_at: dict[int, datetime] = {}
+    for ev in events:
+        sid = int(ev.song_id)
+        counts[sid] = counts.get(sid, 0) + 1
+        if sid not in last_at:
+            last_at[sid] = ev.started_at
+    days: dict[int, float] = {}
+    for sid, at in last_at.items():
+        started = at if at.tzinfo else at.replace(tzinfo=timezone.utc)
+        days[sid] = max(0.0, (now - started).total_seconds() / 86400.0)
+    return counts, days
+
+
+def _apply_engagement_scorer(
+    db: Session,
+    ranked: list[RankedItem],
+    *,
+    by_id: dict[int, Song],
+    profile_genres: list[str],
+    play_counts: dict[int, int],
+    days_since: dict[int, float],
+) -> tuple[list[RankedItem], dict[int, dict], bool]:
+    """Re-rank cosine candidates by P(engage). Returns (ranked, feat_by_song, applied)."""
+    feat_by_song: dict[int, dict] = {}
+    feature_rows: list[dict] = []
+    song_ids: list[int] = []
+    for item in ranked:
+        song = by_id.get(item.song_id)
+        if song is None:
+            continue
+        feats = song.features
+        feat = build_song_features(
+            cosine_score=item.score,
+            song_genres=[g.name for g in song.genres],
+            profile_genres=profile_genres,
+            from_library=song.owner_user_id is not None,
+            energy=feats.energy if feats else None,
+            tempo=feats.tempo if feats else None,
+            user_plays=play_counts.get(item.song_id, 0),
+            days_since_play=days_since.get(item.song_id),
+        )
+        feat_by_song[item.song_id] = feat
+        feature_rows.append(feat)
+        song_ids.append(item.song_id)
+
+    if not feature_rows or not scorer_job.scorer_ready(db):
+        return ranked, feat_by_song, False
+
+    scores = scorer_job.score_candidates(db, feature_rows)
+    if scores is None:
+        return ranked, feat_by_song, False
+    engage = {sid: p for sid, p in zip(song_ids, scores)}
+    return scorer_job.rerank_by_engagement(ranked, engage), feat_by_song, True
+
+
+def _log_served_impressions(
+    db: Session,
+    user: User,
+    explained: list[RankedItem],
+    *,
+    cosine_by_id: dict[int, float],
+    feat_by_song: dict[int, dict],
+    by_id: dict[int, Song],
+    profile_genres: list[str],
+    play_counts: dict[int, int],
+    days_since: dict[int, float],
+) -> uuid.UUID:
+    request_id = uuid.uuid4()
+    items: list[tuple[int, float, dict]] = []
+    for item in explained:
+        song = by_id.get(item.song_id)
+        if song is None:
+            continue
+        cosine = float(cosine_by_id.get(item.song_id, item.score))
+        feat = feat_by_song.get(item.song_id)
+        if feat is None:
+            feats = song.features
+            feat = build_song_features(
+                cosine_score=cosine,
+                song_genres=[g.name for g in song.genres],
+                profile_genres=profile_genres,
+                from_library=song.owner_user_id is not None,
+                energy=feats.energy if feats else None,
+                tempo=feats.tempo if feats else None,
+                user_plays=play_counts.get(item.song_id, 0),
+                days_since_play=days_since.get(item.song_id),
+            )
+        items.append((item.song_id, cosine, feat))
+    impressions_svc.log_impressions(db, user.id, request_id=request_id, items=items)
+    return request_id
+
+
 def recommend_for_user(
     db: Session,
     user: User,
@@ -238,10 +355,36 @@ def recommend_for_user(
     else:
         ranked = rank_by_cosine(features, profile, exclude=exclude, limit=limit * 5)
 
+    cosine_by_id = {r.song_id: r.score for r in ranked}
+    profile_genres = _top_profile_genre_names(features, profile) or [g.lower() for g in seed_genres]
+    play_counts, days_since = _user_listen_stats(db, user.id, now)
+
+    # Cosine candidates → learned P(engage) re-rank → MMR + exploration.
+    ranked, feat_by_song, scorer_applied = _apply_engagement_scorer(
+        db,
+        ranked,
+        by_id=by_id,
+        profile_genres=profile_genres,
+        play_counts=play_counts,
+        days_since=days_since,
+    )
+
     diverse = mmr_select(features, ranked, k=limit, lambda_relevance=0.72)
     final = inject_exploration(features, diverse, ranked, k=limit, explore_frac=0.15)
     meta = {s.id: _song_row(s) for s in songs}
     explained = explain_recommendations(features, profile, final, song_meta=meta)
+
+    request_id = _log_served_impressions(
+        db,
+        user,
+        explained,
+        cosine_by_id=cosine_by_id,
+        feat_by_song=feat_by_song,
+        by_id=by_id,
+        profile_genres=profile_genres,
+        play_counts=play_counts,
+        days_since=days_since,
+    )
 
     items = [(by_id[r.song_id], r) for r in explained if r.song_id in by_id]
     return RecommendationResult(
@@ -250,6 +393,8 @@ def recommend_for_user(
         mode=mode,
         short_term_days=prefs.short_term_days,
         long_term_days=prefs.long_term_days,
+        scorer_applied=scorer_applied,
+        request_id=request_id,
     )
 
 
