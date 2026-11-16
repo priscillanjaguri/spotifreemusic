@@ -37,6 +37,32 @@ export function OwnFileBadge() {
   );
 }
 
+const PROVIDER_LABELS: Record<string, string> = {
+  audius: "Audius",
+  jamendo: "Jamendo",
+};
+
+export function ProviderBadge({ provider }: { provider: string }) {
+  const label = PROVIDER_LABELS[provider] ?? provider;
+  if (provider === "my_library" || provider === "mock_dev") return null;
+  return (
+    <Tooltip>
+      <TooltipTrigger render={<span className="shrink-0" />}>
+        <Badge variant="outline" className="border-orchid-glow/35 bg-white/5 text-[10px] text-lavender">
+          {label}
+        </Badge>
+      </TooltipTrigger>
+      <TooltipContent>
+        {provider === "audius"
+          ? "Full stream from Audius under the Open Music License"
+          : provider === "jamendo"
+            ? "Creative Commons track from Jamendo"
+            : `Streamed via ${label}`}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 type SongRowProps = {
   song: Song;
   queue: Song[];
@@ -109,6 +135,7 @@ export function SongRow({ song, queue, index, meta, action, linkFacets, badges }
             <p className={cn("min-w-0 truncate font-bold", isCurrent ? "text-accent-foreground" : "text-heading")}>{song.title}</p>
             {song.data_source === "mock_dev" && <MockBadge />}
             {song.data_source === "user_provided" && !badges && <OwnFileBadge />}
+            {song.playback?.provider && <ProviderBadge provider={song.playback.provider} />}
             {badges}
           </div>
           <p className="truncate text-sm text-muted-foreground">

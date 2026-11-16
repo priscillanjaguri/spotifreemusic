@@ -46,8 +46,15 @@ class Settings(BaseSettings):
     ]
     # Set true behind HTTPS (production) so the session cookie is never sent over plain HTTP.
     cookie_secure: bool = False
-    # Optional: without it the app runs, but search/playback report "provider not configured".
+    # Optional: without it the app runs, but search/playback report "provider not configured"
+    # unless Audius (enabled by default) or the dev mock fills in.
     jamendo_client_id: str | None = None
+    # Audius Open Music License catalogue (full streams). Read-only search works without a key.
+    audius_enabled: bool = True
+    audius_api_host: str = "https://api.audius.co"
+    audius_app_name: str = "spotifree"
+    # Optional free-tier key from https://api.audius.co/plans for higher rate limits.
+    audius_api_key: str | None = None
     # Optional Spotify Web API (Client Credentials). Metadata / ML enrichment ONLY —
     # never used for playback URLs. Both id + secret required to enable.
     spotify_client_id: str | None = None
@@ -101,8 +108,20 @@ class Settings(BaseSettings):
         return bool(self.genius_client_id and self.genius_client_secret)
 
     @property
+    def audius_configured(self) -> bool:
+        return bool(self.audius_enabled and self.audius_api_host.strip() and self.audius_app_name.strip())
+
+    @property
+    def any_catalogue_provider(self) -> bool:
+        return bool(self.jamendo_client_id) or self.audius_configured
+
+    @property
     def mock_provider_enabled(self) -> bool:
-        return self.dev_mock_provider and self.environment == "development" and not self.jamendo_client_id
+        return (
+            self.dev_mock_provider
+            and self.environment == "development"
+            and not self.any_catalogue_provider
+        )
 
 
 @lru_cache

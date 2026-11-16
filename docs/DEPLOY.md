@@ -1,7 +1,8 @@
 # Deploy Spotifree (single platform)
 
 Spotifree is **one Docker image**: Vite SPA served by FastAPI, plus **Postgres**.
-Optional: Jamendo (`JAMENDO_CLIENT_ID`), Cloudflare R2 (`R2_*`), and Spotify Client
+Optional: Jamendo (`JAMENDO_CLIENT_ID`), Audius (`AUDIUS_*` — enabled by default for
+full Open Music License streams), Cloudflare R2 (`R2_*`), and Spotify Client
 Credentials (`SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET`) for **metadata-only** ML
 enrichment (genres / popularity / audio-features / album + artist images — never playback).
 
@@ -34,7 +35,11 @@ Do **not** split the SPA to Vercel and the API elsewhere; the production app is 
 | `ENVIRONMENT` | Yes | `production` |
 | `COOKIE_SECURE` | Yes | `true` |
 | `CORS_ORIGINS` | Yes | JSON list including your public HTTPS URL **and** Capacitor origins: `["https://YOUR.up.railway.app","https://localhost","capacitor://localhost"]` |
-| `JAMENDO_CLIENT_ID` | No | Discover / CC catalogue |
+| `JAMENDO_CLIENT_ID` | No | Discover / Creative Commons catalogue |
+| `AUDIUS_ENABLED` | No | Default `true`. Set `false` to disable Audius Discover streams |
+| `AUDIUS_API_HOST` | No | Default `https://api.audius.co` |
+| `AUDIUS_APP_NAME` | No | Default `spotifree` (sent on every Audius request) |
+| `AUDIUS_API_KEY` | No | Optional free key from https://api.audius.co/plans (higher rate limits) |
 | `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` | No | Spotify Client Credentials; metadata for ML only (no streaming) |
 | `GENIUS_ACCESS_TOKEN` / `GENIUS_CLIENT_*` | No | Unused for lyrics (LRCLIB is keyless). Kept optional for future Genius metadata. |
 | `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET` | No | My Library object storage |
@@ -47,12 +52,13 @@ Do **not** split the SPA to Vercel and the API elsewhere; the production app is 
 
 1. Same GitHub repo (`priscillanjaguri/spotifreemusic`) on `main`.
 2. Render → **New** → **Blueprint** → select the repo (uses `render.yaml`).
-3. Fill blueprint prompts for optional secrets (`CORS_ORIGINS`, Jamendo, R2, Spotify).
+3. Fill blueprint prompts for optional secrets (`CORS_ORIGINS`, Jamendo, R2, Spotify, optional `AUDIUS_API_KEY`).
 4. After the first URL is known, set `CORS_ORIGINS` to include `https://<service>.onrender.com` plus Capacitor origins.
-5. Set `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` in the Render dashboard (or Cursor app secrets) to enable library / Jamendo metadata enrichment for recommendations (including album covers + artist photos when missing). Leave unset to skip gracefully.
-6. Backfill existing My Library covers/artist images (auth cookie or Bearer): `POST /api/v1/library/spotify-enrich?limit=200`.
-7. Plain lyrics use **LRCLIB** (no API key) via `GET /api/v1/lyrics/{song_id}`. Genius env vars are optional/unused for lyric bodies.
-7. Same APK Server URL steps as Railway.
+5. Audius defaults ship in `render.yaml` (`AUDIUS_ENABLED=true`, host + app name). Optional: set `AUDIUS_API_KEY` from https://api.audius.co/plans for higher limits. Set `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` for library / catalogue metadata enrichment (covers + artist photos). Leave Spotify unset to skip gracefully.
+6. After merging Audius (or any catalogue change), use **Manual Deploy** on the Render web service if auto-deploy is off.
+7. Backfill existing My Library covers/artist images (auth cookie or Bearer): `POST /api/v1/library/spotify-enrich?limit=200`.
+8. Plain lyrics use **LRCLIB** (no API key) via `GET /api/v1/lyrics/{song_id}`. Genius env vars are optional/unused for lyric bodies.
+9. Same APK Server URL steps as Railway.
 
 ## Local Docker (smoke test)
 

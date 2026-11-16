@@ -9,11 +9,27 @@ def _settings(**overrides) -> Settings:
 
 
 def test_mock_provider_only_in_development_without_real_provider():
-    assert _settings(environment="development", dev_mock_provider=True).mock_provider_enabled
-    assert not _settings(environment="production", dev_mock_provider=True).mock_provider_enabled
-    assert not _settings(environment="test", dev_mock_provider=True).mock_provider_enabled
-    assert not _settings(environment="development", dev_mock_provider=True, jamendo_client_id="abc").mock_provider_enabled
-    assert not _settings(environment="development").mock_provider_enabled
+    assert _settings(
+        environment="development", dev_mock_provider=True, audius_enabled=False
+    ).mock_provider_enabled
+    assert not _settings(
+        environment="production", dev_mock_provider=True, audius_enabled=False
+    ).mock_provider_enabled
+    assert not _settings(
+        environment="test", dev_mock_provider=True, audius_enabled=False
+    ).mock_provider_enabled
+    assert not _settings(
+        environment="development",
+        dev_mock_provider=True,
+        jamendo_client_id="abc",
+        audius_enabled=False,
+    ).mock_provider_enabled
+    assert not _settings(
+        environment="development",
+        dev_mock_provider=True,
+        audius_enabled=True,
+    ).mock_provider_enabled
+    assert not _settings(environment="development", audius_enabled=False).mock_provider_enabled
 
 
 def test_mock_search_matches_every_word():
@@ -24,9 +40,11 @@ def test_mock_search_matches_every_word():
 
 def test_mock_tracks_are_labelled_mock_dev(client):
     from app.main import app
-    from app.providers.registry import get_music_provider
+    from app.providers.registry import get_music_provider, get_music_providers
 
-    app.dependency_overrides[get_music_provider] = lambda: MockDevAdapter()
+    mock = MockDevAdapter()
+    app.dependency_overrides[get_music_provider] = lambda: mock
+    app.dependency_overrides[get_music_providers] = lambda: [mock]
     register(client)
     song = client.get("/api/v1/songs/search?q=violet").json()["results"][0]
     assert song["data_source"] == "mock_dev"

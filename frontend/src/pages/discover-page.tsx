@@ -80,7 +80,8 @@ export function DiscoverPage() {
         <p className="font-script text-2xl text-orchid-glow">Explore</p>
         <h1 className="mt-1 font-display text-4xl font-semibold text-cream sm:text-5xl">Discover</h1>
         <p className="mt-2 max-w-lg text-sm text-lavender/95">
-          Search Creative Commons music by song, artist or genre. Play anything, and keep what you love.
+          Search Jamendo (Creative Commons) and Audius (Open Music License) by song, artist or genre.
+          Full streams only — play anything, and keep what you love.
         </p>
       </PhotoHero>
 
