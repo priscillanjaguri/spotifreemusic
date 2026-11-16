@@ -25,6 +25,8 @@ class RecommendationsOut(BaseModel):
     long_term_days: int
     # True when cosine candidates were re-ranked by the learned engagement scorer.
     scorer_applied: bool = False
+    # True when sequential next-track candidates were merged into the cosine pool.
+    sequential_applied: bool = False
 
 
 class FeedbackIn(BaseModel):

@@ -16,6 +16,7 @@ from app.api import (
     profile,
     recommendations,
     scorer as scorer_api,
+    sequential as sequential_api,
     songs,
 )
 from app.core.config import get_settings
@@ -50,6 +51,7 @@ def create_app() -> FastAPI:
         companion.router,
         eval_api.router,
         scorer_api.router,
+        sequential_api.router,
     ):
         app.include_router(router, prefix="/api/v1")
     if settings.mock_provider_enabled:

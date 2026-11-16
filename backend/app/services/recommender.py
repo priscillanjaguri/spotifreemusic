@@ -40,6 +40,7 @@ from app.services.collection import SONG_LOAD
 from app.services.feedback import latest_not_interested_ids
 from app.services import impressions as impressions_svc
 from app.services import scorer_job
+from app.services import sequential_job
 
 log = logging.getLogger(__name__)
 
@@ -54,6 +55,7 @@ class RecommendationResult:
     short_term_days: int
     long_term_days: int
     scorer_applied: bool = False
+    sequential_applied: bool = False
     request_id: uuid.UUID | None = None
 
 
@@ -359,7 +361,32 @@ def recommend_for_user(
     profile_genres = _top_profile_genre_names(features, profile) or [g.lower() for g in seed_genres]
     play_counts, days_since = _user_listen_stats(db, user.id, now)
 
-    # Cosine candidates → learned P(engage) re-rank → MMR + exploration.
+    # Sequential next-track candidates ∪ cosine → (optional) P(engage) → MMR.
+    sequential_applied = False
+    if sequential_job.sequential_ready(db):
+        seeds = sequential_job.recent_seed_song_ids(db, user.id, now=now)
+        seq_ranked = sequential_job.sequential_candidates(
+            db,
+            seed_song_ids=seeds,
+            exclude=exclude | set(seeds),
+        )
+        if seq_ranked:
+            # Ensure sequential-only songs are in the feature matrix / by_id map.
+            missing_ids = {r.song_id for r in seq_ranked if r.song_id not in by_id}
+            if missing_ids:
+                more = _load_candidate_songs(db, user, extra_ids=missing_ids)
+                for s in more:
+                    if s.id not in by_id:
+                        songs.append(s)
+                        by_id[s.id] = s
+                features = build_feature_matrix([_song_row(s) for s in songs])
+            ranked, seq_ids = sequential_job.merge_candidates(ranked, seq_ranked)
+            sequential_applied = bool(seq_ids)
+            # Preserve original cosine scores for impression logging; seq-only → their score.
+            for r in ranked:
+                cosine_by_id.setdefault(r.song_id, r.score)
+
+    # Merged candidates → learned P(engage) re-rank → MMR + exploration.
     ranked, feat_by_song, scorer_applied = _apply_engagement_scorer(
         db,
         ranked,
@@ -394,6 +421,7 @@ def recommend_for_user(
         short_term_days=prefs.short_term_days,
         long_term_days=prefs.long_term_days,
         scorer_applied=scorer_applied,
+        sequential_applied=sequential_applied,
         request_id=request_id,
     )
 
